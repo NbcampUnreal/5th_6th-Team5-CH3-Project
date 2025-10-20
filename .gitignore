@@ -93,4 +93,22 @@ Build/Android/res/*/*
 Plugins/**/Binaries/*
 Plugins/**/Intermediate/*
 
+# ---- 에셋/컨텐츠 무시 (주의: 팀과 의사결정 필요) ----
+# Content 폴더의 언리얼 에셋을 전부 무시 (uasset, umap 등)
+Content/**/*.uasset
+Content/**/*.umap
+Content/**/Config/*.ini
+
+# 텍스처/오디오/임포트 파일 등 (원치 않으면 추가)
+Content/**/*.png
+Content/**/*.jpg
+Content/**/*.tga
+Content/**/*.ogg
+Content/**/*.wav
+Content/**/*.fbx
+Content/**/*.psd
+
+# 임시/변환 파일
+Saved/**
+
 # End of https://www.toptal.com/developers/gitignore/api/unrealengine
