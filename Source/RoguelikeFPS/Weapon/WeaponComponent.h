@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Weapon/PickUpComponent.h"
 #include "WeaponComponent.generated.h"
 
 /**
@@ -35,15 +36,23 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* _AttackAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay, meta = (AllowPrivateAccess = "true"))
+	UPickUpComponent* _PickUpComponent;
+
+
 public:
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	virtual void Attack();
+	virtual void StartAttack();
 
-	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	bool AttachWeapon(ACharacter* TargetCharacter);
+	/*UFUNCTION(BlueprintCallable, Category = "Weapon")
+	bool TryAttachWeapon(ACharacter* TargetCharacter);*/
 
+	UFUNCTION()
+	void AttachWeapon(ACharacter* TargetCharacter); // 델리게이트용 (void)
 
 protected:
+	virtual void BeginPlay() override;
+
 	UFUNCTION()
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 

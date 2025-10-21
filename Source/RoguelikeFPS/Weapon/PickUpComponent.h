@@ -4,14 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "Components/SphereComponent.h"
-#include "PlayerCharacter.h"
+#include "GameFramework/Character.h"
 #include "PickUpComponent.generated.h"
 
 /**
  * 
  */
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPickUp, APlayerCharacter*, PickUpCharacter);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPickUp, ACharacter*, PickUpCharacter);
 
 UCLASS(Blueprintable, BlueprintType, ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class UPickUpComponent : public USphereComponent

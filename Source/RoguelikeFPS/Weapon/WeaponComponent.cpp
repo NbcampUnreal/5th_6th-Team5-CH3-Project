@@ -6,19 +6,26 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 
+
 UWeaponComponent::UWeaponComponent()
+{
+	_PickUpComponent = CreateDefaultSubobject<UPickUpComponent>(TEXT("PickUp"));
+
+}
+
+void UWeaponComponent::StartAttack()
 {
 
 }
 
-bool UWeaponComponent::AttachWeapon(ACharacter* TargetCharacter)
+void UWeaponComponent::AttachWeapon(ACharacter* TargetCharacter)
 {
 	_Character = TargetCharacter;
 
 	// Check that the character is valid, and has no weapon component yet
 	if (_Character == nullptr || _Character->GetInstanceComponents().FindItemByClass<UWeaponComponent>())
 	{
-		return false;
+		return;
 	}
 
 	// Attach the weapon to the First Person Character
@@ -37,11 +44,21 @@ bool UWeaponComponent::AttachWeapon(ACharacter* TargetCharacter)
 		if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
 		{
 			// Attack
-			EnhancedInputComponent->BindAction(_AttackAction, ETriggerEvent::Triggered, this, &UWeaponComponent::Attack);
+			EnhancedInputComponent->BindAction(_AttackAction, ETriggerEvent::Triggered, this, &UWeaponComponent::StartAttack);
 		}
 	}
 
-	return true;
+	//return true;
+}
+
+void UWeaponComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (_PickUpComponent)
+	{
+		_PickUpComponent->OnPickUp.AddDynamic(this, &UWeaponComponent::AttachWeapon);
+	}
 }
 
 void UWeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
