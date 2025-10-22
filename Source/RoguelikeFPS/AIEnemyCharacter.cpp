@@ -1,60 +1,92 @@
 ﻿#include "AIEnemyCharacter.h"
-#include "Perception/PawnSensingComponent.h"
 #include "AIEnemyController.h"
-#include "Kismet/GameplayStatics.h"
-#include "BehaviorTree/BlackboardComponent.h"
-#include "EnemyStateMachineComponent.h"
+#include "DrawDebugHelpers.h"
 
 AAIEnemyCharacter::AAIEnemyCharacter()
 {
     PrimaryActorTick.bCanEverTick = true;
-
-    PawnSensingComp = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensingComp"));
-    PawnSensingComp->SightRadius = 1000.0f;
-    PawnSensingComp->SetPeripheralVisionAngle(45.0f);
-    PawnSensingComp->SetSensingUpdatesEnabled(true);
-
-    PawnSensingComp->bOnlySensePlayers = false; //임시
 }
 
 void AAIEnemyCharacter::BeginPlay()
 {
     Super::BeginPlay();
-
-    //Controller를 얻어왔는지 확인
-    if (GetController())
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Controller OK"));
-    }
-
-    else
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Controller is NULL!"));
-    }
-
-
-    if (PawnSensingComp)
-        PawnSensingComp->OnSeePawn.AddDynamic(this, &AAIEnemyCharacter::OnSeePawn);
 }
 
-void AAIEnemyCharacter::OnSeePawn(APawn* Pawn)
+void AAIEnemyCharacter::Tick(float DeltaSeconds)
 {
-    if (!Pawn) return;
+    Super::Tick(DeltaSeconds);
 
-    TargetActor = Pawn;
-
-    if (AAIEnemyController* AIController = Cast<AAIEnemyController>(GetController()))
+#if !(UE_BUILD_SHIPPING)   // 에디터/개발에서만
+    if (bDrawPerceptionDebug)
     {
-        // BT의 Blackboard에 타겟 설정
-        if (UBlackboardComponent* BB = AIController->GetBlackboardComponent())
-        {
-            BB->SetValueAsObject(TEXT("TargetActor"), TargetActor);
-        }
-
-        // FSM 상태 변경
-        if (UEnemyStateMachineComponent* FSM = FindComponentByClass<UEnemyStateMachineComponent>())
-        {
-            FSM->ChangeState(EEnemyState::Chase);
-        }
+        DrawPerceptionGizmos();
     }
+#endif
+}
+
+void AAIEnemyCharacter::DrawPerceptionGizmos()
+{
+    AAIEnemyController* AICon = Cast<AAIEnemyController>(GetController());
+    if (!AICon) return;
+
+    // 컨트롤러에 설정된 Perception 값들 읽기
+    const float SightRadius = AICon->SightRadius;
+    const float LoseSightRadius = AICon->LoseSightRadius;
+    const float FOVHalfAngleDeg = AICon->PeripheralVisionAngle; // 좌우 반각(°)
+
+    const FVector Origin = GetActorLocation();
+    const FVector Forward = GetActorForwardVector();
+    const FVector Up = FVector::UpVector;
+    const FVector Right = GetActorRightVector();
+
+    UWorld* World = GetWorld();
+    if (!World) return;
+
+    // 1) 시야 반경 원 (연두색)
+    DrawDebugCircle(
+        World,
+        Origin,
+        SightRadius,
+        DebugSegments,
+        FColor::Green,
+        false,        // 지속X(프레임마다 갱신)
+        0.f,
+        0,
+        DebugThickness,
+        FVector(1, 0, 0), FVector(0, 1, 0),  // XY 평면
+        false
+    );
+
+    // 2) LoseSight 반경 원 (하늘색)
+    DrawDebugCircle(
+        World,
+        Origin,
+        LoseSightRadius,
+        DebugSegments,
+        FColor::Cyan,
+        false,
+        0.f,
+        0,
+        DebugThickness,
+        FVector(1, 0, 0), FVector(0, 1, 0),
+        false
+    );
+
+    // 3) 시야각(FOV) 콘(부채꼴) — 정면 방향으로 시야 “부피” 표시
+    // DrawDebugCone(월드, 시작점, 방향, 길이, 가로 반각(rad), 세로 반각(rad), 세그먼트, 색)
+    const float HalfAngleRad = FMath::DegreesToRadians(FOVHalfAngleDeg);
+    DrawDebugCone(
+        World,
+        Origin + FVector(0, 0, 50.f),    // 약간 위로 올려서 지면과 겹침 방지(선택)
+        Forward,
+        SightRadius,
+        HalfAngleRad,       // 가로 반각
+        HalfAngleRad,       // 세로 반각 (동일하게)
+        DebugSegments,
+        FColor::Green,
+        false,
+        0.f,
+        0,
+        DebugThickness
+    );
 }

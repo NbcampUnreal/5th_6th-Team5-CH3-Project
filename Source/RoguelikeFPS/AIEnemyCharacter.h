@@ -2,7 +2,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "Perception/PawnSensingComponent.h"
+#include "EnemyState.h"
+#include "EnemyConfig.h"
+#include "EnemyStateMachineComponent.h"   // FSM
 #include "AIEnemyCharacter.generated.h"
 
 UCLASS()
@@ -13,15 +15,31 @@ class ROGUELIKEFPS_API AAIEnemyCharacter : public ACharacter
 public:
     AAIEnemyCharacter();
 
+
+
 protected:
     virtual void BeginPlay() override;
+    virtual void Tick(float DeltaSeconds) override;
 
+public:
+    // 몹 BP에서 각자 다른 Asset 할당
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI")
+    UEnemyConfig* Config = nullptr;   
+
+    // FSM 컴포넌트 (상태 전이/상태별 로직 담당)
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
-    UPawnSensingComponent* PawnSensingComp;
+    UEnemyStateMachineComponent* StateMachine;
 
-    UFUNCTION()
-    void OnSeePawn(APawn* Pawn);
+    // 디버그 기즈모 토글
+    UPROPERTY(EditAnywhere, Category = "AI|Debug")
+    bool bDrawPerceptionDebug = true;
 
-    UPROPERTY()
-    AActor* TargetActor;
+    // (선택) 라인 두께/세그먼트 조절
+    UPROPERTY(EditAnywhere, Category = "AI|Debug")
+    int32 DebugSegments = 64;
+
+    UPROPERTY(EditAnywhere, Category = "AI|Debug")
+    float DebugThickness = 1.0f;
+
+    void DrawPerceptionGizmos();
 };
