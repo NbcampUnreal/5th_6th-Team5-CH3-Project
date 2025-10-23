@@ -9,14 +9,14 @@ AFPSCharacter::AFPSCharacter()
 	// 초기 스탯 설정
 	: Level(1),
 Health(100),
-Mana(100),
 Attack(10),
 Defence(10),
 AttackSpeed(5),
 MovingSpeed(600),
 Stamina(500),
-Experience(0)
-
+Experience(0),
+MaxExperience(100),
+bIsAlive(true)
 {
 	PrimaryActorTick.bCanEverTick = false;
 
@@ -35,6 +35,10 @@ Experience(0)
 	DashMultifly = 10.0f;
 	DashSpeed = MovingSpeed * DashMultifly;
 	DashTime = 1.0f;
+
+	// Crouch 활성화
+	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
+	GetCharacterMovement()->CrouchedHalfHeight = 60.0f;
 }
 
 
@@ -98,10 +102,17 @@ void AFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 			{
 				EnhancedInput->BindAction(
 					PlayerController->CrouchAction,
-					ETriggerEvent::Triggered,
+					ETriggerEvent::Started,
 					this,
-					&AFPSCharacter::Crouched
+					&AFPSCharacter::StartCrouch
 				);
+				EnhancedInput->BindAction(
+					PlayerController->CrouchAction,
+					ETriggerEvent::Completed,
+					this,
+					&AFPSCharacter::StopCrouch
+				);
+
 			}
 
 
@@ -178,8 +189,60 @@ void AFPSCharacter::StopDash()
 
 
 
-void AFPSCharacter::Crouched(const FInputActionValue& value)
+void AFPSCharacter::StartCrouch(const FInputActionValue& value)
 {
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Crouch Pressed"));
 	Crouch();
+}
+
+void AFPSCharacter::StopCrouch(const FInputActionValue& value)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Crouch Stop"));
+	UnCrouch();
+}
+
+
+
+// 레벨업 함수
+void AFPSCharacter::LevelUp()
+{
+	if (Experience == MaxExperience)
+	{
+		Level += 1;
+		Health += 20;
+		Attack += 3;
+		Defence += 3;
+		Experience = 0;
+	}
+}
+
+
+// 사망 함수
+void AFPSCharacter::OnDeath()
+{
+	if (Health <= 0)
+	{
+		bIsAlive = false;
+		// 사망 시 게임 오버 레벨 호출
+	}
+}
+
+// 피격 함수
+float AFPSCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, TObjectPtr<AController> EventInstigator, TObjectPtr<AActor> DamageCauser)
+{
+	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser) - Defence;  // 실제데미지 = 데미지 - 방어력
+	
+	if (ActualDamage > 0)
+	{
+		// 체력 감소
+		Health -= ActualDamage;
+
+		if (Health <= 0)
+		{
+			OnDeath();
+		}
+	}
+
+	return ActualDamage;
 }
 

@@ -27,10 +27,8 @@ protected:
 	// Status
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
 	int32 Level;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="CharacterStatus")
-	int32 Health;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
-	int32 Mana;
+	int32 Health;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
 	int32 Attack;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
@@ -43,10 +41,15 @@ protected:
 	int32 Stamina;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
 	int32 Experience;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
+	int32 MaxExperience;
+	// 캐릭터 생존여부
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
+	bool bIsAlive;
 
 
 	// 대시 속도
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Dash")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash")
 	float DashMultifly;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Dash")
 	float DashSpeed;
@@ -73,6 +76,21 @@ protected:
 	UFUNCTION()
 	void StopDash();
 	UFUNCTION()
-	void Crouched(const FInputActionValue& value);
+	void StartCrouch(const FInputActionValue& value);
+	UFUNCTION()
+	void StopCrouch(const FInputActionValue& value);
+
+	// 레벨업
+	void LevelUp();
+
+	// 사망
+	void OnDeath();
+
+	// 피격 함수
+	virtual float TakeDamage(
+		float DamageAmount,
+		FDamageEvent const& DamageEvent,
+		TObjectPtr<AController> EventInstigator,
+		TObjectPtr<AActor> DamageCauser);
 
 };
