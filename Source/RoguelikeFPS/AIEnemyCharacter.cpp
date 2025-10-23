@@ -1,6 +1,7 @@
 ﻿#include "AIEnemyCharacter.h"
 #include "AIEnemyController.h"
 #include "DrawDebugHelpers.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 AAIEnemyCharacter::AAIEnemyCharacter()
 {
@@ -10,6 +11,26 @@ AAIEnemyCharacter::AAIEnemyCharacter()
 void AAIEnemyCharacter::BeginPlay()
 {
     Super::BeginPlay();
+
+    ensureMsgf(Config, TEXT("Enemy Config is null on %s"), *GetName());
+
+    // 기본 이동속도 적용
+    ApplyWalkSpeed();
+}
+
+void AAIEnemyCharacter::ApplyWalkSpeed()
+{
+    float Speed = (Config ? Config->WalkSpeed : 300.f);
+    GetCharacterMovement()->MaxWalkSpeed = Speed;
+    CurrentMoveSpeed = Speed;
+}
+
+void AAIEnemyCharacter::ApplyChaseSpeed()
+{
+    // Config에 ChaseSpeed가 없으면 WalkSpeed로 대체
+    const float Speed = (Config && Config->ChaseSpeed > 0.f) ? Config->ChaseSpeed : (Config ? Config->WalkSpeed : 500.f);
+    GetCharacterMovement()->MaxWalkSpeed = Speed;
+    CurrentMoveSpeed = Speed;
 }
 
 void AAIEnemyCharacter::Tick(float DeltaSeconds)

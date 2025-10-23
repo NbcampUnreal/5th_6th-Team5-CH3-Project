@@ -4,7 +4,8 @@
 #include "GameFramework/Character.h"
 #include "EnemyState.h"
 #include "EnemyConfig.h"
-#include "EnemyStateMachineComponent.h"   // FSM
+#include "EnemyStateMachineComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "AIEnemyCharacter.generated.h"
 
 UCLASS()
@@ -29,6 +30,18 @@ public:
     // FSM 컴포넌트 (상태 전이/상태별 로직 담당)
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
     UEnemyStateMachineComponent* StateMachine;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI|Movement")
+    float CurrentMoveSpeed = 0.f;
+
+    UFUNCTION(BlueprintCallable, Category = "AI|Movement")
+    void ApplyWalkSpeed();     // 기본 순찰/이동 속도
+
+    UFUNCTION(BlueprintCallable, Category = "AI|Movement")
+    void ApplyChaseSpeed();    // 추적 속도(있다면)
+
+
+
 
     // 디버그 기즈모 토글
     UPROPERTY(EditAnywhere, Category = "AI|Debug")

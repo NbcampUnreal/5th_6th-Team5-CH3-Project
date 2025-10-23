@@ -19,6 +19,10 @@ public:
     virtual void OnPossess(APawn* InPawn) override;
     virtual void Tick(float DeltaSeconds) override;
 
+    UPROPERTY(EditAnywhere, Category = "AI|Filter")
+    FName DisallowedTargetTag = TEXT("enemy");
+
+
     /** BT/BB 자산은 BP_EnemyController에서 이 필드에 지정 */
     UPROPERTY(EditDefaultsOnly, Category = "AI|BT")
     UBehaviorTree* BehaviorTreeAsset;
@@ -57,6 +61,7 @@ public:
     static const FName BB_TargetDistance;
     static const FName BB_InAttackRange;
     static const FName BB_LastSeenLocation;
+    static const FName BB_HasLastSeen;
 
 protected:
     /** Perception 이벤트 */

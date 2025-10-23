@@ -1,5 +1,6 @@
 ﻿#include "AIEnemyController.h"
 #include "AIEnemyCharacter.h"
+#include "Perception/AISenseConfig_Sight.h"
 #include "Perception/AISense_Sight.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -9,6 +10,7 @@ const FName AAIEnemyController::BB_HasLOS = TEXT("HasLineOfSight");
 const FName AAIEnemyController::BB_TargetDistance = TEXT("TargetDistance");
 const FName AAIEnemyController::BB_InAttackRange = TEXT("InAttackRange");
 const FName AAIEnemyController::BB_LastSeenLocation = TEXT("LastSeenLocation");
+const FName AAIEnemyController::BB_HasLastSeen = TEXT("HasLastSeen");
 
 AAIEnemyController::AAIEnemyController()
 {
@@ -41,31 +43,50 @@ AAIEnemyController::AAIEnemyController()
 void AAIEnemyController::OnPossess(APawn* InPawn)
 {
     Super::OnPossess(InPawn);
+    if (!BehaviorTreeAsset) return;
 
-    if (BehaviorTreeAsset)
+    UseBlackboard(BehaviorTreeAsset->BlackboardAsset, BlackboardComp);
+    RunBehaviorTree(BehaviorTreeAsset);
+
+    if (InPawn && BlackboardComp)
     {
-        UseBlackboard(BehaviorTreeAsset->BlackboardAsset, BlackboardComp);
-        RunBehaviorTree(BehaviorTreeAsset);
-
-        if (const auto* Enemy = Cast<AAIEnemyCharacter>(InPawn))
-        {
-            if (ensure(Enemy->Config))
-            {
-                // 공격 사거리
-                AttackRange = Enemy->Config->AttackRange;
-
-                // AIPerception 시야 파라미터 적용
-                SightConfig->SightRadius = Enemy->Config->SightRadius;
-                SightConfig->LoseSightRadius = Enemy->Config->LoseSightRadius;
-                SightConfig->PeripheralVisionAngleDegrees = Enemy->Config->PeripheralVisionAngle;
-
-                // 적용 갱신
-                PerceptionComp->ConfigureSense(*SightConfig);     // 재적용
-                PerceptionComp->RequestStimuliListenerUpdate();   // 갱신 요청
-            }
-        }
-            
+        BlackboardComp->SetValueAsVector(TEXT("HomeLocation"), InPawn->GetActorLocation());
     }
+
+    const auto* Enemy = Cast<AAIEnemyCharacter>(InPawn);
+    if (!ensure(Enemy && Enemy->Config && PerceptionComp)) return;
+
+    // ★ 여기서 SightConfig 존재 보장
+    if (!SightConfig)
+    {
+        // 없으면 런타임에 새로 만든다
+        SightConfig = NewObject<UAISenseConfig_Sight>(this, UAISenseConfig_Sight::StaticClass());
+        // 기본 감지 대상 설정(프로젝트 규칙에 맞게)
+        SightConfig->DetectionByAffiliation.bDetectEnemies = true;
+        SightConfig->DetectionByAffiliation.bDetectNeutrals = true;
+        SightConfig->DetectionByAffiliation.bDetectFriendlies = true;
+
+        // Perception에 등록 + 우선 감각으로 지정
+        PerceptionComp->ConfigureSense(*SightConfig);
+        PerceptionComp->SetDominantSense(SightConfig->GetSenseImplementation());
+    }
+
+    // ★ 이제 안전하게 몹별 Config 값 적용
+    SightConfig->SightRadius = Enemy->Config->SightRadius;
+    SightConfig->LoseSightRadius = Enemy->Config->LoseSightRadius;
+    SightConfig->PeripheralVisionAngleDegrees = Enemy->Config->PeripheralVisionAngle;
+    SightConfig->AutoSuccessRangeFromLastSeenLocation = 0.f; // 시야 스티킹 방지 권장
+    SightConfig->SetMaxAge(ForgetDelaySeconds);
+
+    // 변경 반영
+    PerceptionComp->RequestStimuliListenerUpdate();
+
+    // 나머지 값들
+    AttackRange = Enemy->Config->AttackRange;
+    BlackboardComp->SetValueAsFloat(TEXT("PatrolRadius"), Enemy->Config->PatrolRadius);
+    BlackboardComp->SetValueAsFloat(TEXT("PatrolWaitMin"), Enemy->Config->PatrolWaitMin);
+    BlackboardComp->SetValueAsFloat(TEXT("PatrolWaitMax"), Enemy->Config->PatrolWaitMax);
+    BlackboardComp->SetValueAsFloat(TEXT("AcceptanceRadius"), Enemy->Config->AcceptanceRadius);
 }
 
 void AAIEnemyController::Tick(float DeltaSeconds)
@@ -97,6 +118,18 @@ void AAIEnemyController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus St
 {
     if (!BlackboardComp) return;
 
+    // 여기서 캐릭터만 감지하게 처리
+    if (Actor->ActorHasTag(DisallowedTargetTag))
+    {
+        // 혹시 이미 타깃으로 잡혀 있던 경우도 즉시 해제
+        if (BlackboardComp->GetValueAsObject(BB_TargetActor) == Actor)
+        {
+            BlackboardComp->ClearValue(BB_TargetActor);
+            BlackboardComp->SetValueAsBool(BB_HasLOS, false);
+        }
+        return;
+    }
+
     // 시야 센스만 처리
     if (Stimulus.Type != UAISense::GetSenseID(UAISense_Sight::StaticClass()))
         return;
@@ -108,12 +141,17 @@ void AAIEnemyController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus St
     {
         // 본 즉시 타깃 지정 및 마지막 본 위치 갱신
         BlackboardComp->SetValueAsObject(BB_TargetActor, Actor);
-        BlackboardComp->SetValueAsVector(BB_LastSeenLocation, Actor->GetActorLocation());
+        //BlackboardComp->SetValueAsVector(BB_LastSeenLocation, Actor->GetActorLocation());
+        BlackboardComp->SetValueAsVector(BB_LastSeenLocation, Stimulus.StimulusLocation);
+        BlackboardComp->SetValueAsBool(BB_HasLastSeen, true);
     }
     else
     {
         // 이번 프레임에 '안 보임' 이벤트 발생.
         // 아직 활성 자극(Active Stimulus)이 남아 있는지 확인 → 없으면 완전 해제.
+
+        BlackboardComp->SetValueAsVector(BB_LastSeenLocation, Stimulus.StimulusLocation);
+
         FActorPerceptionBlueprintInfo Info;
         PerceptionComp->GetActorsPerception(Actor, Info);
 
@@ -125,29 +163,25 @@ void AAIEnemyController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus St
         {
             if (BlackboardComp->GetValueAsObject(BB_TargetActor) == Actor)
             {
-                ClearTarget();
+                BlackboardComp->ClearValue(BB_TargetActor);
+                BlackboardComp->SetValueAsBool(BB_HasLOS, false);
             }
         }
     }
 }
 
-void AAIEnemyController::OnPerceptionUpdated(const TArray<AActor*>& UpdatedActors)
+void AAIEnemyController::OnPerceptionUpdated(const TArray<AActor*>&)
 {
     if (!BlackboardComp) return;
-
-    // 선택: 현재 타깃을 지금 '보는 중'이면 LastSeenLocation 갱신
     if (AActor* Target = Cast<AActor>(BlackboardComp->GetValueAsObject(BB_TargetActor)))
     {
         FActorPerceptionBlueprintInfo Info;
         PerceptionComp->GetActorsPerception(Target, Info);
-
-        const bool bSensedNow =
-            Info.LastSensedStimuli.ContainsByPredicate(
-                [](const FAIStimulus& S) { return S.WasSuccessfullySensed(); });
-
-        if (bSensedNow)
+        const FAIStimulus* Seen = Info.LastSensedStimuli.FindByPredicate(
+            [](const FAIStimulus& S){ return S.WasSuccessfullySensed(); });
+        if (Seen)
         {
-            BlackboardComp->SetValueAsVector(BB_LastSeenLocation, Target->GetActorLocation());
+            BlackboardComp->SetValueAsVector(BB_LastSeenLocation, Seen->StimulusLocation);
         }
     }
 }
