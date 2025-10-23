@@ -33,5 +33,11 @@ public:
 	//임시
 	UFUNCTION(BlueprintCallable)
 	void TestInventory();
+
+	//검색
+	UFUNCTION(BlueprintCallable)
+	UItemBase* SearchItemName(const FName& Name) const;
+	UFUNCTION(BlueprintCallable)
+	UItemBase* SearchItemNumber(int32 ItemNumber) const;
 	
 };
