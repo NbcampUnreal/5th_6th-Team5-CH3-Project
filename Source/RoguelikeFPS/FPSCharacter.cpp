@@ -9,6 +9,7 @@ AFPSCharacter::AFPSCharacter()
 	// 초기 스탯 설정
 	: Level(1),
 Health(100),
+MaxHealth(100),
 Attack(10),
 Defence(10),
 AttackSpeed(5),
