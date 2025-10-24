@@ -80,7 +80,9 @@ void UGunComponent::SetDamage()
 {
 	if (_Templete)
 	{
-
+		float Damage = _Status.AttackPoint;
+		if (FMath::FRand() < _Status.CriticalChance) Damage *= _Status.CriticalMultiplier;
+		_Templete->Damage = Damage;
 	}
 }
 
