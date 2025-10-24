@@ -56,7 +56,6 @@ void AAIEnemyController::OnPossess(APawn* InPawn)
     const auto* Enemy = Cast<AAIEnemyCharacter>(InPawn);
     if (!ensure(Enemy && Enemy->Config && PerceptionComp)) return;
 
-    // ★ 여기서 SightConfig 존재 보장
     if (!SightConfig)
     {
         // 없으면 런타임에 새로 만든다

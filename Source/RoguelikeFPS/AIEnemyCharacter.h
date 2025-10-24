@@ -55,4 +55,28 @@ public:
     float DebugThickness = 1.0f;
 
     void DrawPerceptionGizmos();
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stats")
+    float MAXHP;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stats")
+    float HP;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stats")
+    float ATK;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stats")
+    float DEF;
+
+
+    // 체력 회복
+    UFUNCTION(BlueprintCallable, Category = "Stats")
+    void AddHealth(float Amount);
+    // 사망 처리 함수 (체력이 0 이하가 되었을 때 호출)
+    UFUNCTION(BlueprintCallable, Category = "Stats")
+    virtual void OnDeath();
+
+    // 데미지 처리 함수 - 외부로부터 데미지를 받을 때 호출됨
+    // 또는 AActor의 TakeDamage()를 오버라이드
+    virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 };

@@ -2,6 +2,7 @@
 #include "AIEnemyController.h"
 #include "DrawDebugHelpers.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Components/CapsuleComponent.h"
 
 AAIEnemyCharacter::AAIEnemyCharacter()
 {
@@ -12,10 +13,22 @@ void AAIEnemyCharacter::BeginPlay()
 {
     Super::BeginPlay();
 
+    if (!StateMachine)
+        StateMachine = FindComponentByClass<UEnemyStateMachineComponent>();
+
     ensureMsgf(Config, TEXT("Enemy Config is null on %s"), *GetName());
 
-    // 기본 이동속도 적용
-    ApplyWalkSpeed();
+    if (Config)
+    {
+        // 스탯 적용
+        MAXHP = Config->MaxHP;
+        HP = MAXHP;
+        ATK = Config->ATK;
+        DEF = Config->DEF;
+
+        // 이동 속도
+        ApplyWalkSpeed();
+    }
 }
 
 void AAIEnemyCharacter::ApplyWalkSpeed()
@@ -110,4 +123,43 @@ void AAIEnemyCharacter::DrawPerceptionGizmos()
         0,
         DebugThickness
     );
+}
+
+void AAIEnemyCharacter::AddHealth(float Amount)
+{
+    HP = FMath::Clamp(HP + Amount, 0.0f, MAXHP);
+    UE_LOG(LogTemp, Log, TEXT("Health increased to: %f"), HP);
+}
+
+void AAIEnemyCharacter::OnDeath()
+{
+    if (StateMachine)            // 널가드
+        StateMachine->ChangeState(EEnemyState::Dead);
+
+    UE_LOG(LogTemp, Warning, TEXT("Monster is DEAD"));
+    // 충돌/이동 정지
+    GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    if (AAIController* AICon = Cast<AAIController>(GetController()))
+        AICon->StopMovement();
+
+    SetLifeSpan(2.0f);           // Destroy() 즉시 호출 대신 권장
+}
+
+float AAIEnemyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+    // 기본 데미지 처리 로직 호출 (필수는 아님)
+    float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+    // 체력을 데미지만큼 감소시키고, 0 이하로 떨어지지 않도록 Clamp
+    HP = FMath::Clamp(HP - DamageAmount, 0.0f, MAXHP);
+    UE_LOG(LogTemp, Warning, TEXT("Health decreased to: %f"), HP);
+
+    // 체력이 0 이하가 되면 사망 처리
+    if (HP <= 0.0f)
+    {
+        OnDeath();
+    }
+
+    // 실제 적용된 데미지를 반환
+    return ActualDamage;
 }
