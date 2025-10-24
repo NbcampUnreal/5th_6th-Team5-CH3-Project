@@ -21,19 +21,23 @@ class ROGUELIKEFPS_API UProjectileComponent : public USphereComponent
 public:
 	UProjectileComponent();
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Data, meta = (AllowPrivateAccess = "true"))
+	float Damage;
 protected:
 	
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	UProjectileMovementComponent* _ProjectileMovement;
-
+	
 public:
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 	virtual void BeginPlay() override;
 
-	UProjectileMovementComponent* GetProjectileMovement() const { return _ProjectileMovement; }
+	void SetMovementSpeed(float speed);
+
+	//UProjectileMovementComponent* GetProjectileMovement() const { return _ProjectileMovement; }
 protected:
 
 private:

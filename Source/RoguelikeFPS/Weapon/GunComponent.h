@@ -10,7 +10,7 @@
 /**
  * 
  */
-
+class UProjectileComponent;
 
 UCLASS(Blueprintable, BlueprintType, ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class ROGUELIKEFPS_API UGunComponent : public UWeaponComponent
@@ -20,6 +20,7 @@ class ROGUELIKEFPS_API UGunComponent : public UWeaponComponent
 
 public:
 	UGunComponent();
+	~UGunComponent();
 protected:
 
 private:
@@ -28,7 +29,12 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data, meta = (AllowPrivateAccess = "true"))
 	FGunStatus _Status;
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
+	int32 CurrentBulletCount = 0;
+
+	UPROPERTY()
+	UProjectileComponent* _Projectile;
 public:
 	virtual void DoAttack() override;
 
@@ -40,4 +46,11 @@ protected:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 private:
 	bool Check_ProjectileHaveComponent();
+
+	void SetDamage();
+
+	void Fire();
+
+	void InitProjectile();
+	void ReloadBullet();
 };

@@ -42,7 +42,12 @@ void UProjectileComponent::BeginPlay()
 	if (GetOwner())
 	{
 		GetOwner()->SetLifeSpan(3.0f);
-		//GetOwner()->SetRootComponent(this);
 		_ProjectileMovement->UpdatedComponent = GetOwner()->GetRootComponent();
 	}
+}
+
+void UProjectileComponent::SetMovementSpeed(float speed)
+{
+	_ProjectileMovement->InitialSpeed = speed;
+	_ProjectileMovement->MaxSpeed = speed;
 }

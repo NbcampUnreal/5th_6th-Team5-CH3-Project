@@ -20,29 +20,32 @@ struct FGunStatus
     GENERATED_BODY()
 
     // 편집·블루프린트 노출
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
     float AttackPoint;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun")
-    int32 CurrentBulletCount;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+    int32 MaxBulletCount;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun")
-    int32 MaxBulletCount; 
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
     float AttackDelay = 0.0f;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
     float ReloadTime = 0.0f;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
     float ProjectileSpeed = 0.0f;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
     int ProjectilesPerShot = 1;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
     float Accuracy = 1.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+    float CriticalChance = 0.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+    float CriticalMultiplier = 5.f;
 
     // 생성자에서 기본값 초기화도 가능
     /*FGunStatus()
