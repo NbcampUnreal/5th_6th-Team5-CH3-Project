@@ -19,7 +19,7 @@ AProjectile::AProjectile()
 	_Collision->SetWalkableSlopeOverride(FWalkableSlopeOverride(WalkableSlope_Unwalkable, 0.f));
 	_Collision->CanCharacterStepUpOn = ECB_No;
 
-	SetRootComponent(_Collision);
+	RootComponent = _Collision;
 
 	_ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
 	_ProjectileMovement->UpdatedComponent = _Collision;
@@ -49,11 +49,18 @@ void AProjectile::Tick(float DeltaTime)
 
 void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	if ((OtherActor != nullptr) && (OtherActor != GetOwner()) && (OtherComp != nullptr) && OtherComp->IsSimulatingPhysics())
+	if ((OtherActor != nullptr) && (OtherActor != GetOwner()) && (OtherComp != nullptr))
 	{
 		//OtherComp->AddImpulseAtLocation(GetOwner()->GetVelocity() * 100.0f, GetOwner()->GetActorLocation());
 
 		GetOwner()->Destroy();
 	}
+}
+
+void AProjectile::SetMovement(float speed)
+{
+	if (speed < 0) return;
+	_ProjectileMovement->InitialSpeed = speed;
+	_ProjectileMovement->MaxSpeed = speed;
 }
 

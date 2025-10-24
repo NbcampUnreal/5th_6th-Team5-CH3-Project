@@ -18,6 +18,8 @@ public:
 	// Sets default values for this actor's properties
 	AProjectile();
 
+	UPROPERTY()
+	float Damage;
 protected:
 
 private:
@@ -26,15 +28,14 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	USphereComponent* _Collision;
-
-	UPROPERTY()
-	float Damage;
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+
+	void SetMovement(float speed);
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

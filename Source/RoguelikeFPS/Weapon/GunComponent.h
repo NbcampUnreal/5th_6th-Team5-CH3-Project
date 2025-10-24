@@ -28,11 +28,20 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Projectile, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<AProjectile> _ProjectileClass;
 
+	UPROPERTY()
+	AProjectile* _Templete;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data, meta = (AllowPrivateAccess = "true"))
 	FGunStatus _Status;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
 	int32 CurrentBulletCount = 0;
+
+	UPROPERTY()
+	FTimerHandle _GunTimerHandle;
+
+	UPROPERTY()
+	bool CanAttack; 
 public:
 	virtual void DoAttack() override;
 

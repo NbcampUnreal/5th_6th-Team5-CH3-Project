@@ -3,12 +3,11 @@
 
 #include "Weapon/GunComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "ProjectileComponent.h"
 #include "Engine/SCS_Node.h"
 
 UGunComponent::UGunComponent()
 {
-	
+	CanAttack = true;
 }
 
 UGunComponent::~UGunComponent()
@@ -18,6 +17,7 @@ UGunComponent::~UGunComponent()
 
 void UGunComponent::DoAttack()
 {
+	if (!CanAttack) return;
 	if (_Character == nullptr || _Character->GetController() == nullptr)
 	{
 		return;
@@ -25,7 +25,23 @@ void UGunComponent::DoAttack()
 
 	SetDamage();
 
-	Fire();
+	for (size_t count = 0; count < _Status.ProjectilesPerShot; count++)
+	{
+		Fire();
+	}
+
+	CurrentBulletCount--;
+	GEngine->AddOnScreenDebugMessage(1, 5.0f, FColor::Green, FString::Printf(TEXT("CurrentBulletCount : %d"), CurrentBulletCount));
+
+	CanAttack = false;
+
+	FTimerDelegate Delegate = FTimerDelegate::CreateLambda([this]()
+		{
+			CanAttack = true;
+		});
+
+	UWorld* const World = GetWorld();
+	World->GetTimerManager().SetTimer(_GunTimerHandle, Delegate, _Status.AttackDelay, false);
 
 	// Try and play the sound if specified b 
 	if (_AttackSound != nullptr) {
@@ -44,14 +60,7 @@ void UGunComponent::DoAttack()
 void UGunComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-	//if (!Check_ProjectileHaveComponent())
-	//{
-	//	UE_LOG(LogTemp, Fatal, TEXT("Gun's Projectile does not have Component"));
-	//}
-
 	InitProjectile();
-
 	CurrentBulletCount = _Status.MaxBulletCount;
 }
 
@@ -69,10 +78,10 @@ void UGunComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 
 void UGunComponent::SetDamage()
 {
-	/*if (_Projectile)
+	if (_Templete)
 	{
-		_Projectile->Damage = _Status.AttackPoint;
-	}*/
+
+	}
 }
 
 void UGunComponent::Fire()
@@ -88,18 +97,16 @@ void UGunComponent::Fire()
 		if (World != nullptr)
 		{
 			APlayerController* PlayerController = Cast<APlayerController>(_Character->GetController());
-			const FRotator SpawnRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
-			const FVector SpawnLocation = this->GetSocketLocation(FName("Muzzle"));
+			//const FRotator SpawnRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
+			//const FVector SpawnLocation = this->GetSocketLocation(FName("Muzzle"));
 
 			//Set Spawn Collision Handling Override
 			FActorSpawnParameters ActorSpawnParams;
 			ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+			ActorSpawnParams.Template = _Templete;
 
 			// Spawn the projectile at the muzzle
-			World->SpawnActor<AActor>(_ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
-
-			CurrentBulletCount--;
-			GEngine->AddOnScreenDebugMessage(1, 5.0f, FColor::Green, FString::Printf(TEXT("CurrentBulletCount : %d"), CurrentBulletCount));
+			World->SpawnActor<AActor>(_ProjectileClass, this->GetSocketLocation(FName("Muzzle")), PlayerController->PlayerCameraManager->GetCameraRotation(), ActorSpawnParams);
 		}
 	}
 	else {
@@ -109,7 +116,13 @@ void UGunComponent::Fire()
 
 void UGunComponent::InitProjectile()
 {
-	//
+	if (_ProjectileClass)
+	{
+		//Templete
+		AProjectile* TempActor = _ProjectileClass->GetDefaultObject<AProjectile>();
+		TempActor->SetMovement(_Status.ProjectileSpeed);
+		_Templete = TempActor;
+	}
 }
 
 void UGunComponent::ReloadBullet()
