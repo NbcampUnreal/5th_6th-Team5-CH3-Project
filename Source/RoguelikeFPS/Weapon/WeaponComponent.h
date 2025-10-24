@@ -12,7 +12,7 @@
  */
 class ACharacter;
 
-UCLASS()
+UCLASS(Blueprintable, BlueprintType, ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class ROGUELIKEFPS_API UWeaponComponent : public USkeletalMeshComponent
 {
 	GENERATED_BODY()
@@ -21,8 +21,9 @@ public:
 	UWeaponComponent();
 
 protected:
+	//Owner
+	ACharacter* _Character;
 
-private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay, meta = (AllowPrivateAccess = "true"))
 	USoundBase* _AttackSound;
 
@@ -36,16 +37,11 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* _AttackAction;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay, meta = (AllowPrivateAccess = "true"))
-	UPickUpComponent* _PickUpComponent;
-
-
+private:
+	
 public:
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	virtual void StartAttack();
-
-	/*UFUNCTION(BlueprintCallable, Category = "Weapon")
-	bool TryAttachWeapon(ACharacter* TargetCharacter);*/
+	virtual void DoAttack();
 
 	UFUNCTION()
 	void AttachWeapon(ACharacter* TargetCharacter); // 델리게이트용 (void)
@@ -57,6 +53,5 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
-	//Owner
-	ACharacter* _Character;
+
 };

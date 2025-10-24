@@ -5,15 +5,15 @@
 #include "PlayerCharacter.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "PickUpComponent.h"
 
 
 UWeaponComponent::UWeaponComponent()
 {
-	_PickUpComponent = CreateDefaultSubobject<UPickUpComponent>(TEXT("PickUp"));
-
+	
 }
 
-void UWeaponComponent::StartAttack()
+void UWeaponComponent::DoAttack()
 {
 
 }
@@ -30,7 +30,8 @@ void UWeaponComponent::AttachWeapon(ACharacter* TargetCharacter)
 
 	// Attach the weapon to the First Person Character
 	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
-	AttachToComponent(_Character->GetMesh(), AttachmentRules, FName(TEXT("GripPoint")));
+	GetOwner()->AttachToComponent(_Character->GetMesh(), AttachmentRules, FName(TEXT("GripPoint")));
+	//AttachToComponent(_Character->GetMesh(), AttachmentRules, FName(TEXT("GripPoint")));
 
 	// Set up action bindings
 	if (APlayerController* PlayerController = Cast<APlayerController>(_Character->GetController()))
@@ -44,7 +45,7 @@ void UWeaponComponent::AttachWeapon(ACharacter* TargetCharacter)
 		if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
 		{
 			// Attack
-			EnhancedInputComponent->BindAction(_AttackAction, ETriggerEvent::Triggered, this, &UWeaponComponent::StartAttack);
+			EnhancedInputComponent->BindAction(_AttackAction, ETriggerEvent::Triggered, this, &UWeaponComponent::DoAttack);
 		}
 	}
 
@@ -55,9 +56,19 @@ void UWeaponComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (_PickUpComponent)
+	//Check PickUpCompoent Attached
+	//if PickUpCompoent is exsit. Do AddDynamic
+	if (GetOwner() != nullptr)
 	{
-		_PickUpComponent->OnPickUp.AddDynamic(this, &UWeaponComponent::AttachWeapon);
+		UPickUpComponent* PickUp = GetOwner()->FindComponentByClass<UPickUpComponent>();
+		if (PickUp)
+		{
+			PickUp->OnPickUp.AddDynamic(this, &UWeaponComponent::AttachWeapon);
+			UE_LOG(LogTemp, Warning, TEXT("AddDynamic"));
+		}
+		else {
+			UE_LOG(LogTemp, Warning, TEXT("Can't find UPickUpComponent"));
+		}
 	}
 }
 
@@ -75,7 +86,6 @@ void UWeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 			}
 		}
 	}
-
 
 	Super::EndPlay(EndPlayReason);
 }
