@@ -24,6 +24,6 @@ void UPickUpComponent::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedCompo
 	{
 		OnPickUp.Broadcast(Character);
 
-		//OnComponentBeginOverlap.RemoveAll(this);
+		OnComponentBeginOverlap.RemoveAll(this);
 	}
 }
