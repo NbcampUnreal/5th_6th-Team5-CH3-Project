@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Weapon/WeaponComponent.h"
 #include "GunStatus.h"
+#include "Projectile.h"
 #include "GunComponent.generated.h"
 
 /**
@@ -25,16 +26,13 @@ protected:
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Projectile, meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<AActor> _ProjectileClass;
+	TSubclassOf<AProjectile> _ProjectileClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data, meta = (AllowPrivateAccess = "true"))
 	FGunStatus _Status;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
 	int32 CurrentBulletCount = 0;
-
-	UPROPERTY()
-	UProjectileComponent* _Projectile;
 public:
 	virtual void DoAttack() override;
 
@@ -45,8 +43,6 @@ protected:
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 private:
-	bool Check_ProjectileHaveComponent();
-
 	void SetDamage();
 
 	void Fire();
