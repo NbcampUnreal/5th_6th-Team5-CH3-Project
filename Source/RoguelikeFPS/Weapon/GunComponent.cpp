@@ -31,7 +31,7 @@ void UGunComponent::DoAttack()
 	}
 
 	CurrentBulletCount--;
-	GEngine->AddOnScreenDebugMessage(1, 5.0f, FColor::Green, FString::Printf(TEXT("CurrentBulletCount : %d"), CurrentBulletCount));
+	//GEngine->AddOnScreenDebugMessage(1, 5.0f, FColor::Green, FString::Printf(TEXT("CurrentBulletCount : %d"), CurrentBulletCount));
 
 	CanAttack = false;
 
@@ -98,9 +98,8 @@ void UGunComponent::Fire()
 		UWorld* const World = GetWorld();
 		if (World != nullptr)
 		{
-			APlayerController* PlayerController = Cast<APlayerController>(_Character->GetController());
-			//const FRotator SpawnRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
-			//const FVector SpawnLocation = this->GetSocketLocation(FName("Muzzle"));
+			const FRotator SpawnRotation = CalculateSapwnRotaion();
+			const FVector SpawnLocation = this->GetSocketLocation(FName("Muzzle"));
 
 			//Set Spawn Collision Handling Override
 			FActorSpawnParameters ActorSpawnParams;
@@ -108,12 +107,49 @@ void UGunComponent::Fire()
 			ActorSpawnParams.Template = _Templete;
 
 			// Spawn the projectile at the muzzle
-			World->SpawnActor<AActor>(_ProjectileClass, this->GetSocketLocation(FName("Muzzle")), PlayerController->PlayerCameraManager->GetCameraRotation(), ActorSpawnParams);
+			World->SpawnActor<AActor>(_ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
 		}
 	}
 	else {
 		UE_LOG(LogTemp, Warning, TEXT("_ProjectileClass nullptr"));
 	}
+}
+
+FRotator UGunComponent::CalculateSapwnRotaion()
+{
+	if (_Character)
+	{
+		APlayerController* PlayerController = Cast<APlayerController>(_Character->GetController());
+		if (PlayerController)
+		{
+			FRotator SpawnRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
+
+			float AccuracyChance = FMath::FRand();
+			if (AccuracyChance < _Status.Accuracy) {
+
+			}
+			else {
+				double PitchAdditioanlAngle = FMath::Lerp(0, _Status.Spread_Angle, FMath::Lerp(_Status.Accuracy, 1, AccuracyChance));
+				double YawAdditioanlAngle = FMath::FRandRange(0, PitchAdditioanlAngle);
+
+				if (FMath::RandRange(0, 1)) PitchAdditioanlAngle *= -1;
+				if (FMath::RandRange(0, 1)) YawAdditioanlAngle *= -1;
+
+				SpawnRotation.Pitch += PitchAdditioanlAngle;
+				SpawnRotation.Yaw += YawAdditioanlAngle;
+			}
+
+			return SpawnRotation;
+		}
+		else {
+			UE_LOG(LogTemp, Warning, TEXT("PlayerController is nullptr"));
+		}
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("_Character is nullptr"));
+	}
+
+	return FRotator();
 }
 
 void UGunComponent::InitProjectile()

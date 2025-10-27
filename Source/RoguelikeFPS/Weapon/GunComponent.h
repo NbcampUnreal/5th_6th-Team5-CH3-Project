@@ -55,6 +55,7 @@ private:
 	void SetDamage();
 
 	void Fire();
+	FRotator CalculateSapwnRotaion();
 
 	void InitProjectile();
 	void ReloadBullet();
