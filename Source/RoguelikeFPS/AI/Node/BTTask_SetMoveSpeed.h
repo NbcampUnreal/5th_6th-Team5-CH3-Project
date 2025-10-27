@@ -1,9 +1,9 @@
 ﻿#pragma once
-
+//JMS
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
-#include "AIEnemyCharacter.h"
-#include "AIEnemyController.h"
+#include "AI/Character/AIEnemyCharacter.h"
+#include "AI/Character/AIEnemyController.h"
 #include "BTTask_SetMoveSpeed.generated.h"
 
 

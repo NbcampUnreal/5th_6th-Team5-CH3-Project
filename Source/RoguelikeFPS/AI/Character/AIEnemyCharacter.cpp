@@ -1,5 +1,5 @@
-﻿#include "AIEnemyCharacter.h"
-#include "AIEnemyController.h"
+﻿#include "AI/Character/AIEnemyCharacter.h"
+#include "AI/Character/AIEnemyController.h"
 #include "DrawDebugHelpers.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"

@@ -1,8 +1,8 @@
 ﻿#pragma once
-
+//JMS
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "EnemyState.h"
+#include "AI/Structure/EnemyState.h"
 #include "EnemyStateMachineComponent.generated.h"
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))

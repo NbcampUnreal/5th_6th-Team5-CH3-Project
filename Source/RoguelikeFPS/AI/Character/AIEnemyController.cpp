@@ -1,5 +1,5 @@
-﻿#include "AIEnemyController.h"
-#include "AIEnemyCharacter.h"
+﻿#include "AI/Character/AIEnemyController.h"
+#include "AI/Character/AIEnemyCharacter.h"
 #include "Perception/AISenseConfig_Sight.h"
 #include "Perception/AISense_Sight.h"
 #include "BehaviorTree/BehaviorTree.h"

@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "BehaviorTree/BTTaskNode.h"
 #include "BTTask_FindPatrolPoint.generated.h"
-
+//JMS
 UCLASS()
 class ROGUELIKEFPS_API UBTTask_FindPatrolPoint : public UBTTaskNode
 {

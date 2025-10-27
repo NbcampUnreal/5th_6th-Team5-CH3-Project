@@ -1,6 +1,6 @@
 ﻿
 // BTTask_ClearBBKey.cpp
-#include "BTTask_ClearBBKey.h"
+#include "AI/Node/BTTask_ClearBBKey.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
 EBTNodeResult::Type UBTTask_ClearBBKey::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8*)

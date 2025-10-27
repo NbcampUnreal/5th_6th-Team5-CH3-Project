@@ -1,10 +1,10 @@
 ﻿#pragma once
-
+//JMS
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "EnemyState.h"
-#include "EnemyConfig.h"
-#include "EnemyStateMachineComponent.h"
+#include "AI/Structure/EnemyState.h"
+#include "AI/Structure/EnemyConfig.h"
+#include "AI/Structure/EnemyStateMachineComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "AIEnemyCharacter.generated.h"
 
