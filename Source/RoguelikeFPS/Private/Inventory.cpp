@@ -60,7 +60,6 @@ void UInventory::ShowInventory() const
 	}
 	UE_LOG(LogTemp, Log, TEXT("Current Gold : %d"), Gold);
 }
-
 UItemBase* UInventory::SearchItemName(const FName& Name) const
 {
 	for (UItemBase* Item : Items)
@@ -84,13 +83,11 @@ UItemBase* UInventory::SearchItemNumber(int32 ItemNumber) const
 	}
 	return nullptr;
 }
-
 //юс╫ц
 void UInventory::TestInventory()
 {
 	UItemBase* Gun = NewObject<UItemBase>();
 	Gun->ItemName = "Gun";
-	Gun->ItemNumber = 001;
 	Gun->Amount = 1;
 	Gun->Description = "Basic Gun";
 	Gun->BuyPrice = 100;
@@ -99,24 +96,17 @@ void UInventory::TestInventory()
 
 	UItemBase* Potion = NewObject<UItemBase>();
 	Potion->ItemName = "Potion";
-	Potion->ItemNumber = 002;
 	Potion->Amount = 5;
 	Potion->Description = "Heal Potion";
 	Potion->BuyPrice = 20;
 	Potion->SellPrice = 10;
 	Potion->ItemType = "Potion";
 
-	AddItem(Gun);
-	AddItem(Potion);
+	BuyItem(Gun);
+	BuyItem(Potion);
 
-	UItemBase* SearchGun = SearchItemName("Gun");
-	if (SearchGun)
-	{
-		UE_LOG(LogTemp, Log, TEXT("Search Name : %s, Amount : %d"), *SearchGun->ItemName.ToString(), SearchGun->Amount);
-	}
-	UItemBase* SearchPotion = SearchItemNumber(002);
-	if (SearchPotion)
-	{
-		UE_LOG(LogTemp, Log, TEXT("Search Number : %d, Name : %s, Amount : %d"), SearchPotion->ItemNumber, *SearchPotion->ItemName.ToString(), SearchPotion->Amount);
-	}
+	SellItem(Gun);
+	SellItem(Potion);
+
+	ShowInventory();
 }

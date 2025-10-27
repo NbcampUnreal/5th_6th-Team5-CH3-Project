@@ -1,17 +1,14 @@
 #include "MyPlayerController.h"
 #include "Blueprint/UserWidget.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
+#include "ItemBase.h"
 
 void AMyPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
 	PlayerInventory = NewObject<UInventory>(this);
-	PlayerInventory->AddToRoot();
-
-	UItemBase* SampleItem = NewObject<UItemBase>();
-	SampleItem->ItemName = "Potion";
-	SampleItem->Amount = 3;
-	PlayerInventory->AddItem(SampleItem);
 
 	if (InventoryWidgetClass)
 	{
@@ -24,21 +21,42 @@ void AMyPlayerController::BeginPlay()
 		}
 	}
 
-	InputComponent->BindAction("InventoryOnOff", IE_Pressed, this, &AMyPlayerController::InventoryOnOff);
+	if (ULocalPlayer* LocalPlayer = GetLocalPlayer())
+	{
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>())
+		{
+			if (IMC_Inventory)
+				Subsystem->AddMappingContext(IMC_Inventory, 0);
+		}
+	}
+}
+
+void AMyPlayerController::SetupInputComponent()
+{
+	Super::SetupInputComponent();
+
+	if (UEnhancedInputComponent* EnhancedInput = Cast<UEnhancedInputComponent>(InputComponent))
+	{
+		if (IA_InventoryOnOff)
+			EnhancedInput->BindAction(IA_InventoryOnOff, ETriggerEvent::Triggered, this, &AMyPlayerController::InventoryOnOff);
+	}
 }
 
 void AMyPlayerController::InventoryOnOff()
 {
-	if (!InventoryWidget)
+	if (!InventoryWidget) return;
+
+	bool bVisible = InventoryWidget->IsVisible();
+	InventoryWidget->SetVisibility(bVisible ? ESlateVisibility::Hidden : ESlateVisibility::Visible);
+
+	if (!bVisible)
 	{
-		return;
-	}
-	if (InventoryWidget->IsVisible())
-	{
-		InventoryWidget->SetVisibility(ESlateVisibility::Hidden);
+		bShowMouseCursor = true;
+		SetInputMode(FInputModeGameAndUI().SetWidgetToFocus(InventoryWidget->TakeWidget()));
 	}
 	else
 	{
-		InventoryWidget->SetVisibility(ESlateVisibility::Visible);
+		bShowMouseCursor = false;
+		SetInputMode(FInputModeGameOnly());
 	}
 }

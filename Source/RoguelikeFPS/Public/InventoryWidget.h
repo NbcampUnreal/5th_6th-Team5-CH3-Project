@@ -30,4 +30,6 @@ protected:
 
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* GoldText;
+
+
 };

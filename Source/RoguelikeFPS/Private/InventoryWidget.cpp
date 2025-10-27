@@ -12,7 +12,7 @@ void UInventoryWidget::UpdateUI()
 		return;
 	}
 
-	GoldText->SetText(FText::AsNumber(Inventory->Gold));
+	GoldText->SetText(FText::FromString(FString::Printf(TEXT("Gold : %d"), Inventory->Gold)));
 
 	ItemBox->ClearChildren();
 
