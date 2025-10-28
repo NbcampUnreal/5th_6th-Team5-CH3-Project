@@ -44,6 +44,8 @@ private:
 	bool CanAttack; 
 public:
 	virtual void DoAttack() override;
+	void Fire();
+	void SetDamage(float Damage);
 
 protected:
 	virtual void BeginPlay() override;
@@ -54,7 +56,6 @@ protected:
 private:
 	void SetDamage();
 
-	void Fire();
 	FRotator CalculateSapwnRotaion();
 
 	void InitProjectile();

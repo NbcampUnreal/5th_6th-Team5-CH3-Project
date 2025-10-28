@@ -18,12 +18,14 @@ UGunComponent::~UGunComponent()
 void UGunComponent::DoAttack()
 {
 	if (!CanAttack) return;
-	if (_Character == nullptr || _Character->GetController() == nullptr)
-	{
-		return;
-	}
+	if (_Character == nullptr || _Character->GetController() == nullptr) return;
 
 	SetDamage();
+
+	if (!(CurrentBulletCount > 0)) {
+		ReloadBullet();
+		return;
+	}
 
 	for (size_t count = 0; count < _Status.ProjectilesPerShot; count++)
 	{
@@ -88,16 +90,12 @@ void UGunComponent::SetDamage()
 
 void UGunComponent::Fire()
 {
-	if (!(CurrentBulletCount > 0)) {
-		ReloadBullet();
-		return;
-	}
-
 	if (_ProjectileClass != nullptr)
 	{
 		UWorld* const World = GetWorld();
 		if (World != nullptr)
 		{
+			//const FRotator SpawnRotation = CalculateSapwnRotaion();
 			const FRotator SpawnRotation = CalculateSapwnRotaion();
 			const FVector SpawnLocation = this->GetSocketLocation(FName("Muzzle"));
 
@@ -115,6 +113,13 @@ void UGunComponent::Fire()
 	}
 }
 
+void UGunComponent::SetDamage(float Damage)
+{
+	_Status.AttackPoint += Damage;
+	SetDamage();
+	_Status.AttackPoint -= Damage;
+}
+
 FRotator UGunComponent::CalculateSapwnRotaion()
 {
 	if (_Character)
@@ -124,19 +129,17 @@ FRotator UGunComponent::CalculateSapwnRotaion()
 		{
 			FRotator SpawnRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
 
+
 			float AccuracyChance = FMath::FRand();
 			if (AccuracyChance < _Status.Accuracy) {
 
 			}
 			else {
-				double PitchAdditioanlAngle = FMath::Lerp(0, _Status.Spread_Angle, FMath::Lerp(_Status.Accuracy, 1, AccuracyChance));
-				double YawAdditioanlAngle = FMath::FRandRange(0, PitchAdditioanlAngle);
-
-				if (FMath::RandRange(0, 1)) PitchAdditioanlAngle *= -1;
-				if (FMath::RandRange(0, 1)) YawAdditioanlAngle *= -1;
-
-				SpawnRotation.Pitch += PitchAdditioanlAngle;
-				SpawnRotation.Yaw += YawAdditioanlAngle;
+				float ConeHalfAngleRad = FMath::DegreesToRadians(_Status.Spread_Angle);
+				FVector Forward = SpawnRotation.Vector();
+				FVector ShotDir = FMath::VRandCone(Forward, ConeHalfAngleRad);
+				FRotator SpawnRot = ShotDir.Rotation();
+				SpawnRotation = SpawnRot;
 			}
 
 			return SpawnRotation;
