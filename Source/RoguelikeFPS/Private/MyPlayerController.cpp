@@ -38,7 +38,9 @@ void AMyPlayerController::SetupInputComponent()
 	if (UEnhancedInputComponent* EnhancedInput = Cast<UEnhancedInputComponent>(InputComponent))
 	{
 		if (IA_InventoryOnOff)
+		{
 			EnhancedInput->BindAction(IA_InventoryOnOff, ETriggerEvent::Triggered, this, &AMyPlayerController::InventoryOnOff);
+		}
 	}
 }
 

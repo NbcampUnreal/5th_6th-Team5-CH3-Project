@@ -1,4 +1,5 @@
 #include "MyCharacter.h"
+#include "Inventory.h"
 
 AMyCharacter::AMyCharacter()
 {
@@ -10,9 +11,5 @@ AMyCharacter::AMyCharacter()
 void AMyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	if (Inventory)
-	{
-		Inventory->TestInventory();
-	}
+
 }
