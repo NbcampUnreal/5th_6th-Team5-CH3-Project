@@ -1,5 +1,7 @@
 ﻿#include "AI/Character/AIEnemyCharacter.h"
 #include "AI/Character/AIEnemyController.h"
+#include "AI/Structure/MeleeAttackComponent.h"
+#include "AI/Structure/RangedAttackComponent.h"
 #include "DrawDebugHelpers.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -17,6 +19,8 @@ void AAIEnemyCharacter::BeginPlay()
         StateMachine = FindComponentByClass<UEnemyStateMachineComponent>();
 
     ensureMsgf(Config, TEXT("Enemy Config is null on %s"), *GetName());
+
+    ApplyConfigToComponents();
 
     if (Config)
     {
@@ -56,6 +60,27 @@ void AAIEnemyCharacter::Tick(float DeltaSeconds)
         DrawPerceptionGizmos();
     }
 #endif
+}
+
+void AAIEnemyCharacter::ApplyConfigToComponents()
+{
+    if (!Config) return;
+
+    if (auto* Melee = FindComponentByClass<UMeleeAttackComponent>())
+    {
+        Melee->ApplyMeleeConfig(Config);
+        UE_LOG(LogTemp, Log, TEXT("ApplyMeleeConfig Complete"));
+    }
+
+
+    if (auto* Ranged = FindComponentByClass<URangedAttackComponent>())
+    {
+        Ranged->ApplyRangeConfig(Config);
+        UE_LOG(LogTemp, Log, TEXT("ApplyRangeConfig Complete"));
+    }
+
+
+
 }
 
 void AAIEnemyCharacter::DrawPerceptionGizmos()

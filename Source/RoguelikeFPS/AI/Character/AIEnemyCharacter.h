@@ -27,6 +27,9 @@ public:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI")
     UEnemyConfig* Config = nullptr;   
 
+    UFUNCTION(BlueprintCallable, Category = "AI|Config")
+    void ApplyConfigToComponents();
+
     // FSM 컴포넌트 (상태 전이/상태별 로직 담당)
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
     UEnemyStateMachineComponent* StateMachine;

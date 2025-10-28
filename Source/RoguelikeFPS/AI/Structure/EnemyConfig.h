@@ -5,15 +5,12 @@
 #include "EnemyConfig.generated.h"
 
 // EnemyConfig.h
-UENUM(BlueprintType)
-enum class EEnemyClass : uint8 { Melee, Ranged };
 
 UCLASS(BlueprintType)
 class UEnemyConfig : public UDataAsset
 {
     GENERATED_BODY()
 public:
-    UPROPERTY(EditAnywhere, BlueprintReadOnly) EEnemyClass EnemyClass = EEnemyClass::Melee;
 
     // 인지/전투 범위
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Perception")
@@ -66,4 +63,21 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Patrol")
     float AcceptanceRadius = 120.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack|Melee")
+    float Range = 200.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack|Ranged")
+    TSubclassOf<AActor> ProjectileClass;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack|Ranged")
+    float ProjectileSpeed = 2000.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack|Ranged")
+    FName MuzzleSocket = TEXT("Muzzle");
+
+
+
+
+
 };
