@@ -161,7 +161,7 @@ void AFPSCharacter::Meal(int32 MealAmount)
 {
 	if (!bIsAlive) return;
 
-	// **[추가]** 최대 체력을 초과하지 않도록 체력 회복
+	// 최대 체력을 초과하지 않도록 체력 회복
 	Health = FMath::Min(Health + MealAmount, MaxHealth);
 
 	// 필요하다면 디버그 로그 추가
@@ -199,7 +199,6 @@ void AFPSCharacter::OnDeath(AController* KillerController)
 			}
 		}
 	}
-
 }
 
 // 피격 함수

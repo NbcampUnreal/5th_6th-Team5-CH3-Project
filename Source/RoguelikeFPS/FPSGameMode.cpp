@@ -7,6 +7,7 @@
 #include "GameFramework/Character.h"
 #include "FPSCharacter.h" 
 
+
 AFPSGameMode::AFPSGameMode(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
     // AugmentWidgetClass는 이제 헤더에서 설정되므로 주석 처리
