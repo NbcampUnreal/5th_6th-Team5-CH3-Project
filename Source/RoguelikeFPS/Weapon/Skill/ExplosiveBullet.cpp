@@ -24,10 +24,6 @@ void UExplosiveBullet::Projectile_AddDynamic(AProjectile* projectile)
 	if (projectile)
 	{
 		projectile->OnDestroyed.AddDynamic(this, &UExplosiveBullet::Spawn_Explosion);
-		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Green, FString::Printf(TEXT("Projectile_AddDynamic")));
-	}
-	else {
-		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Green, FString::Printf(TEXT("Projectile_AddDynamic : projectile is null")));
 	}
 }
 
@@ -38,11 +34,9 @@ void UExplosiveBullet::Spawn_Explosion(AActor* DestroyedActor)
 		UWorld* World = GetWorld();
 		if (World)
 		{
-			//GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT("Spawn_Explosion")));
 			FActorSpawnParameters ActorSpawnParams;
 			ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 			World->SpawnActor<AExplosiveActor>(_Explosion, DestroyedActor->GetActorLocation(), DestroyedActor->GetActorRotation(), ActorSpawnParams);
-			//AProjectile* SpawnProjectile = World->SpawnActor<AProjectile>(_ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
 		}
 	}
 }

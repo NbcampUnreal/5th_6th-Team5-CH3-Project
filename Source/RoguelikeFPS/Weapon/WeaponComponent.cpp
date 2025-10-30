@@ -32,7 +32,6 @@ void UWeaponComponent::AttachWeapon(ACharacter* TargetCharacter)
 	// Attach the weapon to the First Person Character
 	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
 	GetOwner()->AttachToComponent(_Character->GetMesh(), AttachmentRules, FName(TEXT("GripPoint")));
-	//AttachToComponent(_Character->GetMesh(), AttachmentRules, FName(TEXT("GripPoint")));
 
 	// Set up action bindings
 	if (APlayerController* PlayerController = Cast<APlayerController>(_Character->GetController()))
@@ -50,8 +49,6 @@ void UWeaponComponent::AttachWeapon(ACharacter* TargetCharacter)
 			if (_SkillComponent) _SkillComponent->SetUp();
 		}
 	}
-
-	//return true;
 }
 
 void UWeaponComponent::ActiveSkill()

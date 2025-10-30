@@ -3,6 +3,7 @@
 
 #include "Weapon/Skill/ExplosiveActor.h"
 #include "GameFramework/Character.h"
+#include "NiagaraFunctionLibrary.h"
 
 // Sets default values
 AExplosiveActor::AExplosiveActor()
@@ -15,14 +16,15 @@ AExplosiveActor::AExplosiveActor()
 
 	_Collision->OnComponentBeginOverlap.AddDynamic(this, &AExplosiveActor::OnSphereBeginOverlap);
 
-	InitialLifeSpan = 0.1f;
+	InitialLifeSpan = 1.0f;
 }
 
 // Called when the game starts or when spawned
 void AExplosiveActor::BeginPlay()
 {
 	Super::BeginPlay();
-	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT("%s"), *GetActorLocation().ToString()));
+	//Spawn Particle
+	if (Explosion) UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), Explosion, GetActorLocation(), GetActorRotation());
 }
 
 // Called every frame

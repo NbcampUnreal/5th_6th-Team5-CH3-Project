@@ -45,12 +45,12 @@ protected:
 	int32 Experience;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
 	int32 MaxExperience;
-	// Ä³¸¯ÅÍ »ýÁ¸¿©ºÎ
+	// Ä³ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
 	bool bIsAlive;
 
 
-	// ´ë½Ã ¼Óµµ
+	// ï¿½ï¿½ï¿½ ï¿½Óµï¿½
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash")
 	float DashMultifly;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Dash")
@@ -59,7 +59,7 @@ protected:
 	float DashTime;
 
 
-	// ´ë½Ã Å¸ÀÌ¸Ó ÇÚµé·¯
+	// ï¿½ï¿½ï¿½ Å¸ï¿½Ì¸ï¿½ ï¿½Úµé·¯
 	FTimerHandle DashTimerHandle;
 
 
@@ -82,13 +82,13 @@ protected:
 	UFUNCTION()
 	void StopCrouch(const FInputActionValue& value);
 
-	// ·¹º§¾÷
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	void LevelUp();
 
-	// »ç¸Á
+	// ï¿½ï¿½ï¿½
 	void OnDeath();
 
-	// ÇÇ°Ý ÇÔ¼ö
+	// ï¿½Ç°ï¿½ ï¿½Ô¼ï¿½
 	virtual float TakeDamage(
 		float DamageAmount,
 		FDamageEvent const& DamageEvent,
