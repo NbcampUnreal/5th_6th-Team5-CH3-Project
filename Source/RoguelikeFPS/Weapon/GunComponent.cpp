@@ -92,11 +92,11 @@ void UGunComponent::Fire()
 			ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
 			// Spawn the projectile at the muzzle
-			AProjectile* SpawnProjectile = World->SpawnActor<AProjectile>(_ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
-			
+			AProjectile* SpawnProjectile = World->SpawnActorDeferred<AProjectile>(_ProjectileClass, FTransform(SpawnRotation, SpawnLocation));
+			if (!IsValid(SpawnProjectile)) return;
 			InitSpawnProjectile(SpawnProjectile);
-			
 			ProjectileSpawn.Broadcast(SpawnProjectile);
+			UGameplayStatics::FinishSpawningActor(SpawnProjectile, FTransform(SpawnRotation, SpawnLocation));
 		}
 	}
 	else {
@@ -144,11 +144,9 @@ void UGunComponent::InitSpawnProjectile(AProjectile* proejectile)
 	if (proejectile)
 	{
 		proejectile->SetMovementSpeed(_Status.ProjectileSpeed);
-		proejectile->SetInstigator(GetOwner());
+		proejectile->SetInstigator(_Character);
+		proejectile->SetWeapon(GetOwner());
 		proejectile->SetDamage(_Status.AttackPoint);
-	}
-	else {
-		GEngine->AddOnScreenDebugMessage(2, 0.5f, FColor::Red, FString::Printf(TEXT("InitSpawnProjectile is null")));
 	}
 }
 
