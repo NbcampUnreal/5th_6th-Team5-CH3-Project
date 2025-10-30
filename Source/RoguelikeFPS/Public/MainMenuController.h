@@ -2,8 +2,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
-#include "Blueprint/UserWidget.h" 
 #include "MainMenuController.generated.h"
+
+class UTitleWidget;
+class UMainMenuWidget;
+class UUserWidget;
 
 UCLASS()
 class ROGUELIKEFPS_API AMainMenuController : public APlayerController
@@ -15,10 +18,19 @@ public:
 
 	// 에디터에서 MainMenuWidget 블루프린트를 할당받을 변수
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widgets")
-	TSubclassOf<UUserWidget> MainMenuWidgetClass;
+	TSubclassOf<UTitleWidget> TitleWidgetClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widgets")
+	TSubclassOf<UMainMenuWidget> MainMenuWidgetClass;
 
 private:
 	// 생성된 위젯 인스턴스를 저장
 	UPROPERTY()
-	UUserWidget* MainMenuWidgetInstance;
+	TObjectPtr<UTitleWidget> TitleWidgetInstance;
+
+	UPROPERTY()
+	TObjectPtr<UMainMenuWidget> MainMenuWidgetInstance;
+
+	UFUNCTION()
+	void ShowWeaponSelectMenu();
 };

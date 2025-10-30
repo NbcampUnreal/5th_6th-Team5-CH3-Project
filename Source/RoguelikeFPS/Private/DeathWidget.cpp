@@ -17,9 +17,9 @@ bool UDeathWidget::Initialize()
         RestartButton->OnClicked.AddDynamic(this, &UDeathWidget::OnRestartClicked);
     }
 
-    if (QuitButton)
+    if (ExitButton)
     {
-        QuitButton->OnClicked.AddDynamic(this, &UDeathWidget::OnQuitClicked);
+        ExitButton->OnClicked.AddDynamic(this, &UDeathWidget::OnExitClicked);
     }
 
     // OwningController는 AFPSCharacter의 OnDeath에서 설정된다고 가정합니다.
@@ -43,7 +43,7 @@ void UDeathWidget::OnRestartClicked()
     UGameplayStatics::OpenLevel(OwningController, FName(*CurrentLevelName));
 }
 
-void UDeathWidget::OnQuitClicked()
+void UDeathWidget::OnExitClicked()
 {
     if (!OwningController) return;
 

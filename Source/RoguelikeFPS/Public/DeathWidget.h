@@ -20,7 +20,7 @@ public:
     TObjectPtr<UButton> RestartButton;
 
     UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UButton> QuitButton;
+    TObjectPtr<UButton> ExitButton;
 
     // 이 위젯을 소유하는 컨트롤러 포인터 (클릭 이벤트 처리용)
     UPROPERTY(BlueprintReadOnly)
@@ -34,5 +34,5 @@ private:
     void OnRestartClicked();
 
     UFUNCTION()
-    void OnQuitClicked();
+    void OnExitClicked();
 };
