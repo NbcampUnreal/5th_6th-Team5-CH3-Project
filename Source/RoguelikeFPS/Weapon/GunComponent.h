@@ -11,6 +11,8 @@
 /**
  * 
  */
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FProjectileSpawn, AProjectile*, Projectile);
+
 class UProjectileComponent;
 
 UCLASS(Blueprintable, BlueprintType, ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
@@ -22,14 +24,15 @@ class ROGUELIKEFPS_API UGunComponent : public UWeaponComponent
 public:
 	UGunComponent();
 	~UGunComponent();
+
+	UPROPERTY(BlueprintAssignable, Category = "Interaction")
+	FProjectileSpawn ProjectileSpawn;
+
 protected:
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Projectile, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<AProjectile> _ProjectileClass;
-
-	UPROPERTY()
-	AProjectile* _Templete;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data, meta = (AllowPrivateAccess = "true"))
 	FGunStatus _Status;
@@ -42,10 +45,11 @@ private:
 
 	UPROPERTY()
 	bool CanAttack; 
+
 public:
 	virtual void DoAttack() override;
+
 	void Fire();
-	void SetDamage(float Damage);
 
 protected:
 	virtual void BeginPlay() override;
@@ -54,10 +58,8 @@ protected:
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 private:
-	void SetDamage();
-
 	FRotator CalculateSapwnRotaion();
 
-	void InitProjectile();
+	void InitSpawnProjectile(AProjectile* proejectile);
 	void ReloadBullet();
 };

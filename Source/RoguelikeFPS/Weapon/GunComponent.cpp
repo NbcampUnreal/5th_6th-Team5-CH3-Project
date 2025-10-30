@@ -20,8 +20,6 @@ void UGunComponent::DoAttack()
 	if (!CanAttack) return;
 	if (_Character == nullptr || _Character->GetController() == nullptr) return;
 
-	SetDamage();
-
 	if (!(CurrentBulletCount > 0)) {
 		ReloadBullet();
 		return;
@@ -62,7 +60,7 @@ void UGunComponent::DoAttack()
 void UGunComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	InitProjectile();
+
 	CurrentBulletCount = _Status.MaxBulletCount;
 }
 
@@ -76,16 +74,6 @@ void UGunComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void UGunComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-}
-
-void UGunComponent::SetDamage()
-{
-	if (_Templete)
-	{
-		float Damage = _Status.AttackPoint;
-		if (FMath::FRand() < _Status.CriticalChance) Damage *= _Status.CriticalMultiplier;
-		_Templete->Damage = Damage;
-	}
 }
 
 void UGunComponent::Fire()
@@ -102,22 +90,18 @@ void UGunComponent::Fire()
 			//Set Spawn Collision Handling Override
 			FActorSpawnParameters ActorSpawnParams;
 			ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-			ActorSpawnParams.Template = _Templete;
 
 			// Spawn the projectile at the muzzle
-			World->SpawnActor<AActor>(_ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
+			AProjectile* SpawnProjectile = World->SpawnActor<AProjectile>(_ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
+			
+			InitSpawnProjectile(SpawnProjectile);
+			
+			ProjectileSpawn.Broadcast(SpawnProjectile);
 		}
 	}
 	else {
 		UE_LOG(LogTemp, Warning, TEXT("_ProjectileClass nullptr"));
 	}
-}
-
-void UGunComponent::SetDamage(float Damage)
-{
-	_Status.AttackPoint += Damage;
-	SetDamage();
-	_Status.AttackPoint -= Damage;
 }
 
 FRotator UGunComponent::CalculateSapwnRotaion()
@@ -155,14 +139,16 @@ FRotator UGunComponent::CalculateSapwnRotaion()
 	return FRotator();
 }
 
-void UGunComponent::InitProjectile()
+void UGunComponent::InitSpawnProjectile(AProjectile* proejectile)
 {
-	if (_ProjectileClass)
+	if (proejectile)
 	{
-		//Templete
-		AProjectile* TempActor = _ProjectileClass->GetDefaultObject<AProjectile>();
-		TempActor->SetMovement(_Status.ProjectileSpeed);
-		_Templete = TempActor;
+		proejectile->SetMovementSpeed(_Status.ProjectileSpeed);
+		proejectile->SetInstigator(GetOwner());
+		proejectile->SetDamage(_Status.AttackPoint);
+	}
+	else {
+		GEngine->AddOnScreenDebugMessage(2, 0.5f, FColor::Red, FString::Printf(TEXT("InitSpawnProjectile is null")));
 	}
 }
 

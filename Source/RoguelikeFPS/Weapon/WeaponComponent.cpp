@@ -10,7 +10,8 @@
 
 UWeaponComponent::UWeaponComponent()
 {
-	
+	SetCollisionProfileName("OverlapAll");
+	SetGenerateOverlapEvents(false);
 }
 
 void UWeaponComponent::DoAttack()
@@ -46,7 +47,7 @@ void UWeaponComponent::AttachWeapon(ACharacter* TargetCharacter)
 		{
 			// Attack
 			EnhancedInputComponent->BindAction(_AttackAction, ETriggerEvent::Triggered, this, &UWeaponComponent::DoAttack);
-			if (_SkillComponent) _SkillComponent->SetActionMapping();
+			if (_SkillComponent) _SkillComponent->SetUp();
 		}
 	}
 

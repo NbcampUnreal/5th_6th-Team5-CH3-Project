@@ -22,6 +22,11 @@ void UWeaponSkillComponent::Active()
 	SetCoolDownTimer();
 }
 
+void UWeaponSkillComponent::SetUp()
+{
+	SetActionMapping();
+}
+
 void UWeaponSkillComponent::SetActionMapping()
 {
 	UWeaponComponent* WeaponComp = Cast<UWeaponComponent>(GetAttachParent());
@@ -33,9 +38,6 @@ void UWeaponSkillComponent::SetActionMapping()
 			{
 				WeaponComp->GetCharacterEnhancedInputComponent()->BindAction(_SkillAction, ETriggerEvent::Triggered, this, &UWeaponSkillComponent::Active);
 			}
-		}
-		else {
-			UE_LOG(LogTemp, Fatal, TEXT("GetCharacterEnhancedInputComponent() is null"));
 		}
 	}
 }
@@ -67,14 +69,6 @@ void UWeaponSkillComponent::OnAttachmentChanged()
     }
 	else {
 		UE_LOG(LogTemp, Fatal, TEXT("AttachParent is not WeaponComponent"));
-	}
-
-	if (_SkillAction)
-	{
-
-	}
-	else {
-		UE_LOG(LogTemp, Fatal, TEXT("_SkillAction is null"));
 	}
 }
 
