@@ -13,8 +13,8 @@ AProjectile::AProjectile()
 
 	_Collision = CreateDefaultSubobject<USphereComponent>(TEXT("Collision"));
 	_Collision->InitSphereRadius(5.0f);
-	_Collision->SetCollisionProfileName("Projectile");
-	_Collision->OnComponentHit.AddDynamic(this, &AProjectile::OnHit);
+	_Collision->SetCollisionProfileName("OverlapAll");
+	_Collision->OnComponentBeginOverlap.AddDynamic(this, &AProjectile::OnBeginOverlap);
 
 	_Collision->SetWalkableSlopeOverride(FWalkableSlopeOverride(WalkableSlope_Unwalkable, 0.f));
 	_Collision->CanCharacterStepUpOn = ECB_No;
@@ -37,7 +37,14 @@ AProjectile::AProjectile()
 void AProjectile::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green , FString::Printf(TEXT("TempActor Name : %s"), *_Instigator->GetName()));
+}
+
+void AProjectile::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	//OnDestroyed.Broadcast();
+
+	Super::EndPlay(EndPlayReason);
 }
 
 // Called every frame
@@ -47,20 +54,42 @@ void AProjectile::Tick(float DeltaTime)
 
 }
 
-void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+void AProjectile::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if ((OtherActor != nullptr) && (OtherActor != GetOwner()) && (OtherComp != nullptr))
+	if (!OtherActor || !OtherComp) return;
+	if (OtherActor == GetOwner()) return; // 소유자 자신 무시
+	if (OtherActor->IsA(AProjectile::StaticClass())) return;
+	
+	if (IsValid(_Instigator))
 	{
-		//OtherComp->AddImpulseAtLocation(GetOwner()->GetVelocity() * 100.0f, GetOwner()->GetActorLocation());
-
-		GetOwner()->Destroy();
+		if (_Instigator != OtherActor)
+		{
+			Destroy();
+		}
 	}
 }
 
-void AProjectile::SetMovement(float speed)
+
+void AProjectile::SetMovementSpeed(float speed)
 {
 	if (speed < 0) return;
 	_ProjectileMovement->InitialSpeed = speed;
 	_ProjectileMovement->MaxSpeed = speed;
+}
+
+void AProjectile::SetInstigator(AActor* instigator)
+{
+	if (instigator) {
+		GEngine->AddOnScreenDebugMessage(2, 0.5f, FColor::Red, FString::Printf(TEXT("SetInstigator")));
+		_Instigator = instigator;
+	}
+}
+
+void AProjectile::SetDamage(float damage)
+{
+	if (0 < damage)
+	{
+		_Damage = damage;
+	}
 }
 
