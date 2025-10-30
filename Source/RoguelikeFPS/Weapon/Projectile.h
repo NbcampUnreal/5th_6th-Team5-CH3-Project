@@ -34,6 +34,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Projectile, meta = (AllowPrivateAccess = "true"))
 	AActor* _Instigator;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Projectile, meta = (AllowPrivateAccess = "true"))
+	AActor* _Weapon;
 	
 
 public:
@@ -46,6 +49,7 @@ public:
 	void SetMovementSpeed(float speed);
 
 	void SetInstigator(AActor* instigator);
+	void SetWeapon(AActor* weapon);
 
 	void SetDamage(float damage);
 protected:

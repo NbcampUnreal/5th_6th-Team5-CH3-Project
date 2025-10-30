@@ -3,6 +3,7 @@
 
 #include "Weapon/Projectile.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "Weapon/WeaponComponent.h"
 #include "Components/SphereComponent.h"
 
 // Sets default values
@@ -23,8 +24,8 @@ AProjectile::AProjectile()
 
 	_ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
 	_ProjectileMovement->UpdatedComponent = _Collision;
-	_ProjectileMovement->InitialSpeed = 3000.f;
-	_ProjectileMovement->MaxSpeed = 3000.f;
+	_ProjectileMovement->InitialSpeed = 0.f;
+	_ProjectileMovement->MaxSpeed = 0.f;
 	_ProjectileMovement->bRotationFollowsVelocity = true;
 	_ProjectileMovement->bShouldBounce = true;
 	_ProjectileMovement->ProjectileGravityScale = 0.f;
@@ -37,7 +38,8 @@ AProjectile::AProjectile()
 void AProjectile::BeginPlay()
 {
 	Super::BeginPlay();
-	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green , FString::Printf(TEXT("TempActor Name : %s"), *_Instigator->GetName()));
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green , FString::Printf(TEXT("BeginPlay")));
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("%s"), *GetActorLocation().ToString()));
 }
 
 void AProjectile::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -59,11 +61,14 @@ void AProjectile::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 	if (!OtherActor || !OtherComp) return;
 	if (OtherActor == GetOwner()) return; // 소유자 자신 무시
 	if (OtherActor->IsA(AProjectile::StaticClass())) return;
+	if (OtherComp->IsA(UWeaponComponent::StaticClass())) return;
 	
 	if (IsValid(_Instigator))
 	{
-		if (_Instigator != OtherActor)
+		if (_Instigator != OtherActor && _Weapon != OtherActor)
 		{
+			/*GEngine->AddOnScreenDebugMessage(1, 2.0f, FColor::Red, FString::Printf(TEXT("Instigato Name : %s"), *_Instigator->GetName()));
+			GEngine->AddOnScreenDebugMessage(2, 2.0f, FColor::Blue, FString::Printf(TEXT("OtherActor Name : %s"), *OtherActor->GetName()));*/
 			Destroy();
 		}
 	}
@@ -73,16 +78,25 @@ void AProjectile::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 void AProjectile::SetMovementSpeed(float speed)
 {
 	if (speed < 0) return;
-	_ProjectileMovement->InitialSpeed = speed;
 	_ProjectileMovement->MaxSpeed = speed;
+	_ProjectileMovement->InitialSpeed = speed;
+
+	FVector CurrentDir = GetActorForwardVector();
+	if (!_ProjectileMovement->Velocity.IsNearlyZero())
+	{
+		CurrentDir = _ProjectileMovement->Velocity.GetSafeNormal();
+	}
+	_ProjectileMovement->Velocity = CurrentDir * speed;
 }
 
 void AProjectile::SetInstigator(AActor* instigator)
 {
-	if (instigator) {
-		GEngine->AddOnScreenDebugMessage(2, 0.5f, FColor::Red, FString::Printf(TEXT("SetInstigator")));
-		_Instigator = instigator;
-	}
+	if (instigator) _Instigator = instigator;
+}
+
+void AProjectile::SetWeapon(AActor* weapon)
+{
+	if (weapon) _Weapon = weapon;
 }
 
 void AProjectile::SetDamage(float damage)
