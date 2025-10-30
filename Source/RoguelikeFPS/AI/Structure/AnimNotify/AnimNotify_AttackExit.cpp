@@ -8,12 +8,13 @@ void UAnimNotify_AttackExit::Notify(USkeletalMeshComponent* MeshComp, UAnimSeque
     if (!MeshComp) return;
     if (AActor* Owner = MeshComp->GetOwner())
     {
-        UE_LOG(LogTemp, Log, TEXT("AnimNotify_AttackExit start"));
+        //UE_LOG(LogTemp, Log, TEXT("AnimNotify_AttackExit start"));
         bool bHandled = false;
 
         if (auto* Melee = Owner->FindComponentByClass<UMeleeAttackComponent>())
         {
             Melee->FinishAttack();
+            Melee->bAttackEnded = true;
             bHandled = true;
         }
         if (!bHandled)

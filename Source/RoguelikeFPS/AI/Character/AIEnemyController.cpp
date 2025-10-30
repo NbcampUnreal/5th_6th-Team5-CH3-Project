@@ -185,6 +185,11 @@ void AAIEnemyController::OnPerceptionUpdated(const TArray<AActor*>&)
     }
 }
 
+void AAIEnemyController::SendDeadToBT()
+{
+    BlackboardComp->SetValueAsBool(TEXT("IsDead"), true);
+}
+
 void AAIEnemyController::ClearTarget()
 {
     BlackboardComp->ClearValue(BB_TargetActor);

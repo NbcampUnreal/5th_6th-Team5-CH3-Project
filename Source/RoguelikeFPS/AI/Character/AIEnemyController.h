@@ -55,6 +55,9 @@ public:
     UPROPERTY(EditAnywhere, Category = "AI|Combat")
     float AttackRange = 200.f;           // InAttackRange 판정용
 
+    UFUNCTION()
+    void SendDeadToBT();
+
     /** BB 키 이름들 (한 곳에서 관리) */
     static const FName BB_TargetActor;
     static const FName BB_HasLOS;
@@ -70,6 +73,8 @@ protected:
 
     UFUNCTION()
     void OnPerceptionUpdated(const TArray<AActor*>& UpdatedActors);
+
+
 
     /** 타깃 및 관련 키 초기화 */
     void ClearTarget();

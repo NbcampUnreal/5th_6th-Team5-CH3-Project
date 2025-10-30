@@ -17,8 +17,8 @@ bool UEnemyAttackBaseComponent::CanAttack() const
 
 void UEnemyAttackBaseComponent::StartAttack(AActor* Target)
 {
-    if (bAttackInProgress || !CanAttack()) return;
-    bAttackInProgress = true;
+    if (!CanAttack()) return;
+    //bAttackInProgress = true;
     CurrentTarget = Target;
     bCanceled = false;
     // 파생 클래스에서 몽타주 재생/사운드/예열 등 구현
@@ -36,8 +36,8 @@ void UEnemyAttackBaseComponent::CancelAttack()
 
 void UEnemyAttackBaseComponent::FinishAttack()
 {
-    if (!bAttackInProgress) return; // 중복 방지
-    bAttackInProgress = false;
+    //if (!bAttackInProgress) return; // 중복 방지
+    //bAttackInProgress = false;
     MarkCooldown();
     OnAttackFinished.Broadcast();
 }

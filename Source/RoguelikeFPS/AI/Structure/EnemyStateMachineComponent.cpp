@@ -96,7 +96,7 @@ void UEnemyStateMachineComponent::OnEnterState(EEnemyState State)
     switch (State)
     {
     case EEnemyState::Idle:
-        UE_LOG(LogTemp, Log, TEXT("Entered Idle"));
+        //UE_LOG(LogTemp, Log, TEXT("Entered Idle"));
         CachedAnim->SetAnimState(EEnemyState::Idle);
         CachedAnim->SetInAttack(false);
         CachedAnim->SetHasTarget(false);
@@ -104,31 +104,33 @@ void UEnemyStateMachineComponent::OnEnterState(EEnemyState State)
         break;
 
     case EEnemyState::Patrol:
-        UE_LOG(LogTemp, Log, TEXT("Entered Patrol"));
+        //UE_LOG(LogTemp, Log, TEXT("Entered Patrol"));
         CachedAnim->SetAnimState(EEnemyState::Patrol);
         CachedAnim->SetInAttack(false);
         CachedAnim->SetHasTarget(false);
         break;
 
     case EEnemyState::Chase:
-        UE_LOG(LogTemp, Log, TEXT("Entered Chase"));
+        //UE_LOG(LogTemp, Log, TEXT("Entered Chase"));
         CachedAnim->SetAnimState(EEnemyState::Chase);
         CachedAnim->SetInAttack(false);
         CachedAnim->SetHasTarget(true);
         break;
 
     case EEnemyState::Attack:
-        UE_LOG(LogTemp, Log, TEXT("Entered Attack"));
+        //UE_LOG(LogTemp, Log, TEXT("Entered Attack"));
         CachedAnim->SetAnimState(EEnemyState::Attack);
         CachedAnim->SetInAttack(true);
-        UE_LOG(LogTemp, Warning, TEXT("The boolean value is %s"), (CachedAnim->bInAttack ? TEXT("true") : TEXT("false")));
         CachedAnim->SetHasTarget(true);
-        UE_LOG(LogTemp, Warning, TEXT("The boolean value is %s"), (CachedAnim->bHasTarget ? TEXT("true") : TEXT("false")));
         OnEnter_Attack();
         break;
 
     case EEnemyState::Dead:
-        UE_LOG(LogTemp, Log, TEXT("Entered Dead"));
+        //UE_LOG(LogTemp, Log, TEXT("Entered Dead"));
+        CachedAnim->SetAnimState(EEnemyState::Dead);
+        CachedAnim->SetInAttack(false);
+        CachedAnim->SetHasTarget(false);
+        CachedAnim->SetIsDead(true);
         break;
     }
 }
@@ -138,13 +140,13 @@ void UEnemyStateMachineComponent::OnExitState(EEnemyState State)
     switch (State)
     {
     case EEnemyState::Idle:
-        UE_LOG(LogTemp, Log, TEXT("Exit Idle"));
+        //UE_LOG(LogTemp, Log, TEXT("Exit Idle"));
         break;
     case EEnemyState::Attack:
-        UE_LOG(LogTemp, Log, TEXT("Exit Attack"));
+        //UE_LOG(LogTemp, Log, TEXT("Exit Attack"));
         break;
     case EEnemyState::Chase:
-        UE_LOG(LogTemp, Log, TEXT("Exit Chase"));
+        //UE_LOG(LogTemp, Log, TEXT("Exit Chase"));
         break;
     default:
         break;

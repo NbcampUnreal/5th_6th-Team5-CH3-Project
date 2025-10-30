@@ -8,7 +8,7 @@ void UAnimNotify_AttackHit::Notify(USkeletalMeshComponent* MeshComp, UAnimSequen
     if (!MeshComp) return;
     if (AActor* Owner = MeshComp->GetOwner())
     {
-        UE_LOG(LogTemp, Log, TEXT("AnimNotify_AttackHit start"));
+        //UE_LOG(LogTemp, Log, TEXT("AnimNotify_AttackHit start"));
         if (auto* Melee = Owner->FindComponentByClass<UMeleeAttackComponent>())
             Melee->DoHit();
         else if (auto* Ranged = Owner->FindComponentByClass<URangedAttackComponent>())

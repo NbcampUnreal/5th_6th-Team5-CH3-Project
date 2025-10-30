@@ -5,6 +5,7 @@
 
 class UAnimMontage;
 class UProjectileMovementComponent;
+class AProjectile;
 
 UCLASS(ClassGroup = (AI), meta = (BlueprintSpawnableComponent))
 class ROGUELIKEFPS_API URangedAttackComponent : public UEnemyAttackBaseComponent
@@ -15,7 +16,7 @@ public:
     void ApplyRangeConfig(const UEnemyConfig* Config);
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ranged")
-    TSubclassOf<AActor> ProjectileClass;
+    TSubclassOf<AProjectile> ProjectileClass;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ranged")
     float MuzzleSpeed = 2000.f;

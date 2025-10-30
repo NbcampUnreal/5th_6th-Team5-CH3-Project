@@ -25,18 +25,29 @@ public:
     //스탯 
     //공, 방, 체, 최대체력, 공속, 이속,
     //이후 추적 시간 추가
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stats")
+    int Level = 1;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stats")
-    float MaxHP = 200.f;
+    float MaxHP = 2.f;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stats")
     float HP = 200.f;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stats")
+    float HPperLevel = 15.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stats")
     float ATK = 25.f;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stats")
+    float ATKperLevel = 1.2f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stats")
     float DEF = 0.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stats")
+    float DEFperLevel = 6.67f;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stats|Combat")
     float AttackRange = 250.f;
@@ -65,7 +76,9 @@ public:
     float AcceptanceRadius = 120.f;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack|Melee")
-    float Range = 200.f;
+    float MeleeRange = 220.f;  // 스윕 길이(초록 캡슐 길이)
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack|Melee")
+    float MeleeHitRadius = 60.f;   // 스윕 두께(초록 캡슐 반지름)
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack|Ranged")
     TSubclassOf<AActor> ProjectileClass;

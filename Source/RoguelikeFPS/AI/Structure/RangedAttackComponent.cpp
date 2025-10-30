@@ -5,6 +5,8 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Animation/AnimInstance.h"
+#include "Weapon/Projectile.h"
+
 
 void URangedAttackComponent::ApplyRangeConfig(const UEnemyConfig* Config)
 {
@@ -19,23 +21,7 @@ void URangedAttackComponent::ApplyRangeConfig(const UEnemyConfig* Config)
 void URangedAttackComponent::StartAttack(AActor* Target)
 {
     Super::StartAttack(Target);
-    //UE_LOG(LogTemp, Log, TEXT("Entered RangedStartAttack"));
-    //if (!CanAttack()) return;
 
-    //if (ACharacter* OwnerChar = Cast<ACharacter>(GetOwner()))
-    //{
-    //    if (AttackMontage && OwnerChar->GetMesh() && OwnerChar->GetMesh()->GetAnimInstance())
-    //    {
-    //        OwnerChar->GetMesh()->GetAnimInstance()->OnMontageEnded.RemoveDynamic(this, &URangedAttackComponent::OnMontageEnded);
-    //        OwnerChar->GetMesh()->GetAnimInstance()->OnMontageEnded.AddDynamic(this, &URangedAttackComponent::OnMontageEnded);
-    //        OwnerChar->PlayAnimMontage(AttackMontage);
-    //    }
-    //    else
-    //    {
-    //        DoHit();
-    //        FinishAttack();
-    //    }
-    //}
 }
 
 void URangedAttackComponent::DoHit()
@@ -52,12 +38,9 @@ void URangedAttackComponent::DoHit()
     P.Owner = GetOwner();
     P.Instigator = Cast<APawn>(GetOwner());
 
-    if (AActor* Proj = GetWorld()->SpawnActor<AActor>(ProjectileClass, Loc, Rot, P))
+    if (AProjectile* Proj = GetWorld()->SpawnActor<AProjectile>(ProjectileClass, Loc, Rot, P))
     {
-        if (auto* Move = Proj->FindComponentByClass<UProjectileMovementComponent>())
-        {
-            Move->InitialSpeed = Move->MaxSpeed = MuzzleSpeed;
-        }
+        Proj->SetMovement(MuzzleSpeed);
     }
 }
 

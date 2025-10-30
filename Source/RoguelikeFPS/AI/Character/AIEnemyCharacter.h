@@ -43,6 +43,12 @@ public:
     UFUNCTION(BlueprintCallable, Category = "AI|Movement")
     void ApplyChaseSpeed();    // 추적 속도(있다면)
 
+    UFUNCTION(BlueprintCallable, Category = "AI|Movement")
+    float GetWalkSpeed();     // 기본 순찰/이동 속도
+
+    UFUNCTION(BlueprintCallable, Category = "AI|Movement")
+    float GetChaseSpeed();    // 추적 속도(있다면)
+
 
 
 
@@ -58,6 +64,9 @@ public:
     float DebugThickness = 1.0f;
 
     void DrawPerceptionGizmos();
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stats")
+    int Level;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stats")
     float MAXHP;

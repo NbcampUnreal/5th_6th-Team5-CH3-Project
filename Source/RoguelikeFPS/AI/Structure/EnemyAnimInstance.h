@@ -19,6 +19,8 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Anim")
     bool bInAttack = false;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Anim")
+    bool bIsDead = false;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Anim")
     float MoveSpeed = 0.f;
@@ -34,5 +36,9 @@ public:
     void SetInAttack(bool bNew) { bInAttack = bNew; }
 
     UFUNCTION(BlueprintCallable, Category = "Anim")
+    void SetIsDead(bool bNew) { bIsDead = bNew; }
+
+    UFUNCTION(BlueprintCallable, Category = "Anim")
     void SetMoveSpeed(float InSpeed) { MoveSpeed = InSpeed; }
+
 };
