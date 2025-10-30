@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -20,8 +18,20 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Game Data")
 	bool bIsReadyToStart = false;
 
+	// **[추가]** Level 1의 기본 스탯 저장 (캐릭터 초기화에 사용)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Base Stats")
+	int32 BaseMaxHealth = 100;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Base Stats")
+	int32 BaseAttack = 10;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Base Stats")
+	int32 BaseDefence = 10;
+
 public:
 	// 선택 인덱스를 설정하는 함수
 	UFUNCTION(BlueprintCallable, Category = "Game Data")
 	void SetSelectedOption(int32 OptionIndex);
+
+	// **[추가]** 게임 재시작을 위한 기본 스탯 초기화 함수
+	UFUNCTION(BlueprintCallable, Category = "Game Data")
+	void ResetGameStatsToLevelOne();
 };

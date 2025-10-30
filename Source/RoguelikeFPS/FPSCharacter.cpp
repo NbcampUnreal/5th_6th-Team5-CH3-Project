@@ -4,6 +4,10 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "InputCoreTypes.h" 
+#include "DeathWidget.h" 
+#include "Blueprint/UserWidget.h" 
+#include "Kismet/GameplayStatics.h"
 // Enhanced Input 관련 헤더 모두 제거됨
 
 
@@ -39,7 +43,6 @@ AFPSCharacter::AFPSCharacter()
 		GetCharacterMovement()->MaxWalkSpeed = MovingSpeed;
 		GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
 
-		// **[수정]** CrouchedHalfHeight 경고 제거를 위해 함수 호출로 변경
 		GetCharacterMovement()->SetCrouchedHalfHeight(60.0f);
 	}
 
@@ -48,31 +51,21 @@ AFPSCharacter::AFPSCharacter()
 	DashTime = 1.0f;
 }
 
-// **[추가]** BeginPlay (입력 매핑 컨텍스트 설정을 제거했으므로 비워둡니다)
 void AFPSCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (!DeathWidgetClass)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("DeathWidgetClass is not set on %s"), *GetName());
+	}
 }
 
 
 void AFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	// **[수정]** 전통적인 Input Axis/Action 바인딩 예시 (Blueprint 설정에 따라 변경될 수 있음)
-	// Blueprint에서 Input을 처리하려면 이 함수를 비워둡니다.
-
-	// Axis 바인딩 예시:
-	// PlayerInputComponent->BindAxis("MoveForward", this, &AFPSCharacter::MoveForward);
-	// PlayerInputComponent->BindAxis("MoveRight", this, &AFPSCharacter::MoveRight);
-
-	// Action 바인딩 예시:
-	// PlayerInputComponent->BindAction("Jump", EInputEvent::IE_Pressed, this, &AFPSCharacter::StartJump);
-	// PlayerInputComponent->BindAction("Jump", EInputEvent::IE_Released, this, &AFPSCharacter::StopJump);
 }
-
-
-// **[수정]** 전통적인 Input Axis 바인딩 시 float을 받도록 수정
 void AFPSCharacter::MoveForward(float AxisValue)
 {
 	if (!Controller || FMath::IsNearlyZero(AxisValue)) return;
@@ -98,18 +91,17 @@ void AFPSCharacter::LookPitch(float AxisValue)
 }
 
 
-// **[수정]** Action 바인딩 시 입력 값 없이 호출되도록 수정
 void AFPSCharacter::StartJump()
 {
 	Jump();
 }
-// **[수정]** Action 바인딩 시 입력 값 없이 호출되도록 수정
+
 void AFPSCharacter::StopJump()
 {
 	StopJumping();
 }
 
-// **[수정]** Action 바인딩 시 입력 값 없이 호출되도록 수정
+
 void AFPSCharacter::StartDash()
 {
 	if (!bIsAlive || !GetCharacterMovement()) return;
@@ -138,13 +130,13 @@ void AFPSCharacter::StopDash()
 }
 
 
-// **[수정]** Action 바인딩 시 입력 값 없이 호출되도록 수정
+
 void AFPSCharacter::StartCrouch()
 {
 	Crouch();
 }
 
-// **[수정]** Action 바인딩 시 입력 값 없이 호출되도록 수정
+
 void AFPSCharacter::StopCrouch()
 {
 	UnCrouch();
@@ -164,6 +156,17 @@ void AFPSCharacter::LevelUp()
 	}
 }
 
+// 아이템 (임시)
+void AFPSCharacter::Meal(int32 MealAmount)
+{
+	if (!bIsAlive) return;
+
+	// **[추가]** 최대 체력을 초과하지 않도록 체력 회복
+	Health = FMath::Min(Health + MealAmount, MaxHealth);
+
+	// 필요하다면 디버그 로그 추가
+	// UE_LOG(LogTemp, Warning, TEXT("Healed by Meal: %d. Current Health: %d"), MealAmount, Health);
+}
 
 // 사망 함수
 void AFPSCharacter::OnDeath(AController* KillerController)
@@ -172,11 +175,31 @@ void AFPSCharacter::OnDeath(AController* KillerController)
 	{
 		bIsAlive = false;
 
-		// **[추가]** 사망 델리게이트 발송
 		OnPlayerDeath.Broadcast(KillerController);
 
-		// ... (사망 처리 로직)
+		if (APlayerController* PC = Cast<APlayerController>(Controller))
+		{
+			//마우스 커서 표시
+			DisableInput(PC);
+			PC->bShowMouseCursor = true;
+			FInputModeUIOnly InputMode;
+			InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+			PC->SetInputMode(InputMode);
+
+			//사망 UI 위젯 생성 및 표시
+			if (DeathWidgetClass)
+			{
+				TObjectPtr<UDeathWidget> DeathWidgetInstance = CreateWidget<UDeathWidget>(PC, DeathWidgetClass);
+
+				if(DeathWidgetInstance)
+				{
+					DeathWidgetInstance->OwningController = PC;
+					DeathWidgetInstance->AddToViewport();
+				}
+			}
+		}
 	}
+
 }
 
 // 피격 함수

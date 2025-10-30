@@ -11,6 +11,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerDeath, AController*, Killer
 
 class USpringArmComponent;
 class UCameraComponent;
+class UUserWidget;
 
 UCLASS()
 class ROGUELIKEFPS_API AFPSCharacter : public ACharacter
@@ -20,14 +21,15 @@ class ROGUELIKEFPS_API AFPSCharacter : public ACharacter
 public:
 	AFPSCharacter();
 
-	// **[추가]** 사망 델리게이트 변수
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UUserWidget> DeathWidgetClass;
+
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnPlayerDeath OnPlayerDeath;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 protected:
-	// **[추가]** BeginPlay 선언 (필요할 수 있으므로 유지)
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
@@ -56,10 +58,10 @@ protected:
 	int32 Experience;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
 	int32 MaxExperience;
+
 	// 캐릭터 생존여부
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
 	bool bIsAlive;
-
 
 	// 대시 속도 (유지)
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash")
@@ -98,14 +100,17 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Input")
 	void StopCrouch();
 
+	// 아이템 (임시)
+	UFUNCTION(BlueprintCallable, Category = "Status")
+	void Meal(int32 MealAmount);
+
 	// 레벨업
 	void LevelUp();
 
 	// 사망
-	void OnDeath(AController* KillerController); // **[수정]** KillerController를 받도록 시그니처 변경
+	void OnDeath(AController* KillerController);
 
 	// 피격 함수
-	// **[수정]** UHT 오류 방지를 위해 원시 포인터 AController*와 AActor*를 사용
 	virtual float TakeDamage(
 		float DamageAmount,
 		FDamageEvent const& DamageEvent,
