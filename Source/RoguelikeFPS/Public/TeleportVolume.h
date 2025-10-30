@@ -1,3 +1,5 @@
+// TeleportVolume.h
+
 #pragma once
 
 #include "CoreMinimal.h"
@@ -21,8 +23,9 @@ protected:
 	virtual void BeginPlay() override;
 
 	// 1. 트리거 볼륨 컴포넌트 (액터가 겹치는 영역을 감지)
+	// **[수정]** TObjectPtr 적용
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Teleport")
-	UBoxComponent* OverlapVolume;
+	TObjectPtr<UBoxComponent> OverlapVolume;
 
 	// 2. 목적지 레벨 이름 (에디터에서 설정)
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Teleport")

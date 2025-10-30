@@ -1,3 +1,5 @@
+// StatsComponent.h
+
 #pragma once
 
 #include "CoreMinimal.h"
@@ -5,6 +7,7 @@
 #include "StatsComponent.generated.h"
 
 // 델리게이트: 레벨업 이벤트 발생 시 GameMode에게 알리기 위해 사용
+// **[수정]** TObjectPtr 적용
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLevelUp, APlayerController*, PlayerController);
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))

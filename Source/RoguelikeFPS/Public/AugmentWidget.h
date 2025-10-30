@@ -1,3 +1,5 @@
+// AugmentWidget.h
+
 #pragma once
 
 #include "CoreMinimal.h"
@@ -12,22 +14,23 @@ class ROGUELIKEFPS_API UAugmentWidget : public UUserWidget
 {
     GENERATED_BODY()
 
-protected:
+public:
+    // **[수정]** Initialize()는 일반적으로 public에 선언합니다.
     virtual bool Initialize() override;
 
 public:
     // 증강 옵션 버튼들 (UMG에서 BindWidget으로 연결)
-    UPROPERTY(meta = (BindWidget)) UButton* AugmentButton_1;
-    UPROPERTY(meta = (BindWidget)) UButton* AugmentButton_2;
-    UPROPERTY(meta = (BindWidget)) UButton* AugmentButton_3;
+    UPROPERTY(meta = (BindWidget)) TObjectPtr<UButton> AugmentButton_1;
+    UPROPERTY(meta = (BindWidget)) TObjectPtr<UButton> AugmentButton_2;
+    UPROPERTY(meta = (BindWidget)) TObjectPtr<UButton> AugmentButton_3;
 
-    // 증강 적용 후 게임 재개 및 위젯 제거를 위해 PlayerController 포인터 필요
+    // **[수정]** TObjectPtr 적용
     UPROPERTY(BlueprintReadOnly)
-    APlayerController* OwningController = nullptr;
+    TObjectPtr<APlayerController> OwningController = nullptr;
 
-    // 이 위젯이 적용할 StatsComponent 포인터
+    // **[수정]** TObjectPtr 적용
     UPROPERTY(BlueprintReadOnly)
-    UStatsComponent* TargetStatsComponent = nullptr;
+    TObjectPtr<UStatsComponent> TargetStatsComponent = nullptr;
 
 protected:
     UFUNCTION()
