@@ -25,4 +25,7 @@ public:
     // UStatsComponent의 델리게이트와 연결될 함수
     UFUNCTION()
     void HandlePlayerLevelUp(APlayerController* PlayerController);
+
+    UFUNCTION()
+    void HandlePlayerDeath(AController* KillerController);
 };

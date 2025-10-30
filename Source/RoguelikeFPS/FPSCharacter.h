@@ -2,7 +2,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "StatsComponent.h"
 #include "FPSCharacter.generated.h"
+
+// AController 포인터를 포함하는 사망 델리게이트
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerDeath, AController*, KillerController);
 
 class USpringArmComponent;
 class UCameraComponent;
@@ -16,7 +20,23 @@ class ROGUELIKEFPS_API AFPSCharacter : public ACharacter
 public:
 	AFPSCharacter();
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UStatsComponent> StatsComp;
+
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnPlayerDeath OnPlayerDeath;
+
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	UFUNCTION(BlueprintCallable, Category = "Status")
+	void Die(AController* KillerController); // 사망 함수
+
+	//피격 함수
+	virtual float TakeDamage(
+		float DamageAmount,
+		FDamageEvent const& DamageEvent,
+		AController* EventInstigator,
+		AActor* DamageCauser) override;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
@@ -83,17 +103,9 @@ protected:
 	void StopCrouch(const FInputActionValue& value);
 
 	// 레벨업
-	void LevelUp();
+	//void LevelUp();
 
 	// 사망
-	void OnDeath();
-
-	// 피격 함수
-	virtual float TakeDamage(
-		float DamageAmount,
-		FDamageEvent const& DamageEvent,
-		TObjectPtr<AController> EventInstigator,
-		TObjectPtr<AActor> DamageCauser);
-
+	//void OnDeath();
 };
 
