@@ -36,7 +36,7 @@ void USixShot::BurstTick()
 			_isSkillCoolDown = false;
 			return;
 		}
-		GunComp->SetDamage(_Damage);
+		
 		GunComp->Fire();
 		BurstCount++;
 		if (BurstCount >= 6)
