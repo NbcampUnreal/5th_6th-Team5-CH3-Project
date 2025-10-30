@@ -39,12 +39,13 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	virtual void Active();
-	void SetActionMapping();
+	virtual void SetUp();
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void OnRegister() override;
 	virtual void OnAttachmentChanged() override;
-
+	void SetActionMapping();
 	void SetCoolDownTimer();
 private:
 		
