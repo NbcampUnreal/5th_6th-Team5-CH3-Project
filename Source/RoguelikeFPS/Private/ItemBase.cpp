@@ -9,4 +9,5 @@ UItemBase::UItemBase()
 	SellPrice = 0;
 	Description = "";
 	ItemType = "";
+	Thumbnail = nullptr;
 }

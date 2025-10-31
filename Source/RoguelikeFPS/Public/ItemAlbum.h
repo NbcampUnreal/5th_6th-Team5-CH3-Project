@@ -15,10 +15,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ItemAlbum")
 	UDataTable* ItemDataTable;
 
-	// 이름/ID로 검색 (값 반환)
+	// 이름/ID로 검색
 	UFUNCTION(BlueprintCallable, Category = "ItemAlbum")
 	FItemData SearchItemName(const FName& Name) const;
-
 	UFUNCTION(BlueprintCallable, Category = "ItemAlbum")
 	FItemData SearchItemNumber(int32 ItemNumber) const;
 

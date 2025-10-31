@@ -1,4 +1,5 @@
 #include "MyCharacter.h"
+#include "Inventory.h"
 
 AMyCharacter::AMyCharacter()
 {
@@ -10,9 +11,21 @@ AMyCharacter::AMyCharacter()
 void AMyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	if (Inventory)
-	{
-		Inventory->TestInventory();
-	}
+    
+}
+void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+    Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+    PlayerInputComponent->BindAxis("MoveForward", this, &AMyCharacter::MoveForward);
+    PlayerInputComponent->BindAxis("MoveRight", this, &AMyCharacter::MoveRight);
+}
+void AMyCharacter::MoveForward(float Value)
+{
+    AddMovementInput(FVector::ForwardVector, Value);
+}
+
+void AMyCharacter::MoveRight(float Value)
+{
+    AddMovementInput(FVector::RightVector, Value);
 }
