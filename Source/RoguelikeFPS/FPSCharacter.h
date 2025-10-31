@@ -27,8 +27,12 @@ public:
 	TObjectPtr<UStatsComponent> StatsComp;
 
 	// UI/µ®∏Æ∞‘¿Ã∆Æ
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<UUserWidget> MiniHUDClass;
+
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UUserWidget> DeathWidgetClass;
+
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnPlayerDeath OnPlayerDeath;
 
@@ -81,6 +85,7 @@ protected:
 	void StartCrouch();
 	UFUNCTION(BlueprintCallable, Category = "Input")
 	void StopCrouch();
+
 
 
 	// ªÁ∏¡

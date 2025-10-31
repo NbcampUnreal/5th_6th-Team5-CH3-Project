@@ -82,6 +82,15 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Stats|Core")
 	int32 GetLevel() const { return CurrentLevel; }
 
+	UFUNCTION(BlueprintPure, Category = "Stats|Experience")
+	float GetCurrentXP() const { return CurrentXP; }
+
+	UFUNCTION(BlueprintPure, Category = "Stats|Experience")
+	float GetXPToNextLevel() const { return XPToNextLevel; }
+
+	UFUNCTION(BlueprintPure, Category = "Stats|Core")
+	int32 GetMaxHealth() const { return MaxHealth; }
+
 	// 핵심 로직 함수
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	float CalculateFinalDamage(float BaseDamage, bool& bWasCriticalHit);

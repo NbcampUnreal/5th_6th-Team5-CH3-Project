@@ -55,6 +55,17 @@ void AFPSCharacter::BeginPlay()
         UE_LOG(LogTemp, Warning, TEXT("DeathWidgetClass is not set on %s"), *GetName());
     }
 #endif
+    if (MiniHUDClass && IsLocallyControlled())
+    {
+        if (APlayerController* PC = Cast<APlayerController>(Controller))
+        {
+            UUserWidget* HUD = CreateWidget<UUserWidget>(PC, MiniHUDClass);
+            if (HUD)
+            {
+                HUD->AddToViewport();
+            }
+        }
+    }
 }
 
 
