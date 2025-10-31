@@ -1,228 +1,218 @@
-// FPSCharacter.cpp
-
 #include "FPSCharacter.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "InputCoreTypes.h" 
-#include "DeathWidget.h" 
-#include "Blueprint/UserWidget.h" 
+#include "StatsComponent.h" 
+#include "Engine/World.h"
+#include "GameFramework/DamageType.h"
+#include "Engine/DamageEvents.h"
 #include "Kismet/GameplayStatics.h"
-// Enhanced Input 관련 헤더 모두 제거됨
+#include "Blueprint/UserWidget.h"
+#include "DeathWidget.h" 
+#include "GameFramework/Controller.h"
+
+// 헤드샷 상수 정의 (캐릭터 스켈레톤의 Head Bone 이름에 맞춰 수정 필요)
+static const float HEADSHOT_MULTIPLIER = 1.5f;
+static const FName HEAD_BONE_NAME = TEXT("head");
 
 
 AFPSCharacter::AFPSCharacter()
-// 초기 스탯 설정 (유지)
-	: Level(1),
-	Health(100),
-	MaxHealth(100),
-	Attack(10),
-	Defence(10),
-	AttackSpeed(5),
-	MovingSpeed(600),
-	Stamina(500),
-	Experience(0),
-	MaxExperience(100),
-	bIsAlive(true)
 {
-	PrimaryActorTick.bCanEverTick = false;
+    PrimaryActorTick.bCanEverTick = false;
 
-	// 카메라 부착 (유지)
-	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComp"));
-	SpringArmComp->SetupAttachment(RootComponent);
-	SpringArmComp->TargetArmLength = 50.0f;
-	SpringArmComp->bUsePawnControlRotation = true;
+    StatsComp = CreateDefaultSubobject<UStatsComponent>(TEXT("StatsComponent"));
 
-	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
-	CameraComp->SetupAttachment(SpringArmComp, USpringArmComponent::SocketName);
-	CameraComp->bUsePawnControlRotation = false;
+    SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComp"));
+    SpringArmComp->SetupAttachment(RootComponent);
+    SpringArmComp->TargetArmLength = 50.0f;
+    SpringArmComp->bUsePawnControlRotation = true;
 
-	// 대시 스피드
-	if (GetCharacterMovement())
-	{
-		GetCharacterMovement()->MaxWalkSpeed = MovingSpeed;
-		GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
+    CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
+    CameraComp->SetupAttachment(SpringArmComp, USpringArmComponent::SocketName);
+    CameraComp->bUsePawnControlRotation = false;
 
-		GetCharacterMovement()->SetCrouchedHalfHeight(60.0f);
-	}
-
-	DashMultifly = 10.0f;
-	DashSpeed = MovingSpeed * DashMultifly;
-	DashTime = 1.0f;
+    if (GetCharacterMovement())
+    {
+        GetCharacterMovement()->MaxWalkSpeed = 600.0f;
+        GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
+        GetCharacterMovement()->SetCrouchedHalfHeight(60.0f);
+    }
 }
 
 void AFPSCharacter::BeginPlay()
 {
-	Super::BeginPlay();
+    Super::BeginPlay();
 
-	if (!DeathWidgetClass)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("DeathWidgetClass is not set on %s"), *GetName());
-	}
+    if (StatsComp && GetCharacterMovement())
+    {
+        GetCharacterMovement()->MaxWalkSpeed = StatsComp->GetMovementSpeed();
+    }
+
+#if WITH_EDITOR
+    if (!DeathWidgetClass)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("DeathWidgetClass is not set on %s"), *GetName());
+    }
+#endif
 }
 
 
 void AFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
+    Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+    PlayerInputComponent->BindAxis(TEXT("MoveForward"), this, &AFPSCharacter::MoveForward);
+    PlayerInputComponent->BindAxis(TEXT("MoveRight"), this, &AFPSCharacter::MoveRight);
+    PlayerInputComponent->BindAxis(TEXT("LookYaw"), this, &AFPSCharacter::LookYaw);
+    PlayerInputComponent->BindAxis(TEXT("LookPitch"), this, &AFPSCharacter::LookPitch);
+
+    PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &AFPSCharacter::StartJump);
+    PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Released, this, &AFPSCharacter::StopJump);
+
+    PlayerInputComponent->BindAction(TEXT("Dash"), EInputEvent::IE_Pressed, this, &AFPSCharacter::StartDash);
+
+    PlayerInputComponent->BindAction(TEXT("Crouch"), EInputEvent::IE_Pressed, this, &AFPSCharacter::StartCrouch);
+    PlayerInputComponent->BindAction(TEXT("Crouch"), EInputEvent::IE_Released, this, &AFPSCharacter::StopCrouch);
 }
+
 void AFPSCharacter::MoveForward(float AxisValue)
 {
-	if (!Controller || FMath::IsNearlyZero(AxisValue)) return;
-	AddMovementInput(GetActorForwardVector(), AxisValue);
+    if (!Controller || FMath::IsNearlyZero(AxisValue)) return;
+    AddMovementInput(GetActorForwardVector(), AxisValue);
 }
 
 void AFPSCharacter::MoveRight(float AxisValue)
 {
-	if (!Controller || FMath::IsNearlyZero(AxisValue)) return;
-	AddMovementInput(GetActorRightVector(), AxisValue);
+    if (!Controller || FMath::IsNearlyZero(AxisValue)) return;
+    AddMovementInput(GetActorRightVector(), AxisValue);
 }
 
 void AFPSCharacter::LookYaw(float AxisValue)
 {
-	if (!Controller || FMath::IsNearlyZero(AxisValue)) return;
-	AddControllerYawInput(AxisValue);
+    if (!Controller || FMath::IsNearlyZero(AxisValue)) return;
+    AddControllerYawInput(AxisValue);
 }
 
 void AFPSCharacter::LookPitch(float AxisValue)
 {
-	if (!Controller || FMath::IsNearlyZero(AxisValue)) return;
-	AddControllerPitchInput(AxisValue);
+    if (!Controller || FMath::IsNearlyZero(AxisValue)) return;
+    AddControllerPitchInput(AxisValue);
 }
 
 
 void AFPSCharacter::StartJump()
 {
-	Jump();
+    Jump();
 }
 
 void AFPSCharacter::StopJump()
 {
-	StopJumping();
+    StopJumping();
 }
 
 
 void AFPSCharacter::StartDash()
 {
-	if (!bIsAlive || !GetCharacterMovement()) return;
+    if (!bIsAlive || !GetCharacterMovement() || !StatsComp) return;
 
-	GetCharacterMovement()->MaxWalkSpeed = DashSpeed;
+    // DashMultifly, DashTimerHandle, DashTime은 .h에 선언되어 있어야 합니다.
+    float DashSpeed = StatsComp->GetMovementSpeed() * DashMultifly;
+    GetCharacterMovement()->MaxWalkSpeed = DashSpeed;
 
-	if (GetWorldTimerManager().IsTimerActive(DashTimerHandle))
-	{
-		GetWorldTimerManager().ClearTimer(DashTimerHandle);
-	}
+    if (GetWorldTimerManager().IsTimerActive(DashTimerHandle))
+    {
+        GetWorldTimerManager().ClearTimer(DashTimerHandle);
+    }
 
-	GetWorldTimerManager().SetTimer(
-		DashTimerHandle,
-		this,
-		&AFPSCharacter::StopDash,
-		DashTime,
-		false
-	);
+    GetWorldTimerManager().SetTimer(
+        DashTimerHandle,
+        this,
+        &AFPSCharacter::StopDash,
+        DashTime,
+        false
+    );
 }
 
 void AFPSCharacter::StopDash()
 {
-	if (!bIsAlive || !GetCharacterMovement()) return;
+    if (!bIsAlive || !GetCharacterMovement() || !StatsComp) return;
 
-	GetCharacterMovement()->MaxWalkSpeed = MovingSpeed;
+    GetCharacterMovement()->MaxWalkSpeed = StatsComp->GetMovementSpeed();
 }
-
 
 
 void AFPSCharacter::StartCrouch()
 {
-	Crouch();
+    Crouch();
 }
-
 
 void AFPSCharacter::StopCrouch()
 {
-	UnCrouch();
+    UnCrouch();
 }
 
 
-// 레벨업 함수 (유지)
-void AFPSCharacter::LevelUp()
-{
-	if (Experience >= MaxExperience)
-	{
-		Level += 1;
-		Health += 20;
-		Attack += 3;
-		Defence += 3;
-		Experience = 0;
-	}
-}
-
-// 아이템 (임시)
-void AFPSCharacter::Meal(int32 MealAmount)
-{
-	if (!bIsAlive) return;
-
-	// 최대 체력을 초과하지 않도록 체력 회복
-	Health = FMath::Min(Health + MealAmount, MaxHealth);
-
-	// 필요하다면 디버그 로그 추가
-	// UE_LOG(LogTemp, Warning, TEXT("Healed by Meal: %d. Current Health: %d"), MealAmount, Health);
-}
-
-// 사망 함수
 void AFPSCharacter::OnDeath(AController* KillerController)
 {
-	if (Health <= 0)
-	{
-		bIsAlive = false;
+    if (!bIsAlive) return;
 
-		OnPlayerDeath.Broadcast(KillerController);
+    bIsAlive = false;
 
-		if (APlayerController* PC = Cast<APlayerController>(Controller))
-		{
-			//마우스 커서 표시
-			DisableInput(PC);
-			PC->bShowMouseCursor = true;
-			FInputModeUIOnly InputMode;
-			InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-			PC->SetInputMode(InputMode);
+    OnPlayerDeath.Broadcast(KillerController);
 
-			//사망 UI 위젯 생성 및 표시
-			if (DeathWidgetClass)
-			{
-				TObjectPtr<UDeathWidget> DeathWidgetInstance = CreateWidget<UDeathWidget>(PC, DeathWidgetClass);
+    if (APlayerController* PC = Cast<APlayerController>(Controller))
+    {
+        DisableInput(PC);
 
-				if(DeathWidgetInstance)
-				{
-					DeathWidgetInstance->OwningController = PC;
-					DeathWidgetInstance->AddToViewport();
-				}
-			}
-		}
-	}
+        if (DeathWidgetClass)
+        {
+            if (TObjectPtr<UDeathWidget> DeathWidgetInstance = CreateWidget<UDeathWidget>(PC, DeathWidgetClass))
+            {
+                DeathWidgetInstance->OwningController = PC;
+                DeathWidgetInstance->AddToViewport();
+
+                PC->bShowMouseCursor = true;
+                FInputModeUIOnly InputMode;
+                InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+                PC->SetInputMode(InputMode);
+            }
+        }
+    }
 }
 
-// 피격 함수
+
 float AFPSCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	if (!bIsAlive) return 0.0f;
+    if (!bIsAlive || !StatsComp) return 0.0f;
 
-	// 1. 방어력 계산 후 실제로 적용할 대미지 계산
-	float DamageToApply = FMath::Max(0.0f, DamageAmount - Defence);
+    float FinalDamageAmount = DamageAmount;
 
-	// 2. 체력 감소
-	if (DamageToApply > 0)
-	{
-		// Health는 int32이므로 적용할 대미지를 정수로 변환하여 적용
-		Health -= FMath::RoundToInt(DamageToApply);
+    // === 1. 헤드샷 판정 (UE5 공식 방식) ===
+    if (DamageAmount > 0.0f && DamageEvent.IsOfType(FPointDamageEvent::ClassID))
+    {
+        const FPointDamageEvent* PointEvent = static_cast<const FPointDamageEvent*>(&DamageEvent);
+        if (PointEvent && PointEvent->HitInfo.BoneName == HEAD_BONE_NAME)
+        {
+            FinalDamageAmount *= HEADSHOT_MULTIPLIER;
 
-		// 3. 사망 체크
-		if (Health <= 0)
-		{
-			// **[수정]** OnDeath 호출 시 EventInstigator를 전달
-			OnDeath(EventInstigator);
-		}
-	}
+#if WITH_EDITOR
+            if (GEngine)
+            {
+                GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, TEXT("HEADSHOT!"));
+            }
+#endif
+        }
+    }
 
-	// 실제로 적용된 대미지를 반환
-	return DamageToApply;
+    // === 2. 대미지 적용 ===
+    float DamageTaken = StatsComp->ApplyDamage(FinalDamageAmount);
+
+    // === 3. 사망 체크 ===
+    if (StatsComp->GetCurrentHealth() <= 0.0f)
+    {
+        OnDeath(EventInstigator);
+    }
+
+    return DamageTaken;
 }

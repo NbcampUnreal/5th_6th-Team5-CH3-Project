@@ -19,7 +19,7 @@ bool UMainMenuWidget::Initialize()
 	if (Button_Weapon3) { Button_Weapon3->OnClicked.AddDynamic(this, &UMainMenuWidget::OnButtonWeapon3Clicked); }
 	if (Button_Weapon4) { Button_Weapon4->OnClicked.AddDynamic(this, &UMainMenuWidget::OnButtonWeapon4Clicked); }
 	if (Button_Start) { Button_Start->OnClicked.AddDynamic(this, &UMainMenuWidget::OnStartGameClicked); }
-	if (Button_Exit) { Button_Exit->OnClicked.AddDynamic(this, &UMainMenuWidget::OnExitGameClicked); }
+	if (Button_Exit) { Button_Exit->OnClicked.AddDynamic(this, &UMainMenuWidget::OnExitButtonClicked); }
 
 	return true;
 }
@@ -99,8 +99,8 @@ void UMainMenuWidget::OnStartGameClicked()
 	UGameplayStatics::OpenLevel(GetWorld(), TEXT("L_GameMap01"));
 }
 
-void UMainMenuWidget::OnExitGameClicked()
+void UMainMenuWidget::OnExitButtonClicked()
 {
-	// 게임 종료
-	UKismetSystemLibrary::QuitGame(GetWorld(), UGameplayStatics::GetPlayerController(GetWorld(), 0), EQuitPreference::Quit, true);
+	// 뒤로 가기
+	OnBackButtonClicked.Broadcast();
 }

@@ -46,7 +46,6 @@ void AMainMenuController::BeginPlay()
 	bShowMouseCursor = true;
 }
 
-
 void AMainMenuController::ShowWeaponSelectMenu()
 {
     // 1. 현재 타이틀 위젯 제거
@@ -57,7 +56,7 @@ void AMainMenuController::ShowWeaponSelectMenu()
     }
 
     // 2. 무기 선택 위젯 (MainMenuWidget) 생성 및 표시
-    if (MainMenuWidgetClass) // MainMenuWidgetClass는 TSubclassOf<UMainMenuWidget>로 가정
+    if (MainMenuWidgetClass)
     {
         // 위젯 생성 및 포인터에 저장
         MainMenuWidgetInstance = CreateWidget<UMainMenuWidget>(this, MainMenuWidgetClass);
@@ -66,11 +65,40 @@ void AMainMenuController::ShowWeaponSelectMenu()
         {
             MainMenuWidgetInstance->AddToViewport();
 
+            MainMenuWidgetInstance->OnBackButtonClicked.AddDynamic(this, &AMainMenuController::ShowTitleScreen);
+
             // 새로운 위젯에 포커스 설정
             FInputModeUIOnly InputModeData;
             InputModeData.SetWidgetToFocus(MainMenuWidgetInstance->TakeWidget());
             SetInputMode(InputModeData);
             // bShowMouseCursor는 이미 true입니다.
+        }
+    }
+}
+
+void AMainMenuController::ShowTitleScreen()
+{
+    // 1. 현재 메인 메뉴 위젯 제거
+    if (MainMenuWidgetInstance)
+    {
+        MainMenuWidgetInstance->RemoveFromParent();
+        MainMenuWidgetInstance = nullptr;
+    }
+    if (TitleWidgetClass)
+    {
+        TitleWidgetInstance = CreateWidget<UTitleWidget>(this, TitleWidgetClass);
+
+        if (TitleWidgetInstance)
+        {
+            TitleWidgetInstance->AddToViewport();
+
+            // Start 버튼에 다시 ShowWeaponSelectMenu 연결
+            TitleWidgetInstance->OnStartButtonClicked.AddDynamic(this, &AMainMenuController::ShowWeaponSelectMenu);
+
+            // 포커스 설정
+            FInputModeUIOnly InputModeData;
+            InputModeData.SetWidgetToFocus(TitleWidgetInstance->TakeWidget());
+            SetInputMode(InputModeData);
         }
     }
 }

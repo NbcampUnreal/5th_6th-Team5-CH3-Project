@@ -23,7 +23,7 @@ protected:
 	virtual void BeginPlay() override;
 
 	// 1. 트리거 볼륨 컴포넌트 (액터가 겹치는 영역을 감지)
-	// **[수정]** TObjectPtr 적용
+	// [수정] TObjectPtr 적용
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Teleport")
 	TObjectPtr<UBoxComponent> OverlapVolume;
 

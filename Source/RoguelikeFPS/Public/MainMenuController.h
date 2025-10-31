@@ -33,4 +33,9 @@ private:
 
 	UFUNCTION()
 	void ShowWeaponSelectMenu();
+
+	UFUNCTION()
+	void ShowTitleScreen();
+
+
 };

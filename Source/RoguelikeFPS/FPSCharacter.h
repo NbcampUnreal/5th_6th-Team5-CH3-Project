@@ -1,4 +1,4 @@
-// FPSCharacter.h
+// FPSCharacter.h (최종 수정)
 
 #pragma once
 
@@ -6,11 +6,12 @@
 #include "GameFramework/Character.h"
 #include "FPSCharacter.generated.h"
 
-// **[추가]** AController 포인터를 포함하는 사망 델리게이트 선언
+// StatsComponent 및 델리게이트 정의
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerDeath, AController*, KillerController);
 
 class USpringArmComponent;
 class UCameraComponent;
+class UStatsComponent;
 class UUserWidget;
 
 UCLASS()
@@ -21,9 +22,13 @@ class ROGUELIKEFPS_API AFPSCharacter : public ACharacter
 public:
 	AFPSCharacter();
 
+	// StatsComponent 포인터
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UStatsComponent> StatsComp;
+
+	// UI/델리게이트
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UUserWidget> DeathWidgetClass;
-
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnPlayerDeath OnPlayerDeath;
 
@@ -32,54 +37,31 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	// 컴포넌트
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
 	TObjectPtr<USpringArmComponent> SpringArmComp;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
 	TObjectPtr<UCameraComponent> CameraComp;
 
-	// Status (유지)
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
-	int32 Level;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
-	int32 Health;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
-	int32 MaxHealth;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
-	int32 Attack;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
-	int32 Defence;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
-	int32 AttackSpeed;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
-	int32 MovingSpeed;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
-	int32 Stamina;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
-	int32 Experience;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
-	int32 MaxExperience;
-
 	// 캐릭터 생존여부
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
-	bool bIsAlive;
+	bool bIsAlive = true;
 
-	// 대시 속도 (유지)
+	// Dash 관련 변수
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash")
-	float DashMultifly;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Dash")
-	float DashSpeed;
+	float DashMultifly = 10.0f; // 기본값 설정
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash")
-	float DashTime;
+	float DashTime = 1.0f; // 기본값 설정
+
+	FTimerHandle DashTimerHandle; // 타이머 핸들러
 
 
-	// 대시 타이머 핸들러 (유지)
-	FTimerHandle DashTimerHandle;
-
-
-	// **[수정]** Action Value 함수 시그니처를 전통적인 방식 (float) 또는 단순 함수로 변경
-	// Blueprint에서 바인딩할 수 있도록 UFUNCTION과 BlueprintCallable을 추가합니다.
+	// 액션 함수들 (Traditional Input)
 	UFUNCTION(BlueprintCallable, Category = "Input")
 	void MoveForward(float AxisValue);
+
+	// 나머지 Input 함수
 	UFUNCTION(BlueprintCallable, Category = "Input")
 	void MoveRight(float AxisValue);
 	UFUNCTION(BlueprintCallable, Category = "Input")
@@ -93,24 +75,18 @@ protected:
 	void StopJump();
 	UFUNCTION(BlueprintCallable, Category = "Input")
 	void StartDash();
-	UFUNCTION()
-	void StopDash();
+	UFUNCTION() // 타이머에서 호출되므로 UFUNCTION 유지
+		void StopDash();
 	UFUNCTION(BlueprintCallable, Category = "Input")
 	void StartCrouch();
 	UFUNCTION(BlueprintCallable, Category = "Input")
 	void StopCrouch();
 
-	// 아이템 (임시)
-	UFUNCTION(BlueprintCallable, Category = "Status")
-	void Meal(int32 MealAmount);
-
-	// 레벨업
-	void LevelUp();
 
 	// 사망
 	void OnDeath(AController* KillerController);
 
-	// 피격 함수
+	// 피격 함수 (StatsComp에 위임)
 	virtual float TakeDamage(
 		float DamageAmount,
 		FDamageEvent const& DamageEvent,
