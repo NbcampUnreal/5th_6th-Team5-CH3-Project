@@ -10,7 +10,8 @@
 
 UWeaponComponent::UWeaponComponent()
 {
-	SetCollisionProfileName("OverlapAll");
+	SetCollisionProfileName("NoCollision");
+	SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	SetGenerateOverlapEvents(false);
 }
 

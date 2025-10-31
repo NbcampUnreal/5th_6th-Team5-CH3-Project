@@ -17,7 +17,8 @@ AProjectile::AProjectile()
 	_Collision->SetCollisionProfileName("Projectile");
 	_Collision->SetGenerateOverlapEvents(true);
 	_Collision->OnComponentBeginOverlap.AddDynamic(this, &AProjectile::OnBeginOverlap);
-	//_Collision->OnComponentHit.AddDynamic(this, &AProjectile::OnHit);
+	_Collision->OnComponentHit.AddDynamic(this, &AProjectile::OnHit);
+
 
 	_Collision->SetWalkableSlopeOverride(FWalkableSlopeOverride(WalkableSlope_Unwalkable, 0.f));
 	_Collision->CanCharacterStepUpOn = ECB_No;
@@ -60,21 +61,6 @@ void AProjectile::Tick(float DeltaTime)
 
 void AProjectile::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	//if (!OtherActor || !OtherComp) return;
-	//if (OtherActor == GetOwner()) return; // 소유자 자신 무시
-	//if (OtherComp->IsA(UWeaponComponent::StaticClass())) return;
-	//
-	//if (IsValid(_Instigator))
-	//{
-	//	if (_Instigator == OtherActor)
-	//	{
-	//		/*GEngine->AddOnScreenDebugMessage(1, 2.0f, FColor::Red, FString::Printf(TEXT("Instigato Name : %s"), *_Instigator->GetName()));
-	//		GEngine->AddOnScreenDebugMessage(2, 2.0f, FColor::Blue, FString::Printf(TEXT("OtherActor Name : %s"), *OtherActor->GetName()));*/
-	//	}
-	//	else {
-	//		Destroy();
-	//	}
-	//}
 	if (OtherComp->IsA(UWeaponComponent::StaticClass())) return;
 	if (!IsValid(_Instigator)) return;
 	if (_Instigator != OtherActor) Destroy();	
@@ -83,7 +69,7 @@ void AProjectile::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 
 void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	//Destroy();
+	Destroy();
 }
 
 void AProjectile::SetMovementSpeed(float speed)
