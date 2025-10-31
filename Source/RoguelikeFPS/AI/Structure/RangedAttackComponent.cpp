@@ -15,7 +15,6 @@ void URangedAttackComponent::ApplyRangeConfig(const UEnemyConfig* Config)
     ProjectileClass = Config->ProjectileClass;
     MuzzleSocket = Config->MuzzleSocket;
     MuzzleSpeed = Config->ProjectileSpeed;
-    
 }
 
 void URangedAttackComponent::StartAttack(AActor* Target)
@@ -40,7 +39,7 @@ void URangedAttackComponent::DoHit()
 
     if (AProjectile* Proj = GetWorld()->SpawnActor<AProjectile>(ProjectileClass, Loc, Rot, P))
     {
-        Proj->SetMovement(MuzzleSpeed);
+        Proj->SetMovementSpeed(MuzzleSpeed);
     }
 }
 
