@@ -1,26 +1,61 @@
 #include "MyPlayerController.h"
+#include "MyCharacter.h"
+#include "ItemBase.h"
+#include "RoguelikeFPS/InventoryWidget/ShopItemWidget.h"
+#include "RoguelikeFPS/InventoryWidget/ShopWidget.h"
+#include "InventoryWidget.h"
+#include "Inventory.h"
 #include "Blueprint/UserWidget.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
-#include "ItemBase.h"
 
 void AMyPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	PlayerInventory = NewObject<UInventory>(this);
-
-	if (InventoryWidgetClass)
+	if (!InventoryWidgetClass)
 	{
-		InventoryWidget = CreateWidget<UInventoryWidget>(this, InventoryWidgetClass);
-		if (InventoryWidget)
+		UE_LOG(LogTemp, Error, TEXT("InventoryWidgetClass is not set in PlayerController"));
+		return;
+	}
+
+	InventoryWidget = CreateWidget<UInventoryWidget>(this, InventoryWidgetClass);
+	if (!InventoryWidget)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to create InventoryWidget"));
+		return;
+	}
+
+	if (!PlayerInventory)
+	{
+		if (AMyCharacter* MyChar = Cast<AMyCharacter>(GetPawn()))
 		{
-			InventoryWidget->AddToViewport();
-			InventoryWidget->InitInventory(PlayerInventory);
-			InventoryWidget->SetVisibility(ESlateVisibility::Hidden);
+			if (MyChar->Inventory)
+			{
+				PlayerInventory = MyChar->Inventory;
+			}
+		}
+
+		if (!PlayerInventory)
+		{
+			PlayerInventory = NewObject<UInventory>(this, UInventory::StaticClass());
+			PlayerInventory->RegisterComponent();
 		}
 	}
 
+	InventoryWidget->InitInventory(PlayerInventory);
+	InventoryWidget->AddToViewport();
+	InventoryWidget->SetVisibility(ESlateVisibility::Hidden);
+
+	if (ShopWidgetClass)
+	{
+		ShopWidget = CreateWidget<UShopWidget>(this, ShopWidgetClass);
+		if (ShopWidget)
+		{
+			ShopWidget->AddToViewport();
+			ShopWidget->SetVisibility(ESlateVisibility::Hidden);
+		}
+	}
 	if (ULocalPlayer* LocalPlayer = GetLocalPlayer())
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>())
@@ -46,8 +81,10 @@ void AMyPlayerController::SetupInputComponent()
 
 void AMyPlayerController::InventoryOnOff()
 {
-	if (!InventoryWidget) return;
-
+	if (!InventoryWidget)
+	{
+		return;
+	}
 	bool bVisible = InventoryWidget->IsVisible();
 	InventoryWidget->SetVisibility(bVisible ? ESlateVisibility::Hidden : ESlateVisibility::Visible);
 
@@ -61,4 +98,19 @@ void AMyPlayerController::InventoryOnOff()
 		bShowMouseCursor = false;
 		SetInputMode(FInputModeGameOnly());
 	}
+}
+
+void AMyPlayerController::OpenShop(const TArray<UItemBase*>& ShopItems)
+{
+	if (!ShopWidget)
+	{
+		return;
+	}
+	ShopWidget->SetVisibility(ESlateVisibility::Visible);
+	ShopWidget->InitShop(ShopItems);
+
+	bShowMouseCursor = true;
+	FInputModeUIOnly InputMode;
+	InputMode.SetWidgetToFocus(ShopWidget->TakeWidget());
+	SetInputMode(InputMode);
 }

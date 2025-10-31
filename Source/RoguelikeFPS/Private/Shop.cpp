@@ -1,10 +1,17 @@
 #include "Shop.h"
 #include "Inventory.h"
 #include "MyCharacter.h"
+#include "MyPlayerController.h"
 #include "ItemBase.h"
+#include "ItemData.h"
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Engine/DataTable.h"
 #include "Blueprint/UserWidget.h"
+#include "RoguelikeFPS/InventoryWidget/ShopItemWidget.h"
+#include "RoguelikeFPS/InventoryWidget/ShopWidget.h"
+
+
 
 AShop::AShop()
 {
@@ -26,7 +33,29 @@ AShop::AShop()
 void AShop::BeginPlay()
 {
     Super::BeginPlay();
+    LoadItemsFromDataTable();
+}
 
+void AShop::LoadItemsFromDataTable()
+{
+    ShopItems.Empty();
+    if (!ItemDataTable) return;
+
+    TArray<FName> RowNames = ItemDataTable->GetRowNames();
+    for (const FName& Name : RowNames)
+    {
+        FItemData* Row = ItemDataTable->FindRow<FItemData>(Name, TEXT("ShopItems"));
+        if (Row)
+        {
+            UItemBase* NewItem = NewObject<UItemBase>(this);
+            NewItem->ItemNumber = Row->ItemNumber;
+            NewItem->ItemName = Row->ItemName;
+            NewItem->Amount = Row->Amount;
+            NewItem->BuyPrice = Row->BuyPrice;
+            NewItem->SellPrice = Row->SellPrice;
+            ShopItems.Add(NewItem);
+        }
+    }
 }
 
 void AShop::PlayerInRange(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
@@ -35,47 +64,28 @@ void AShop::PlayerInRange(UPrimitiveComponent* OverlappedComp, AActor* OtherActo
 {
     if (AMyCharacter* Player = Cast<AMyCharacter>(OtherActor))
     {
-        UE_LOG(LogTemp, Log, TEXT("Player In Range!"));
+        if (AMyPlayerController* PC = Cast<AMyPlayerController>(Player->GetController()))
+        {
+            if (ShopItems.Num() > 0)
+            {
+                PC->OpenShop(ShopItems);
+            }
+        }
     }
-}
-
-void AShop::PlayerOutRange(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+}void AShop::PlayerOutRange(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
     UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
     if (AMyCharacter* Player = Cast<AMyCharacter>(OtherActor))
     {
-        UE_LOG(LogTemp, Log, TEXT("Player Out Range!"));
+        if (AMyPlayerController* PlayerController = Cast<AMyPlayerController>(Player->GetController()))
+        {
+            if (PlayerController->ShopWidget)
+            {
+                PlayerController->ShopWidget->SetVisibility(ESlateVisibility::Hidden);
+                PlayerController->bShowMouseCursor = false;
+                PlayerController->SetInputMode(FInputModeGameOnly());
+            }
+        }
     }
-}
-
-bool AShop::BuyItem(AMyCharacter* Player, UItemBase* Item)
-{
-    if (!Player || !Item)
-    {
-        return false;
-    }
-    if (Player->Inventory->Gold >= Item->BuyPrice)
-    {
-        Player->Inventory->AddItem(Item);
-        Player->Inventory->Gold -= Item->BuyPrice;
-
-        UE_LOG(LogTemp, Log, TEXT("BuyItem : %s, Current Gold : %d"), *Item->ItemName.ToString(), Player->Inventory->Gold);
-        return true;
-    }
-    return false;
-}
-bool AShop::SellItem(AMyCharacter* Player, UItemBase* Item)
-{
-    if (!Player || !Item)
-    {
-        return false;
-    }
-    if (Player->Inventory->RemoveItem(Item))
-    {
-        Player->Inventory->Gold += Item->SellPrice;
-        UE_LOG(LogTemp, Log, TEXT("SoldItem : %s, Current Gold : %d"), *Item->ItemName.ToString(), Player->Inventory->Gold);
-        return true;
-    }
-    return false;
 }
 

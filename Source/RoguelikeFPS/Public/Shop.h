@@ -8,6 +8,7 @@ class UBoxComponent;
 class UStaticMeshComponent;
 class AMyCharacter;
 class UItemBase;
+class DataTable;
 
 UCLASS()
 class ROGUELIKEFPS_API AShop : public AActor
@@ -16,11 +17,6 @@ class ROGUELIKEFPS_API AShop : public AActor
 	
 public:	
 	AShop();
-
-	UFUNCTION(BlueprintCallable)
-	bool BuyItem(AMyCharacter* Player, UItemBase* Item);
-	UFUNCTION(BlueprintCallable)
-	bool SellItem(AMyCharacter* Player, UItemBase* Item);
 
 protected:
 	virtual void BeginPlay() override;
@@ -33,6 +29,12 @@ protected:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Shop")
 	TArray<UItemBase*> ShopItems;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shop")
+	UDataTable* ItemDataTable;
+
+	UFUNCTION()
+	void LoadItemsFromDataTable();
 
 	UFUNCTION()
 	void PlayerInRange(

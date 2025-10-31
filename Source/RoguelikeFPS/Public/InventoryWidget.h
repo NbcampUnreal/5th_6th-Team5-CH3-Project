@@ -2,16 +2,18 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Inventory.h"
-#include "Components/ScrollBox.h"
-#include "Components/TextBlock.h"
 #include "InventoryWidget.generated.h"
+
+class UInventory;
+class UScrollBox;
+class UTextBlock;
+class UInventoryItemWidget;
 
 UCLASS()
 class ROGUELIKEFPS_API UInventoryWidget : public UUserWidget
 {
 	GENERATED_BODY()
-	
+
 public:
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
@@ -31,5 +33,6 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* GoldText;
 
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	TSubclassOf<UInventoryItemWidget> InventoryItemWidgetClass;
 };

@@ -10,20 +10,54 @@ UInventory::UInventory()
 
 void UInventory::AddItem(UItemBase* Item)
 {
-	if (Item)
+	if (!Item)
 	{
-		Items.Add(Item);
-		UE_LOG(LogTemp, Log, TEXT("Item Add : %s"), *Item->ItemName.ToString());
+		return;
 	}
+	for (UItemBase* BuyItem : InventoryItems)
+	{
+		if (BuyItem && BuyItem->ItemName == Item->ItemName)
+		{
+			BuyItem->Amount += Item->Amount;
+			return;
+		}
+	}
+	UItemBase* NewItem = NewObject<UItemBase>(this);
+	NewItem->ItemNumber = Item->ItemNumber;
+	NewItem->ItemName = Item->ItemName;
+	NewItem->Description = Item->Description;
+	NewItem->EffectDescription = Item->EffectDescription;
+	NewItem->Amount = Item->Amount;
+	NewItem->BuyPrice = Item->BuyPrice;
+	NewItem->SellPrice = Item->SellPrice;
+	NewItem->ItemType = Item->ItemType;
+	NewItem->Thumbnail = Item->Thumbnail;
+	InventoryItems.Add(NewItem);
+
 }
 
-bool UInventory::RemoveItem(UItemBase* Item)
+bool UInventory::RemoveItem(UItemBase* Item, int32 Amount)
 {
-	if (Item && Items.Contains(Item))
+	if (!Item || Amount <= 0)
 	{
-		Items.Remove(Item);
-		UE_LOG(LogTemp, Log, TEXT("Item Remove : %s"), *Item->ItemName.ToString());
-		return true;
+		return false;
+	}
+	for (int32 i = 0; i < InventoryItems.Num(); i++)
+	{
+		UItemBase* RemoveItem = InventoryItems[i];
+		if (RemoveItem && RemoveItem->ItemName == Item->ItemName)
+		{
+			if (RemoveItem->Amount < Amount)
+			{
+				return false;
+			}
+			RemoveItem->Amount -= Amount;
+			if (RemoveItem->Amount <= 0)
+			{
+				InventoryItems.RemoveAt(i);
+			}
+			return true;
+		}
 	}
 	return false;
 }
@@ -34,27 +68,59 @@ bool UInventory::BuyItem(UItemBase* Item)
 	{
 		return false;
 	}
-	AddItem(Item);
 	Gold -= Item->BuyPrice;
-	UE_LOG(LogTemp, Log, TEXT("Item Buy : %s, Gold : %d"), *Item->ItemName.ToString(), Gold);
+
+	for (UItemBase* InvenItem : InventoryItems)
+	{
+		if (InvenItem && InvenItem->ItemName == Item->ItemName)
+		{
+			InvenItem->Amount += 1;
+			UE_LOG(LogTemp, Log, TEXT("Item Buy : %s, BuyPrice : %d, Current Gold : %d, Amount : %d"),
+				*Item->ItemName.ToString(), Item->BuyPrice, Gold, InvenItem->Amount);
+			return true;
+		}
+	}
+
+	UItemBase* NewItem = NewObject<UItemBase>(this);
+	NewItem->ItemNumber = Item->ItemNumber;
+	NewItem->ItemName = Item->ItemName;
+	NewItem->Description = Item->Description;
+	NewItem->EffectDescription = Item->EffectDescription;
+	NewItem->Amount = 1;
+	NewItem->BuyPrice = Item->BuyPrice;
+	NewItem->SellPrice = Item->SellPrice;
+	NewItem->ItemType = Item->ItemType;
+	NewItem->Thumbnail = Item->Thumbnail;
+	InventoryItems.Add(NewItem);
+
+	UE_LOG(LogTemp, Log, TEXT("Item Buy : %s, BuyPrice : %d, Current Gold : %d, Amount : %d"), *NewItem->ItemName.ToString(), NewItem->BuyPrice, Gold, NewItem->Amount);
+	
 	return true;
 }
 
-bool UInventory::SellItem(UItemBase* Item)
+bool UInventory::SellItem(UItemBase* Item, int32 Amount)
 {
-	if (RemoveItem(Item))
+	if (!Item || Amount <= 0)
 	{
-		Gold += Item->SellPrice;
-		UE_LOG(LogTemp, Log, TEXT("Item Sell : %s, Gold : %d"), *Item->ItemName.ToString(), Gold);
-		return true;
+		return false;
 	}
-	return false;
+	UItemBase* InvenItem = SearchItemName(Item->ItemName);
+	if (!InvenItem || InvenItem->Amount < Amount)
+	{
+		return false;
+	}
+	Gold += InvenItem->SellPrice * Amount;
+	RemoveItem(Item, Amount);
+
+	UE_LOG(LogTemp, Log, TEXT("Sold Item : %s, SellPrice : %d, Current Gold : %d, Amount : %d"),
+		*Item->ItemName.ToString(), InvenItem->SellPrice * Amount, Gold, InvenItem ? InvenItem->Amount : 0);
+	return true;
 }
 
 void UInventory::ShowInventory() const
 {
 	UE_LOG(LogTemp, Log, TEXT("=== Inventory Detail ==="));
-	for (const UItemBase* Item : Items)
+	for (const UItemBase* Item : InventoryItems)
 	{
 		UE_LOG(LogTemp, Log, TEXT("- %s (Amount : %d)"), *Item->ItemName.ToString(), Item->Amount);
 	}
@@ -62,7 +128,7 @@ void UInventory::ShowInventory() const
 }
 UItemBase* UInventory::SearchItemName(const FName& Name) const
 {
-	for (UItemBase* Item : Items)
+	for (UItemBase* Item : InventoryItems)
 	{
 		if (Item && Item->ItemName == Name)
 		{
@@ -74,7 +140,7 @@ UItemBase* UInventory::SearchItemName(const FName& Name) const
 
 UItemBase* UInventory::SearchItemNumber(int32 ItemNumber) const
 {
-	for (UItemBase* Item : Items)
+	for (UItemBase* Item : InventoryItems)
 	{
 		if (Item && Item->ItemNumber == ItemNumber)
 		{
@@ -82,31 +148,4 @@ UItemBase* UInventory::SearchItemNumber(int32 ItemNumber) const
 		}
 	}
 	return nullptr;
-}
-//юс╫ц
-void UInventory::TestInventory()
-{
-	UItemBase* Gun = NewObject<UItemBase>();
-	Gun->ItemName = "Gun";
-	Gun->Amount = 1;
-	Gun->Description = "Basic Gun";
-	Gun->BuyPrice = 100;
-	Gun->SellPrice = 50;
-	Gun->ItemType = "Weapon";
-
-	UItemBase* Potion = NewObject<UItemBase>();
-	Potion->ItemName = "Potion";
-	Potion->Amount = 5;
-	Potion->Description = "Heal Potion";
-	Potion->BuyPrice = 20;
-	Potion->SellPrice = 10;
-	Potion->ItemType = "Potion";
-
-	BuyItem(Gun);
-	BuyItem(Potion);
-
-	SellItem(Gun);
-	SellItem(Potion);
-
-	ShowInventory();
 }
