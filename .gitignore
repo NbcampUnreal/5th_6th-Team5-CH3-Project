@@ -108,6 +108,10 @@ Content/**/*.wav
 Content/**/*.fbx
 Content/**/*.psd
 
+# 압축 파일
+*.zip
+*.7z
+
 # 임시/변환 파일
 Saved/**
 
