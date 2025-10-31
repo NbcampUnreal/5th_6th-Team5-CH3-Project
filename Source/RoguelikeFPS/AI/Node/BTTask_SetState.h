@@ -1,8 +1,8 @@
 ﻿#pragma once
-
+//JMS
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
-#include "EnemyState.h"                          // ← 반드시 헤더에서 include
+#include "AI/Structure/EnemyState.h"                          
 #include "BTTask_SetState.generated.h"
 
 /**

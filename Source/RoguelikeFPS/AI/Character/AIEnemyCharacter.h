@@ -1,10 +1,10 @@
 ﻿#pragma once
-
+//JMS
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "EnemyState.h"
-#include "EnemyConfig.h"
-#include "EnemyStateMachineComponent.h"
+#include "AI/Structure/EnemyState.h"
+#include "AI/Structure/EnemyConfig.h"
+#include "AI/Structure/EnemyStateMachineComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "AIEnemyCharacter.generated.h"
 
@@ -27,6 +27,9 @@ public:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI")
     UEnemyConfig* Config = nullptr;   
 
+    UFUNCTION(BlueprintCallable, Category = "AI|Config")
+    void ApplyConfigToComponents();
+
     // FSM 컴포넌트 (상태 전이/상태별 로직 담당)
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
     UEnemyStateMachineComponent* StateMachine;
@@ -39,6 +42,12 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "AI|Movement")
     void ApplyChaseSpeed();    // 추적 속도(있다면)
+
+    UFUNCTION(BlueprintCallable, Category = "AI|Movement")
+    float GetWalkSpeed();     // 기본 순찰/이동 속도
+
+    UFUNCTION(BlueprintCallable, Category = "AI|Movement")
+    float GetChaseSpeed();    // 추적 속도(있다면)
 
 
 
@@ -55,6 +64,9 @@ public:
     float DebugThickness = 1.0f;
 
     void DrawPerceptionGizmos();
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stats")
+    int Level;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stats")
     float MAXHP;

@@ -1,5 +1,7 @@
-﻿#include "AIEnemyCharacter.h"
-#include "AIEnemyController.h"
+﻿#include "AI/Character/AIEnemyCharacter.h"
+#include "AI/Character/AIEnemyController.h"
+#include "AI/Structure/MeleeAttackComponent.h"
+#include "AI/Structure/RangedAttackComponent.h"
 #include "DrawDebugHelpers.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -18,14 +20,21 @@ void AAIEnemyCharacter::BeginPlay()
 
     ensureMsgf(Config, TEXT("Enemy Config is null on %s"), *GetName());
 
+    ApplyConfigToComponents();
+
     if (Config)
     {
         // 스탯 적용
-        MAXHP = Config->MaxHP;
+        Level = Config->Level + (int)FMath::FRandRange(1.f, 3.f);
+        MAXHP = Config->MaxHP + (Level - 1) * Config->HPperLevel - 1;
         HP = MAXHP;
-        ATK = Config->ATK;
-        DEF = Config->DEF;
+        ATK = Config->ATK + (Level - 1) * Config->ATKperLevel - 1;
+        DEF = Config->DEF + (Level - 1) * Config->DEFperLevel - 1;
 
+        UE_LOG(LogTemp, Log, TEXT("Level : %d"), Level);
+        UE_LOG(LogTemp, Log, TEXT("HP : %f"), MAXHP);
+        UE_LOG(LogTemp, Log, TEXT("ATK : %f"), ATK);
+        UE_LOG(LogTemp, Log, TEXT("DEF : %f"), DEF);
         // 이동 속도
         ApplyWalkSpeed();
     }
@@ -46,6 +55,18 @@ void AAIEnemyCharacter::ApplyChaseSpeed()
     CurrentMoveSpeed = Speed;
 }
 
+float AAIEnemyCharacter::GetWalkSpeed()
+{
+    float Speed = (Config ? Config->WalkSpeed : 300.f);
+    return Speed;
+}
+
+float AAIEnemyCharacter::GetChaseSpeed()
+{
+    const float Speed = (Config && Config->ChaseSpeed > 0.f) ? Config->ChaseSpeed : (Config ? Config->WalkSpeed : 500.f);
+    return Speed;
+}
+
 void AAIEnemyCharacter::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
@@ -56,6 +77,27 @@ void AAIEnemyCharacter::Tick(float DeltaSeconds)
         DrawPerceptionGizmos();
     }
 #endif
+}
+
+void AAIEnemyCharacter::ApplyConfigToComponents()
+{
+    if (!Config) return;
+
+    if (auto* Melee = FindComponentByClass<UMeleeAttackComponent>())
+    {
+        Melee->ApplyMeleeConfig(Config);
+        //UE_LOG(LogTemp, Log, TEXT("ApplyMeleeConfig Complete"));
+    }
+
+
+    if (auto* Ranged = FindComponentByClass<URangedAttackComponent>())
+    {
+        Ranged->ApplyRangeConfig(Config);
+        //UE_LOG(LogTemp, Log, TEXT("ApplyRangeConfig Complete"));
+    }
+
+
+
 }
 
 void AAIEnemyCharacter::DrawPerceptionGizmos()
@@ -128,7 +170,7 @@ void AAIEnemyCharacter::DrawPerceptionGizmos()
 void AAIEnemyCharacter::AddHealth(float Amount)
 {
     HP = FMath::Clamp(HP + Amount, 0.0f, MAXHP);
-    UE_LOG(LogTemp, Log, TEXT("Health increased to: %f"), HP);
+    //UE_LOG(LogTemp, Log, TEXT("Health increased to: %f"), HP);
 }
 
 void AAIEnemyCharacter::OnDeath()
@@ -136,13 +178,21 @@ void AAIEnemyCharacter::OnDeath()
     if (StateMachine)            // 널가드
         StateMachine->ChangeState(EEnemyState::Dead);
 
-    UE_LOG(LogTemp, Warning, TEXT("Monster is DEAD"));
+    //UE_LOG(LogTemp, Warning, TEXT("Monster is DEAD"));
     // 충돌/이동 정지
     GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     if (AAIController* AICon = Cast<AAIController>(GetController()))
+    {
         AICon->StopMovement();
+    }
+    if (AAIEnemyController* AICon = Cast<AAIEnemyController>(GetController()))
+    {
+        AICon->SendDeadToBT();
+    }
 
-    SetLifeSpan(2.0f);           // Destroy() 즉시 호출 대신 권장
+
+
+    //SetLifeSpan(2.0f);           // Destroy() 즉시 호출 대신 권장
 }
 
 float AAIEnemyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -152,7 +202,7 @@ float AAIEnemyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Dama
 
     // 체력을 데미지만큼 감소시키고, 0 이하로 떨어지지 않도록 Clamp
     HP = FMath::Clamp(HP - DamageAmount, 0.0f, MAXHP);
-    UE_LOG(LogTemp, Warning, TEXT("Health decreased to: %f"), HP);
+    //UE_LOG(LogTemp, Warning, TEXT("Health decreased to: %f"), HP);
 
     // 체력이 0 이하가 되면 사망 처리
     if (HP <= 0.0f)

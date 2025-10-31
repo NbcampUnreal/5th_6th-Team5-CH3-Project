@@ -1,8 +1,8 @@
 ﻿#include "BTTask_SetState.h"
 #include "AIController.h"
 #include "GameFramework/Pawn.h"
-#include "EnemyStateMachineComponent.h"          // FSM 컴포넌트
-#include "AIEnemyCharacter.h"                    // 캐릭터 클래스(컴포넌트 찾기용)
+#include "AI/Structure/EnemyStateMachineComponent.h"          // FSM 컴포넌트
+#include "AI/Character/AIEnemyCharacter.h"                    // 캐릭터 클래스(컴포넌트 찾기용)
 
 UBTTask_SetState::UBTTask_SetState()
 {
@@ -15,14 +15,14 @@ EBTNodeResult::Type UBTTask_SetState::ExecuteTask(UBehaviorTreeComponent& OwnerC
     AAIController* AICon = OwnerComp.GetAIOwner();
     if (!AICon)
     {
-        UE_LOG(LogTemp, Warning, TEXT("[BTTask_SetEnemyState] No AIController"));
+        //UE_LOG(LogTemp, Warning, TEXT("[BTTask_SetEnemyState] No AIController"));
         return EBTNodeResult::Failed;
     }
 
     APawn* Pawn = AICon->GetPawn();
     if (!Pawn)
     {
-        UE_LOG(LogTemp, Warning, TEXT("[BTTask_SetEnemyState] No Pawn"));
+        //UE_LOG(LogTemp, Warning, TEXT("[BTTask_SetEnemyState] No Pawn"));
         return EBTNodeResult::Failed;
     }
 
@@ -30,12 +30,11 @@ EBTNodeResult::Type UBTTask_SetState::ExecuteTask(UBehaviorTreeComponent& OwnerC
     UEnemyStateMachineComponent* FSM = Pawn->FindComponentByClass<UEnemyStateMachineComponent>();
     if (!FSM)
     {
-        UE_LOG(LogTemp, Warning, TEXT("[BTTask_SetEnemyState] FSM component not found on %s"), *Pawn->GetName());
+        //UE_LOG(LogTemp, Warning, TEXT("[BTTask_SetEnemyState] FSM component not found on %s"), *Pawn->GetName());
         return EBTNodeResult::Failed;
     }
 
-    UE_LOG(LogTemp, Warning, TEXT("[BTTask_SetEnemyState] Change to: %s"),
-        *UEnum::GetValueAsString(TargetState));
+    //UE_LOG(LogTemp, Warning, TEXT("[BTTask_SetEnemyState] Change to: %s"),*UEnum::GetValueAsString(TargetState));
 
     FSM->ChangeState(TargetState);
     return EBTNodeResult::Succeeded;

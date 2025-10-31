@@ -1,5 +1,5 @@
-﻿#include "AIEnemyController.h"
-#include "AIEnemyCharacter.h"
+﻿#include "AI/Character/AIEnemyController.h"
+#include "AI/Character/AIEnemyCharacter.h"
 #include "Perception/AISenseConfig_Sight.h"
 #include "Perception/AISense_Sight.h"
 #include "BehaviorTree/BehaviorTree.h"
@@ -183,6 +183,11 @@ void AAIEnemyController::OnPerceptionUpdated(const TArray<AActor*>&)
             BlackboardComp->SetValueAsVector(BB_LastSeenLocation, Seen->StimulusLocation);
         }
     }
+}
+
+void AAIEnemyController::SendDeadToBT()
+{
+    BlackboardComp->SetValueAsBool(TEXT("IsDead"), true);
 }
 
 void AAIEnemyController::ClearTarget()

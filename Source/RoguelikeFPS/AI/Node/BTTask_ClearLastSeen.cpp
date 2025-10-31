@@ -1,7 +1,7 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "BTTask_ClearLastSeen.h"
+#include "AI/Node/BTTask_ClearLastSeen.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
 

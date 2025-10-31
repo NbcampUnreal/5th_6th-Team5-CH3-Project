@@ -1,5 +1,5 @@
 ﻿#pragma once
-
+//JMS
 #include "EnemyState.generated.h"
 
 UENUM(BlueprintType)
