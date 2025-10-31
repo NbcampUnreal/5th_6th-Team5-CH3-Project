@@ -21,8 +21,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Skill, meta = (AllowPrivateAccess = "true"))
 	USphereComponent* _Collision;
 
-	UPROPERTY(EditAnywhere, Category = "FX", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, Category = "FX", meta = (AllowPrivateAccess = "true"))
 	UNiagaraSystem* Explosion;
+
+	UPROPERTY()
+	float _Damage = 0;
 
 protected:
 

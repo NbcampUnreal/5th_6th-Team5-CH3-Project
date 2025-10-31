@@ -12,17 +12,23 @@ AExplosiveActor::AExplosiveActor()
 	PrimaryActorTick.bCanEverTick = true;
 
 	_Collision = CreateDefaultSubobject<USphereComponent>(TEXT("Collision"));
+	_Collision->SetCollisionProfileName("Projectile");
 	SetRootComponent(_Collision);
 
 	_Collision->OnComponentBeginOverlap.AddDynamic(this, &AExplosiveActor::OnSphereBeginOverlap);
-
-	InitialLifeSpan = 1.0f;
+	InitialLifeSpan = 0.5f;
 }
 
 // Called when the game starts or when spawned
 void AExplosiveActor::BeginPlay()
 {
 	Super::BeginPlay();
+
+	UNiagaraComponent* NiComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), Explosion, GetActorLocation(), GetActorRotation());
+	NiComp->SetNiagaraVariableFloat(TEXT("User.Range"), _Collision->GetScaledSphereRadius() * 2);
+	float count = (_Collision->GetScaledSphereRadius() / 500) * 100;
+	NiComp->SetNiagaraVariableInt(TEXT("User.SpawnCount"), count > 36 ? count : 36);
+
 	//Spawn Particle
 	if (Explosion) UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), Explosion, GetActorLocation(), GetActorRotation());
 }
@@ -38,7 +44,7 @@ void AExplosiveActor::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedCompon
 {
 	ACharacter* Character = Cast<ACharacter>(OtherActor);
 	if (Character)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT("OnSphereBeginOverlap")));
+	{  
+		
 	}
 }

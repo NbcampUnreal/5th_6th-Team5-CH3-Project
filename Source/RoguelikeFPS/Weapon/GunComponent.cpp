@@ -104,6 +104,11 @@ void UGunComponent::Fire()
 	}
 }
 
+float UGunComponent::ReturnDamage()
+{
+	return _Status.AttackPoint;
+}
+
 FRotator UGunComponent::CalculateSapwnRotaion()
 {
 	if (_Character)
@@ -145,7 +150,6 @@ void UGunComponent::InitSpawnProjectile(AProjectile* proejectile)
 	{
 		proejectile->SetMovementSpeed(_Status.ProjectileSpeed);
 		proejectile->SetInstigator(_Character);
-		proejectile->SetWeapon(GetOwner());
 		proejectile->SetDamage(_Status.AttackPoint);
 	}
 }

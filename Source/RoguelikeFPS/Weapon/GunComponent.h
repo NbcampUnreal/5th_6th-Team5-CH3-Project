@@ -51,6 +51,8 @@ public:
 
 	void Fire();
 
+	float ReturnDamage();
+
 protected:
 	virtual void BeginPlay() override;
 

@@ -35,10 +35,6 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Projectile, meta = (AllowPrivateAccess = "true"))
 	AActor* _Instigator;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Projectile, meta = (AllowPrivateAccess = "true"))
-	AActor* _Weapon;
-	
-
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -46,10 +42,12 @@ public:
 	UFUNCTION()
 	void OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
+	UFUNCTION()
+	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+
 	void SetMovementSpeed(float speed);
 
 	void SetInstigator(AActor* instigator);
-	void SetWeapon(AActor* weapon);
 
 	void SetDamage(float damage);
 protected:
