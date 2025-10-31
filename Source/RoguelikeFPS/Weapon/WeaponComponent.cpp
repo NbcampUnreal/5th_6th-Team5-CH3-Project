@@ -10,7 +10,9 @@
 
 UWeaponComponent::UWeaponComponent()
 {
-	
+	SetCollisionProfileName("NoCollision");
+	SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	SetGenerateOverlapEvents(false);
 }
 
 void UWeaponComponent::DoAttack()
@@ -31,7 +33,6 @@ void UWeaponComponent::AttachWeapon(ACharacter* TargetCharacter)
 	// Attach the weapon to the First Person Character
 	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
 	GetOwner()->AttachToComponent(_Character->GetMesh(), AttachmentRules, FName(TEXT("GripPoint")));
-	//AttachToComponent(_Character->GetMesh(), AttachmentRules, FName(TEXT("GripPoint")));
 
 	// Set up action bindings
 	if (APlayerController* PlayerController = Cast<APlayerController>(_Character->GetController()))
@@ -46,10 +47,35 @@ void UWeaponComponent::AttachWeapon(ACharacter* TargetCharacter)
 		{
 			// Attack
 			EnhancedInputComponent->BindAction(_AttackAction, ETriggerEvent::Triggered, this, &UWeaponComponent::DoAttack);
+			if (_SkillComponent) _SkillComponent->SetUp();
+		}
+	}
+}
+
+void UWeaponComponent::ActiveSkill()
+{
+	if (_SkillComponent)
+	{
+		_SkillComponent->Active();
+	}
+}
+
+UEnhancedInputComponent* UWeaponComponent::GetCharacterEnhancedInputComponent()
+{
+	if (_Character)
+	{
+		APlayerController* PlayerController = Cast<APlayerController>(_Character->GetController());
+		if (PlayerController)
+		{
+			UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent);
+			if (EnhancedInputComponent)
+			{
+				return EnhancedInputComponent;
+			}
 		}
 	}
 
-	//return true;
+	return nullptr;
 }
 
 void UWeaponComponent::BeginPlay()
@@ -70,6 +96,22 @@ void UWeaponComponent::BeginPlay()
 			UE_LOG(LogTemp, Warning, TEXT("Can't find UPickUpComponent"));
 		}
 	}
+
+	if (_TSubSkillComponent)
+	{
+		_SkillComponent = NewObject<UWeaponSkillComponent>(GetOwner(), _TSubSkillComponent);
+		if (_SkillComponent)
+		{
+			_SkillComponent->RegisterComponent(); // 반드시 등록해야 월드에서 동작
+			_SkillComponent->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
+		}
+		else {
+			UE_LOG(LogTemp, Warning, TEXT("SkillComponent is null"));
+		}
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("TSubSkillComponent is null"));
+	}
 }
 
 void UWeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -89,3 +131,5 @@ void UWeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 	Super::EndPlay(EndPlayReason);
 }
+
+

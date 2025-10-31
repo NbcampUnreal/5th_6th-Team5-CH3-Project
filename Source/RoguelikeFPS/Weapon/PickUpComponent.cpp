@@ -8,6 +8,7 @@ UPickUpComponent::UPickUpComponent()
 {
 	SphereRadius = 32.f;
 	SetCollisionProfileName(TEXT("OverlapAllDynamic"));
+	SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	SetGenerateOverlapEvents(true);
 }
 

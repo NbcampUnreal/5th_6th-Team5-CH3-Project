@@ -42,6 +42,9 @@ struct FGunStatus
     float Accuracy = 1.0f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+    float Spread_Angle = 1.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
     float CriticalChance = 0.f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")

@@ -18,12 +18,12 @@ UGunComponent::~UGunComponent()
 void UGunComponent::DoAttack()
 {
 	if (!CanAttack) return;
-	if (_Character == nullptr || _Character->GetController() == nullptr)
-	{
+	if (_Character == nullptr || _Character->GetController() == nullptr) return;
+
+	if (!(CurrentBulletCount > 0)) {
+		ReloadBullet();
 		return;
 	}
-
-	SetDamage();
 
 	for (size_t count = 0; count < _Status.ProjectilesPerShot; count++)
 	{
@@ -31,7 +31,7 @@ void UGunComponent::DoAttack()
 	}
 
 	CurrentBulletCount--;
-	GEngine->AddOnScreenDebugMessage(1, 5.0f, FColor::Green, FString::Printf(TEXT("CurrentBulletCount : %d"), CurrentBulletCount));
+	//GEngine->AddOnScreenDebugMessage(1, 5.0f, FColor::Green, FString::Printf(TEXT("CurrentBulletCount : %d"), CurrentBulletCount));
 
 	CanAttack = false;
 
@@ -60,7 +60,7 @@ void UGunComponent::DoAttack()
 void UGunComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	InitProjectile();
+
 	CurrentBulletCount = _Status.MaxBulletCount;
 }
 
@@ -76,39 +76,27 @@ void UGunComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
-void UGunComponent::SetDamage()
-{
-	if (_Templete)
-	{
-		float Damage = _Status.AttackPoint;
-		if (FMath::FRand() < _Status.CriticalChance) Damage *= _Status.CriticalMultiplier;
-		_Templete->Damage = Damage;
-	}
-}
-
 void UGunComponent::Fire()
 {
-	if (!(CurrentBulletCount > 0)) {
-		ReloadBullet();
-		return;
-	}
-
 	if (_ProjectileClass != nullptr)
 	{
 		UWorld* const World = GetWorld();
 		if (World != nullptr)
 		{
-			APlayerController* PlayerController = Cast<APlayerController>(_Character->GetController());
-			//const FRotator SpawnRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
-			//const FVector SpawnLocation = this->GetSocketLocation(FName("Muzzle"));
+			//const FRotator SpawnRotation = CalculateSapwnRotaion();
+			const FRotator SpawnRotation = CalculateSapwnRotaion();
+			const FVector SpawnLocation = this->GetSocketLocation(FName("Muzzle"));
 
 			//Set Spawn Collision Handling Override
 			FActorSpawnParameters ActorSpawnParams;
 			ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-			ActorSpawnParams.Template = _Templete;
 
 			// Spawn the projectile at the muzzle
-			World->SpawnActor<AActor>(_ProjectileClass, this->GetSocketLocation(FName("Muzzle")), PlayerController->PlayerCameraManager->GetCameraRotation(), ActorSpawnParams);
+			AProjectile* SpawnProjectile = World->SpawnActorDeferred<AProjectile>(_ProjectileClass, FTransform(SpawnRotation, SpawnLocation));
+			if (!IsValid(SpawnProjectile)) return;
+			InitSpawnProjectile(SpawnProjectile);
+			ProjectileSpawn.Broadcast(SpawnProjectile);
+			UGameplayStatics::FinishSpawningActor(SpawnProjectile, FTransform(SpawnRotation, SpawnLocation));
 		}
 	}
 	else {
@@ -116,14 +104,53 @@ void UGunComponent::Fire()
 	}
 }
 
-void UGunComponent::InitProjectile()
+float UGunComponent::ReturnDamage()
 {
-	if (_ProjectileClass)
+	return _Status.AttackPoint;
+}
+
+FRotator UGunComponent::CalculateSapwnRotaion()
+{
+	if (_Character)
 	{
-		//Templete
-		AProjectile* TempActor = _ProjectileClass->GetDefaultObject<AProjectile>();
-		TempActor->SetMovement(_Status.ProjectileSpeed);
-		_Templete = TempActor;
+		APlayerController* PlayerController = Cast<APlayerController>(_Character->GetController());
+		if (PlayerController)
+		{
+			FRotator SpawnRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
+
+
+			float AccuracyChance = FMath::FRand();
+			if (AccuracyChance < _Status.Accuracy) {
+
+			}
+			else {
+				float ConeHalfAngleRad = FMath::DegreesToRadians(_Status.Spread_Angle);
+				FVector Forward = SpawnRotation.Vector();
+				FVector ShotDir = FMath::VRandCone(Forward, ConeHalfAngleRad);
+				FRotator SpawnRot = ShotDir.Rotation();
+				SpawnRotation = SpawnRot;
+			}
+
+			return SpawnRotation;
+		}
+		else {
+			UE_LOG(LogTemp, Warning, TEXT("PlayerController is nullptr"));
+		}
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("_Character is nullptr"));
+	}
+
+	return FRotator();
+}
+
+void UGunComponent::InitSpawnProjectile(AProjectile* proejectile)
+{
+	if (proejectile)
+	{
+		proejectile->SetMovementSpeed(_Status.ProjectileSpeed);
+		proejectile->SetInstigator(_Character);
+		proejectile->SetDamage(_Status.AttackPoint);
 	}
 }
 
