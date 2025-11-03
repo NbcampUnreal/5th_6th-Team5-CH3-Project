@@ -6,7 +6,6 @@
 #include "GameFramework/Actor.h"
 #include "Components/SphereComponent.h"
 #include "NiagaraSystem.h"
-#include "NiagaraComponent.h"
 #include "ExplosiveActor.generated.h"
 
 UCLASS()

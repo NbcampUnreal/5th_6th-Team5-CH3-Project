@@ -4,6 +4,7 @@
 #include "Weapon/Skill/ExplosiveActor.h"
 #include "GameFramework/Character.h"
 #include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 
 // Sets default values
 AExplosiveActor::AExplosiveActor()
