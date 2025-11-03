@@ -1,5 +1,3 @@
-// MainMenuWidget.h (최종 수정)
-
 #pragma once
 
 #include "CoreMinimal.h"

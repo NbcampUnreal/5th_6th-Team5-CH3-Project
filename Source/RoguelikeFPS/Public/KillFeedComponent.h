@@ -4,6 +4,8 @@
 #include "Components/ActorComponent.h"
 #include "KillFeedComponent.generated.h"
 
+class AFPSCharacter;
+
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class ROGUELIKEFPS_API UKillFeedComponent : public UActorComponent
 {

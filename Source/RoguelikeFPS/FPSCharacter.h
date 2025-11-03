@@ -1,101 +1,143 @@
-// FPSCharacter.h (최종 수정)
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "InputActionValue.h"
 #include "FPSCharacter.generated.h"
-
-// StatsComponent 및 델리게이트 정의
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerDeath, AController*, KillerController);
 
 class USpringArmComponent;
 class UCameraComponent;
-class UStatsComponent;
-class UUserWidget;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerLevelUp);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerDeath);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerStageClear);
 
 UCLASS()
 class ROGUELIKEFPS_API AFPSCharacter : public ACharacter
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 public:
-	AFPSCharacter();
-
-	// StatsComponent 포인터
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UStatsComponent> StatsComp;
-
-	// UI/델리게이트
-	UPROPERTY(EditAnywhere, Category = "UI")
-	TSubclassOf<UUserWidget> MiniHUDClass;
-
-	UPROPERTY(EditDefaultsOnly, Category = "UI")
-	TSubclassOf<UUserWidget> DeathWidgetClass;
-
-	UPROPERTY(BlueprintAssignable, Category = "Events")
-	FOnPlayerDeath OnPlayerDeath;
-
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+    AFPSCharacter();
 
 protected:
-	virtual void BeginPlay() override;
+    virtual void BeginPlay() override;
 
-	// 컴포넌트
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
-	TObjectPtr<USpringArmComponent> SpringArmComp;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
-	TObjectPtr<UCameraComponent> CameraComp;
+public:
+    virtual void Tick(float DeltaTime) override;
+    virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	// 캐릭터 생존여부
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
-	bool bIsAlive = true;
+    // ====== 스탯 ======
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
+    int32 PlayerLevel = 1;
 
-	// Dash 관련 변수
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash")
-	float DashMultifly = 10.0f; // 기본값 설정
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
+    float CurrentXP = 0.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash")
-	float DashTime = 1.0f; // 기본값 설정
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
+    float MaxXP = 100.0f;
 
-	FTimerHandle DashTimerHandle; // 타이머 핸들러
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
+    int32 Health = 100;
 
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
+    int32 MaxHealth = 100;
 
-	// 액션 함수들 (Traditional Input)
-	UFUNCTION(BlueprintCallable, Category = "Input")
-	void MoveForward(float AxisValue);
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
+    int32 Attack = 10;
 
-	// 나머지 Input 함수
-	UFUNCTION(BlueprintCallable, Category = "Input")
-	void MoveRight(float AxisValue);
-	UFUNCTION(BlueprintCallable, Category = "Input")
-	void LookYaw(float AxisValue);
-	UFUNCTION(BlueprintCallable, Category = "Input")
-	void LookPitch(float AxisValue);
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
+    int32 Defence = 5;
 
-	UFUNCTION(BlueprintCallable, Category = "Input")
-	void StartJump();
-	UFUNCTION(BlueprintCallable, Category = "Input")
-	void StopJump();
-	UFUNCTION(BlueprintCallable, Category = "Input")
-	void StartDash();
-	UFUNCTION() // 타이머에서 호출되므로 UFUNCTION 유지
-		void StopDash();
-	UFUNCTION(BlueprintCallable, Category = "Input")
-	void StartCrouch();
-	UFUNCTION(BlueprintCallable, Category = "Input")
-	void StopCrouch();
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
+    int32 AttackSpeed = 5;
 
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
+    int32 MovingSpeed = 600;
 
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
+    bool bIsAlive = true;
 
-	// 사망
-	void OnDeath(AController* KillerController);
+    // ====== 카메라 ======
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
+    TObjectPtr<USpringArmComponent> SpringArmComp;
 
-	// 피격 함수 (StatsComp에 위임)
-	virtual float TakeDamage(
-		float DamageAmount,
-		FDamageEvent const& DamageEvent,
-		AController* EventInstigator,
-		AActor* DamageCauser) override;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
+    TObjectPtr<UCameraComponent> CameraComp;
 
+    // ====== 무기 ======
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapons")
+    USkeletalMeshComponent* PistolMesh;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapons")
+    USkeletalMeshComponent* RifleMesh;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapons")
+    USkeletalMeshComponent* ShotgunMesh;
+
+    // ====== 대시 ======
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash")
+    float DashMultiplier = 10.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash")
+    float DashTime = 1.0f;
+
+    float DashSpeed;
+    FTimerHandle DashTimerHandle;
+
+    // ====== 델리게이트 ======
+    UPROPERTY(BlueprintAssignable, Category = "Events")
+    FOnPlayerLevelUp OnPlayerLevelUp;
+
+    UPROPERTY(BlueprintAssignable, Category = "Events")
+    FOnPlayerDeath OnPlayerDeath;
+
+    UPROPERTY(BlueprintAssignable, Category = "Events")
+    FOnPlayerStageClear OnPlayerStageClear;
+
+    // ====== 함수 ======
+    UFUNCTION(BlueprintCallable, Category = "Stats")
+    void AddXP(float Amount);
+
+    UFUNCTION(BlueprintCallable, Category = "Stats")
+    void LevelUp();
+
+    UFUNCTION(BlueprintCallable, Category = "Stats")
+    void ApplyAugment(FName AugmentID);
+
+    UFUNCTION(BlueprintCallable, Category = "Character")
+    void HandleDeath();
+
+    UFUNCTION(BlueprintCallable, Category = "Character")
+    void HandleStageClear();
+
+    UFUNCTION(BlueprintCallable, Category = "Weapon")
+    void InitializeWeapon(FName SelectedWeaponName);
+
+    UFUNCTION()
+    void Move(const FInputActionValue& Value);
+
+    UFUNCTION()
+    void Look(const FInputActionValue& Value);
+
+    UFUNCTION()
+    void StartJump(const FInputActionValue& Value);
+
+    UFUNCTION()
+    void StopJump(const FInputActionValue& Value);
+
+    UFUNCTION()
+    void StartDash(const FInputActionValue& Value);
+
+    UFUNCTION()
+    void StopDash();
+
+    virtual float TakeDamage(
+        float DamageAmount,
+        FDamageEvent const& DamageEvent,
+        AController* EventInstigator,
+        AActor* DamageCauser
+    ) override;
+
+    void FireWeapon();
 };
