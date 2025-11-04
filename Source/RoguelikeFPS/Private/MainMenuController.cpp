@@ -9,11 +9,6 @@ void AMainMenuController::BeginPlay()
 {
     Super::BeginPlay();
 
-    if (WITH_EDITOR && GEngine)
-    {
-        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("MainMenuController BeginPlay Called! Starting with TitleWidget."));
-    }
-
     if (TitleWidgetClass)
     {
         TitleWidgetInstance = CreateWidget<UTitleWidget>(this, TitleWidgetClass);
@@ -23,21 +18,12 @@ void AMainMenuController::BeginPlay()
             TitleWidgetInstance->OnStartButtonClicked.AddDynamic(this, &AMainMenuController::ShowWeaponSelectMenu);
 
             FInputModeUIOnly InputModeData;
-
             InputModeData.SetWidgetToFocus(TitleWidgetInstance->TakeWidget());
-
             SetInputMode(InputModeData);
             bShowMouseCursor = true;
-            return;
         }
     }
-
-    // fallback
-    FInputModeGameAndUI InputModeData;
-    SetInputMode(InputModeData);
-    bShowMouseCursor = true;
 }
-
 void AMainMenuController::ShowWeaponSelectMenu()
 {
     if (TitleWidgetInstance)
@@ -55,9 +41,7 @@ void AMainMenuController::ShowWeaponSelectMenu()
             MainMenuWidgetInstance->OnBackButtonClicked.AddDynamic(this, &AMainMenuController::ShowTitleScreen);
 
             FInputModeUIOnly InputModeData;
-
             InputModeData.SetWidgetToFocus(MainMenuWidgetInstance->TakeWidget());
-
             SetInputMode(InputModeData);
             bShowMouseCursor = true;
         }
@@ -81,9 +65,7 @@ void AMainMenuController::ShowTitleScreen()
             TitleWidgetInstance->OnStartButtonClicked.AddDynamic(this, &AMainMenuController::ShowWeaponSelectMenu);
 
             FInputModeUIOnly InputModeData;
-
             InputModeData.SetWidgetToFocus(TitleWidgetInstance->TakeWidget());
-
             SetInputMode(InputModeData);
             bShowMouseCursor = true;
         }

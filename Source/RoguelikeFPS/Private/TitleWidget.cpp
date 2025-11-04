@@ -1,10 +1,12 @@
 #include "TitleWidget.h"
-#include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
-#include "Kismet/KismetSystemLibrary.h"
-#include "GameFramework/PlayerController.h"
-#include "Components/Button.h"
-#include "Engine/Engine.h"
+#include "MainMenuWidget.h"
+#include "TimerManager.h"
+
+void UTitleWidget::NativeConstruct()
+{
+    Super::NativeConstruct();
+}
 
 bool UTitleWidget::Initialize()
 {
@@ -37,7 +39,10 @@ void UTitleWidget::OnGameStartClicked()
     if (!World) return;
 
     RemoveFromParent();
-    OnStartButtonClicked.Broadcast();
+    if (UUserWidget* MainMenu = CreateWidget<UUserWidget>(GetWorld(), UMainMenuWidget::StaticClass()))
+    {
+        MainMenu->AddToViewport();
+    }
 }
 
 void UTitleWidget::OnOptionClicked()

@@ -3,10 +3,9 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/Button.h" 
+#include "TitleWidget.generated.h"
 
 class APlayerController;
-
-#include "TitleWidget.generated.h"
 
 UCLASS()
 class ROGUELIKEFPS_API UTitleWidget : public UUserWidget
@@ -14,6 +13,8 @@ class ROGUELIKEFPS_API UTitleWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
+	virtual void NativeConstruct() override;
+
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UButton> GameStartButton;
 

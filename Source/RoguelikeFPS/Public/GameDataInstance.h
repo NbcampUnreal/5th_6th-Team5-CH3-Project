@@ -10,18 +10,31 @@ class ROGUELIKEFPS_API UGameDataInstance : public UGameInstance
     GENERATED_BODY()
 
 public:
-    UPROPERTY(BlueprintReadWrite, Category = "GameData")
+    // 플레이어 선택/상태 데이터
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "PlayerData")
     int32 SelectedWeaponIndex;
 
-    UPROPERTY(BlueprintReadWrite, Category = "GameData")
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "PlayerData")
     bool bIsReadyToStart;
 
-    UFUNCTION(BlueprintCallable, Category = "GameData")
-    void Init();
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "PlayerData")
+    float PlayerXP;
 
-    UFUNCTION(BlueprintCallable, Category = "GameData")
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "PlayerData")
+    int32 PlayerLevel;
+
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "PlayerData")
+    float XPToLevelUp;
+
+public:
+    UGameDataInstance();
+
+    UFUNCTION(BlueprintCallable, Category = "PlayerData")
+    void SetSelectedOption(int32 WeaponIndex);
+
+    UFUNCTION(BlueprintCallable, Category = "PlayerData")
+    int32 GetSelectedOption() const;
+
+    UFUNCTION(BlueprintCallable, Category = "PlayerData")
     void ResetGameStatsToLevelOne();
-
-    UFUNCTION(BlueprintCallable, Category = "GameData")
-    void SetSelectedOption(int32 Index);
 };

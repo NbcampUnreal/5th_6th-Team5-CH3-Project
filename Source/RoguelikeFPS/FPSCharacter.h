@@ -2,142 +2,88 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "InputActionValue.h"
 #include "FPSCharacter.generated.h"
 
 class USpringArmComponent;
 class UCameraComponent;
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerLevelUp);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerDeath);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerStageClear);
+struct FInputActionValue;
 
 UCLASS()
 class ROGUELIKEFPS_API AFPSCharacter : public ACharacter
 {
-    GENERATED_BODY()
+	GENERATED_BODY()
 
 public:
-    AFPSCharacter();
+	AFPSCharacter();
+
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	UFUNCTION(BlueprintCallable)
+	void AddXP(float Amount);
+
+	UFUNCTION(BlueprintCallable)
+	void ApplyAugment(FName AugmentName);
 
 protected:
-    virtual void BeginPlay() override;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
+	TObjectPtr<USpringArmComponent> SpringArmComp;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
+	TObjectPtr<UCameraComponent> CameraComp;
 
-public:
-    virtual void Tick(float DeltaTime) override;
-    virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	// Status
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
+	int32 Level;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
+	int32 Health;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
+	int32 MaxHealth;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
+	int32 Attack;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
+	int32 Defence;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
+	int32 AttackSpeed;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
+	int32 MovingSpeed;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
+	int32 Stamina;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
+	int32 Experience;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
+	int32 MaxExperience;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
+	bool bIsAlive;
 
-    // ====== 스탯 ======
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
-    int32 PlayerLevel = 1;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash")
+	float DashMultifly;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Dash")
+	float DashSpeed;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash")
+	float DashTime;
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
-    float CurrentXP = 0.0f;
+	FTimerHandle DashTimerHandle;
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
-    float MaxXP = 100.0f;
+	UFUNCTION()
+	void Move(const FInputActionValue& value);
+	UFUNCTION()
+	void Look(const FInputActionValue& value);
+	UFUNCTION()
+	void StartJump(const FInputActionValue& value);
+	UFUNCTION()
+	void StopJump(const FInputActionValue& value);
+	UFUNCTION()
+	void StartDash(const FInputActionValue& value);
+	UFUNCTION()
+	void StopDash();
+	UFUNCTION()
+	void StartCrouch(const FInputActionValue& value);
+	UFUNCTION()
+	void StopCrouch(const FInputActionValue& value);
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
-    int32 Health = 100;
+	void LevelUp();
+	void OnDeath();
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
-    int32 MaxHealth = 100;
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
-    int32 Attack = 10;
-
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
-    int32 Defence = 5;
-
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
-    int32 AttackSpeed = 5;
-
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
-    int32 MovingSpeed = 600;
-
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
-    bool bIsAlive = true;
-
-    // ====== 카메라 ======
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
-    TObjectPtr<USpringArmComponent> SpringArmComp;
-
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
-    TObjectPtr<UCameraComponent> CameraComp;
-
-    // ====== 무기 ======
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapons")
-    USkeletalMeshComponent* PistolMesh;
-
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapons")
-    USkeletalMeshComponent* RifleMesh;
-
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapons")
-    USkeletalMeshComponent* ShotgunMesh;
-
-    // ====== 대시 ======
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash")
-    float DashMultiplier = 10.0f;
-
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash")
-    float DashTime = 1.0f;
-
-    float DashSpeed;
-    FTimerHandle DashTimerHandle;
-
-    // ====== 델리게이트 ======
-    UPROPERTY(BlueprintAssignable, Category = "Events")
-    FOnPlayerLevelUp OnPlayerLevelUp;
-
-    UPROPERTY(BlueprintAssignable, Category = "Events")
-    FOnPlayerDeath OnPlayerDeath;
-
-    UPROPERTY(BlueprintAssignable, Category = "Events")
-    FOnPlayerStageClear OnPlayerStageClear;
-
-    // ====== 함수 ======
-    UFUNCTION(BlueprintCallable, Category = "Stats")
-    void AddXP(float Amount);
-
-    UFUNCTION(BlueprintCallable, Category = "Stats")
-    void LevelUp();
-
-    UFUNCTION(BlueprintCallable, Category = "Stats")
-    void ApplyAugment(FName AugmentID);
-
-    UFUNCTION(BlueprintCallable, Category = "Character")
-    void HandleDeath();
-
-    UFUNCTION(BlueprintCallable, Category = "Character")
-    void HandleStageClear();
-
-    UFUNCTION(BlueprintCallable, Category = "Weapon")
-    void InitializeWeapon(FName SelectedWeaponName);
-
-    UFUNCTION()
-    void Move(const FInputActionValue& Value);
-
-    UFUNCTION()
-    void Look(const FInputActionValue& Value);
-
-    UFUNCTION()
-    void StartJump(const FInputActionValue& Value);
-
-    UFUNCTION()
-    void StopJump(const FInputActionValue& Value);
-
-    UFUNCTION()
-    void StartDash(const FInputActionValue& Value);
-
-    UFUNCTION()
-    void StopDash();
-
-    virtual float TakeDamage(
-        float DamageAmount,
-        FDamageEvent const& DamageEvent,
-        AController* EventInstigator,
-        AActor* DamageCauser
-    ) override;
-
-    void FireWeapon();
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
+		AController* EventInstigator, AActor* DamageCauser) override;
 };

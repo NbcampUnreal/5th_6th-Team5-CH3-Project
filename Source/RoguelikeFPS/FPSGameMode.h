@@ -4,24 +4,26 @@
 #include "GameFramework/GameModeBase.h"
 #include "FPSGameMode.generated.h"
 
+class APlayerController;
+class UAugmentWidget;
+
 UCLASS()
 class ROGUELIKEFPS_API AFPSGameMode : public AGameModeBase
 {
     GENERATED_BODY()
 
 public:
-    AFPSGameMode();
-    virtual void BeginPlay() override;
+    AFPSGameMode(const FObjectInitializer& ObjectInitializer);
 
-    UFUNCTION(BlueprintCallable, Category = "Level")
-    void LoadLevel(FName LevelName);
+    virtual void PostLogin(APlayerController* NewPlayer) override;
 
-    UFUNCTION()
-    void HandlePlayerLevelUp();
-
-    UFUNCTION()
-    void HandlePlayerDeath();
+    // 증강 선택 UI 클래스
+    UPROPERTY(EditDefaultsOnly, Category = "Augment")
+    TSubclassOf<UAugmentWidget> AugmentWidgetClass;
 
     UFUNCTION()
-    void HandleStageClear();
+    void HandlePlayerLevelUp(APlayerController* PlayerController);
+
+    UFUNCTION()
+    void HandlePlayerDeath(AController* KillerController);
 };
