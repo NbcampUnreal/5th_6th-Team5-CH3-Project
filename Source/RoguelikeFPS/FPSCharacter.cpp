@@ -5,7 +5,7 @@
 #include "FPSPlayerController.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
-AFPSCharacter::AFPSCharacter()
+AFPSCharacter::AFPSCharacter()		//초기 스텟 설정
 	: Level(1),
 	Health(100),
 	MaxHealth(100),
@@ -20,6 +20,8 @@ AFPSCharacter::AFPSCharacter()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
+
+	// 카메라 부착
 	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComp"));
 	SpringArmComp->SetupAttachment(RootComponent);
 	SpringArmComp->TargetArmLength = 50.0f;
@@ -29,11 +31,14 @@ AFPSCharacter::AFPSCharacter()
 	CameraComp->SetupAttachment(SpringArmComp, USpringArmComponent::SocketName);
 	CameraComp->bUsePawnControlRotation = false;
 
+	// 대시 스피드
 	GetCharacterMovement()->MaxWalkSpeed = MovingSpeed;
 	DashMultifly = 10.0f;
 	DashSpeed = MovingSpeed * DashMultifly;
-	DashTime = 1.0f;
+	DashTime = 0.5f;
 
+
+	// Crouch 활성화
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
 	GetCharacterMovement()->SetCrouchedHalfHeight(60.0f);
 }
@@ -159,4 +164,67 @@ void AFPSCharacter::AddXP(float Amount)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Gained XP: %f"), Amount);
 	// 실제 경험치시스템 여기 반영
+}
+
+void AFPSCharacter::Fire(const FInputActionValue& value)
+{
+	bIsFiring = true;
+
+	GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Red, TEXT("Fire!"));
+
+	GetWorldTimerManager().SetTimer(
+		FireCooltimeHandle,
+		this,
+		&AFPSCharacter::StopFire,
+		FireCooltime,
+		false
+	);
+}
+
+void AFPSCharacter::StopFire()
+{
+	bIsFiring = false;
+}
+void AFPSCharacter::StartFire_Auto(const FInputActionValue& value)
+{
+	GetWorldTimerManager().SetTimer(
+		FireCooltimeHandle,
+		this,
+		&AFPSCharacter::PerformFire,
+		FireCooltime,
+		true
+	);
+
+}
+void AFPSCharacter::PerformFire()
+{
+	bIsFiring = true;
+	GetWorldTimerManager().SetTimer(
+		FireCooltimeHandle,
+		this,
+		&AFPSCharacter::StopFire,
+		AutoFireTime,
+		false
+	);
+}
+void AFPSCharacter::StopFire_Auto(const FInputActionValue& value)
+{
+	GetWorldTimerManager().ClearTimer(FireCooltimeHandle);
+	bIsFiring = false;
+}
+void AFPSCharacter::Reload(const FInputActionValue& value)
+{
+	bIsReloading = true;
+	GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Red, TEXT("Reloaded!"));
+	GetWorldTimerManager().SetTimer(
+		ReloadTimeHandle,
+		this,
+		&AFPSCharacter::StopReload,
+		ReloadTime,
+		false
+	);
+}
+void AFPSCharacter::StopReload()
+{
+	bIsReloading = false;
 }

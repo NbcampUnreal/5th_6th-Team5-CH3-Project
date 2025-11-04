@@ -24,6 +24,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ApplyAugment(FName AugmentName);
 
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
 	TObjectPtr<USpringArmComponent> SpringArmComp;
@@ -61,6 +62,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash")
 	float DashTime;
 
+
 	FTimerHandle DashTimerHandle;
 
 	UFUNCTION()
@@ -79,6 +81,37 @@ protected:
 	void StartCrouch(const FInputActionValue& value);
 	UFUNCTION()
 	void StopCrouch(const FInputActionValue& value);
+
+	UFUNCTION()
+	void Fire(const FInputActionValue& value);
+	UFUNCTION()
+	void StopFire();
+	UFUNCTION()
+	void StartFire_Auto(const FInputActionValue& value);
+	UFUNCTION()
+	void StopFire_Auto(const FInputActionValue& value);
+
+	UFUNCTION()
+	void Reload(const FInputActionValue& value);
+	void StopReload();
+	
+	// 총 발사 변수
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fire")
+	bool bIsFiring;
+	FTimerHandle FireCooltimeHandle;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Fire")
+	float FireCooltime;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Fire")
+	float AutoFireTime;
+	void PerformFire();
+
+	// 장전 변수
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fire")
+	bool bIsReloading;
+	FTimerHandle ReloadTimeHandle;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Fire")
+	float ReloadTime;
+
 
 	void LevelUp();
 	void OnDeath();
