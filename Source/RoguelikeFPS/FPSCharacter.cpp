@@ -5,21 +5,21 @@
 #include "FPSPlayerController.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
-AFPSCharacter::AFPSCharacter()
-	// 초기 스탯 설정
+AFPSCharacter::AFPSCharacter()		//초기 스텟 설정
 	: Level(1),
-Health(100),
-MaxHealth(100),
-Attack(10),
-Defence(10),
-AttackSpeed(5),
-MovingSpeed(600),
-Stamina(500),
-Experience(0),
-MaxExperience(100),
-bIsAlive(true)
+	Health(100),
+	MaxHealth(100),
+	Attack(10),
+	Defence(10),
+	AttackSpeed(5),
+	MovingSpeed(600),
+	Stamina(500),
+	Experience(0),
+	MaxExperience(100),
+	bIsAlive(true)
 {
 	PrimaryActorTick.bCanEverTick = false;
+
 
 	// 카메라 부착
 	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComp"));
@@ -37,9 +37,10 @@ bIsAlive(true)
 	DashSpeed = MovingSpeed * DashMultifly;
 	DashTime = 0.5f;
 
+
 	// Crouch 활성화
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
-	GetCharacterMovement()->CrouchedHalfHeight = 60.0f;
+	GetCharacterMovement()->SetCrouchedHalfHeight(60.0f);
 
 	// FireCooltime
 	FireCooltime = 2.0f;
@@ -303,9 +304,6 @@ void AFPSCharacter::StopReload()
 
 
 
-
-
-// 레벨업 함수
 void AFPSCharacter::LevelUp()
 {
 	if (Experience == MaxExperience)
@@ -318,33 +316,30 @@ void AFPSCharacter::LevelUp()
 	}
 }
 
-
-// 사망 함수
 void AFPSCharacter::OnDeath()
 {
-	if (Health <= 0)
-	{
-		bIsAlive = false;
-		// 사망 시 게임 오버 레벨 호출
-	}
+	if (Health <= 0) bIsAlive = false;
 }
 
-// 피격 함수
-float AFPSCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, TObjectPtr<AController> EventInstigator, TObjectPtr<AActor> DamageCauser)
+float AFPSCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
+	AController* EventInstigator, AActor* DamageCauser)
 {
-	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser) - Defence;  // 실제데미지 = 데미지 - 방어력
-	
+	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser) - Defence;
 	if (ActualDamage > 0)
 	{
-		// 체력 감소
 		Health -= ActualDamage;
-
-		if (Health <= 0)
-		{
-			OnDeath();
-		}
+		if (Health <= 0.f) OnDeath();
 	}
-
 	return ActualDamage;
 }
 
+void AFPSCharacter::ApplyAugment(FName AugmentName)
+{
+	UE_LOG(LogTemp, Warning, TEXT("ApplyAugment called with: %s"), *AugmentName.ToString());
+	// 강화 효과 적용 로직 (예: 스탯 증가, 능력 부여 등)
+}
+void AFPSCharacter::AddXP(float Amount)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Gained XP: %f"), Amount);
+	// 실제 경험치시스템 여기 반영
+}

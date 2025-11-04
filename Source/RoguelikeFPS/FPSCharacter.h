@@ -18,6 +18,13 @@ public:
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	UFUNCTION(BlueprintCallable)
+	void AddXP(float Amount);
+
+	UFUNCTION(BlueprintCallable)
+	void ApplyAugment(FName AugmentName);
+
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
 	TObjectPtr<USpringArmComponent> SpringArmComp;
@@ -45,10 +52,8 @@ protected:
 	int32 Experience;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
 	int32 MaxExperience;
-	// 캐릭터 생존여부
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
 	bool bIsAlive;
-
 
 	// 대시
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash")
@@ -63,7 +68,6 @@ protected:
 	bool bIsDashing2;
 
 
-	// 대시 타이머 핸들러
 	FTimerHandle DashTimerHandle;
 
 	// 총 발사 변수
@@ -112,19 +116,13 @@ protected:
 	UFUNCTION()
 	void Reload(const FInputActionValue& value);
 	void StopReload();
+	
 
-	// 레벨업
+
 	void LevelUp();
-
-	// 사망
 	void OnDeath();
 
-	// 피격 함수
-	virtual float TakeDamage(
-		float DamageAmount,
-		FDamageEvent const& DamageEvent,
-		TObjectPtr<AController> EventInstigator,
-		TObjectPtr<AActor> DamageCauser);
 
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
+		AController* EventInstigator, AActor* DamageCauser) override;
 };
-
