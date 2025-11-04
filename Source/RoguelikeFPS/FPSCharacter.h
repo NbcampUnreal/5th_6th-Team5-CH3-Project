@@ -50,19 +50,38 @@ protected:
 	bool bIsAlive;
 
 
-	// 대시 속도
+	// 대시
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash")
 	float DashMultifly;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Dash")
 	float DashSpeed;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash")
 	float DashTime;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash")
 	bool bIsDashing;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dash")
+	bool bIsDashing2;
 
 
 	// 대시 타이머 핸들러
 	FTimerHandle DashTimerHandle;
 
+	// 총 발사 변수
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fire")
+	bool bIsFiring;
+	FTimerHandle FireCooltimeHandle;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Fire")
+	float FireCooltime;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Fire")
+	float AutoFireTime;
+	void PerformFire();
+
+	// 장전 변수
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fire")
+	bool bIsReloading;
+	FTimerHandle ReloadTimeHandle;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Fire")
+	float ReloadTime;
 
 	// Action Value
 
@@ -82,6 +101,17 @@ protected:
 	void StartCrouch(const FInputActionValue& value);
 	UFUNCTION()
 	void StopCrouch(const FInputActionValue& value);
+	UFUNCTION()
+	void Fire(const FInputActionValue& value);
+	UFUNCTION()
+	void StopFire();
+	UFUNCTION()
+	void StartFire_Auto(const FInputActionValue& value);
+	UFUNCTION()
+	void StopFire_Auto(const FInputActionValue& value);
+	UFUNCTION()
+	void Reload(const FInputActionValue& value);
+	void StopReload();
 
 	// 레벨업
 	void LevelUp();

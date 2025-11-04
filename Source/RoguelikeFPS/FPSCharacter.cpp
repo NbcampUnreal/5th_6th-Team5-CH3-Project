@@ -33,20 +33,26 @@ bIsAlive(true)
 
 	// 대시 스피드
 	GetCharacterMovement()->MaxWalkSpeed = MovingSpeed;
-	DashMultifly = 10.0f;
+	DashMultifly = 2.0f;
 	DashSpeed = MovingSpeed * DashMultifly;
-	DashTime = 1.0f;
+	DashTime = 0.5f;
 
 	// Crouch 활성화
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
 	GetCharacterMovement()->CrouchedHalfHeight = 60.0f;
-}
 
+	// FireCooltime
+	FireCooltime = 2.0f;
+	AutoFireTime = 1.0f;
+
+	// Reload
+	ReloadTime = 1.5f;
+}
 
 void AFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-	
+
 	if (TObjectPtr<UEnhancedInputComponent> EnhancedInput = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		if (TObjectPtr<AFPSPlayerController> PlayerController = Cast<AFPSPlayerController>(GetController()))
@@ -116,13 +122,45 @@ void AFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 			}
 
+			if (PlayerController->Weapon_FireAction)
+			{
+				EnhancedInput->BindAction(
+					PlayerController->Weapon_FireAction,
+					ETriggerEvent::Triggered,
+					this,
+					&AFPSCharacter::Fire
+				);
+			}
 
+			if (PlayerController->Weapon_Fire_AutoAction)
+			{
+				EnhancedInput->BindAction(
+					PlayerController->Weapon_Fire_AutoAction,
+					ETriggerEvent::Started,
+					this,
+					&AFPSCharacter::StartFire_Auto
+				);
+
+				EnhancedInput->BindAction(
+					PlayerController->Weapon_Fire_AutoAction,
+					ETriggerEvent::Completed,
+					this,
+					&AFPSCharacter::StopFire_Auto
+				);
+			}
+
+			if (PlayerController->Weapon_ReloadAction)
+			{
+				EnhancedInput->BindAction(
+					PlayerController->Weapon_ReloadAction,
+					ETriggerEvent::Triggered,
+					this,
+					&AFPSCharacter::Reload
+				);
+			}
 		}
 	}
-
 }
-
-
 
 
 void AFPSCharacter::Move(const FInputActionValue& value)
@@ -140,7 +178,7 @@ void AFPSCharacter::Move(const FInputActionValue& value)
 	{
 		AddMovementInput(GetActorRightVector(), MoveInput.Y);
 	}
-	
+
 }
 void AFPSCharacter::Look(const FInputActionValue& value)
 {
@@ -166,14 +204,17 @@ void AFPSCharacter::StopJump(const FInputActionValue& value)
 }
 void AFPSCharacter::StartDash(const FInputActionValue& value)
 {
-	GetCharacterMovement()->MaxWalkSpeed = DashSpeed;
-
+	if (bIsDashing == true)
+	{
+		bIsDashing2 = true;
+	}
 	if (GetWorldTimerManager().IsTimerActive(DashTimerHandle))
 	{
 		GetWorldTimerManager().ClearTimer(DashTimerHandle);
 	}
 
-	// 몇 초 후에 StopDash 함수 호출
+	GetCharacterMovement()->MaxWalkSpeed = DashSpeed;
+
 	GetWorldTimerManager().SetTimer(
 		DashTimerHandle,
 		this,
@@ -181,28 +222,87 @@ void AFPSCharacter::StartDash(const FInputActionValue& value)
 		DashTime,
 		false
 	);
-}
 
+	bIsDashing = true;
+}
 void AFPSCharacter::StopDash()
 {
 	GetCharacterMovement()->MaxWalkSpeed = MovingSpeed;
+	bIsDashing = false;
+	bIsDashing2 = false;
 }
-
-
-
 void AFPSCharacter::StartCrouch(const FInputActionValue& value)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Crouch Pressed"));
 	Crouch();
 }
-
 void AFPSCharacter::StopCrouch(const FInputActionValue& value)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Crouch Stop"));
 	UnCrouch();
 }
+void AFPSCharacter::Fire(const FInputActionValue& value)
+{
+	bIsFiring = true;
 
-////
+	GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Red, TEXT("Fire!"));
+
+	GetWorldTimerManager().SetTimer(
+		FireCooltimeHandle,
+		this,
+		&AFPSCharacter::StopFire,
+		FireCooltime,
+		false
+	);
+}
+void AFPSCharacter::StopFire()
+{
+	bIsFiring = false;
+}
+void AFPSCharacter::StartFire_Auto(const FInputActionValue& value)
+{
+	GetWorldTimerManager().SetTimer(
+		FireCooltimeHandle,
+		this,
+		&AFPSCharacter::PerformFire,
+		FireCooltime,
+		true
+	);
+
+}
+void AFPSCharacter::PerformFire()
+{
+	bIsFiring = true;
+	GetWorldTimerManager().SetTimer(
+		FireCooltimeHandle,
+		this,
+		&AFPSCharacter::StopFire,
+		AutoFireTime,
+		false
+	);
+}
+void AFPSCharacter::StopFire_Auto(const FInputActionValue& value)
+{
+	GetWorldTimerManager().ClearTimer(FireCooltimeHandle);
+	bIsFiring = false;
+}
+void AFPSCharacter::Reload(const FInputActionValue& value)
+{
+	bIsReloading = true;
+	GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Red, TEXT("Reloaded!"));
+	GetWorldTimerManager().SetTimer(
+		ReloadTimeHandle,
+		this,
+		&AFPSCharacter::StopReload,
+		ReloadTime,
+		false
+	);
+}
+void AFPSCharacter::StopReload()
+{
+	bIsReloading = false;
+}
+
+
+
 
 
 // 레벨업 함수
