@@ -57,6 +57,7 @@ protected:
 	float DashSpeed;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash")
 	float DashTime;
+	bool bIsDashing;
 
 
 	// 대시 타이머 핸들러
