@@ -4,6 +4,7 @@
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 #include "Components/Border.h"
+#include "Components/Image.h"
 #include "Inventory.h"
 #include "InventoryWidget.h"
 
@@ -28,6 +29,17 @@ void UShopItemWidget::SetItemData(UItemBase* InItem)
     {
         ItemNameText->SetText(FText::FromName(ItemData->ItemName));
     }
+    if (PriceText && ItemData)
+    {
+        PriceText->SetText(FText::AsNumber(ItemData->BuyPrice));
+    }
+    if (ItemImage && ItemData)
+    {
+        ItemImage->SetBrushFromTexture(ItemData->Thumbnail);
+    }
+    UE_LOG(LogTemp, Warning, TEXT("SetItemData: %s | Thumbnail: %s"),
+        *ItemData->ItemName.ToString(),
+        ItemData->Thumbnail ? *ItemData->Thumbnail->GetName() : TEXT("NULL"));
 }
 
 void UShopItemWidget::OnBuyClicked()

@@ -53,6 +53,7 @@ void AShop::LoadItemsFromDataTable()
             NewItem->Amount = Row->Amount;
             NewItem->BuyPrice = Row->BuyPrice;
             NewItem->SellPrice = Row->SellPrice;
+            NewItem->Thumbnail = Row->Thumbnail;
             ShopItems.Add(NewItem);
         }
     }

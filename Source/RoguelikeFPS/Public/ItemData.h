@@ -36,4 +36,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
 	FString ItemType;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
+	UTexture2D* Thumbnail;
+
+
 };
