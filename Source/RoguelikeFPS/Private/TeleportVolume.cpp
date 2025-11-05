@@ -1,20 +1,18 @@
 #include "TeleportVolume.h"
 #include "Components/BoxComponent.h"
-#include "GameFramework/Character.h" // ACharacter 사용을 위해 필요
-#include "Kismet/GameplayStatics.h" // 레벨 전환을 위해 필요
-#include "Kismet/KismetSystemLibrary.h" // 디버그 로그를 위해 필요
+#include "Kismet/GameplayStatics.h"
+#include "TimerManager.h"
+#include "FPSCharacter.h"
+#include "Engine/World.h"
+#include "Engine/Engine.h"
 
 ATeleportVolume::ATeleportVolume()
 {
-    PrimaryActorTick.bCanEverTick = false; // 매 프레임 틱 불필요
+    TeleportTrigger = CreateDefaultSubobject<UBoxComponent>(TEXT("TeleportTrigger"));
+    RootComponent = TeleportTrigger;
 
-    // 1. BoxComponent 생성 및 루트 설정
-    OverlapVolume = CreateDefaultSubobject<UBoxComponent>(TEXT("OverlapVolume"));
-    RootComponent = OverlapVolume;
-
-    // 2. 오버랩 이벤트 바인딩 설정
-    // 이 BoxComponent의 Begin Overlap 이벤트를 OnOverlapBegin 함수와 연결
-    OverlapVolume->OnComponentBeginOverlap.AddDynamic(this, &ATeleportVolume::OnOverlapBegin);
+    TeleportTrigger->SetCollisionProfileName(TEXT("Trigger"));
+    TeleportTrigger->OnComponentBeginOverlap.AddDynamic(this, &ATeleportVolume::OnOverlapBegin);
 }
 
 void ATeleportVolume::BeginPlay()
@@ -22,24 +20,46 @@ void ATeleportVolume::BeginPlay()
     Super::BeginPlay();
 }
 
-void ATeleportVolume::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void ATeleportVolume::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+    UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
+    bool bFromSweep, const FHitResult& SweepResult)
 {
-    // 1. 오버랩한 액터가 플레이어인지 확인 (캐릭터 클래스 확인)
-    ACharacter* PlayerCharacter = Cast<ACharacter>(OtherActor);
-    if (!PlayerCharacter) return; // 플레이어 캐릭터가 아니면 리턴
+    if (!OtherActor) return;
 
-    // 2. 플레이어 캐릭터가 맞다면 레벨 전환 로직 실행
-    if (!DestinationLevelName.IsNone())
+    if (OtherActor->IsA<AFPSCharacter>())
     {
-        // 디버그 로그
-        UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Teleporting Player to: %s"), *DestinationLevelName.ToString()), true, true, FColor::Cyan, 5.0f);
-
-        // 레벨 전환 실행
-        // ClientTravel을 사용하여 멀티플레이 환경에서도 안전한 전환
-        APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-        if (PlayerController)
+        // 기존 타이머가 있으면 클리어
+        if (GetWorldTimerManager().IsTimerActive(TeleportTimerHandle))
         {
-            PlayerController->ClientTravel(DestinationLevelName.ToString(), ETravelType::TRAVEL_Absolute);
+            GetWorldTimerManager().ClearTimer(TeleportTimerHandle);
+        }
+
+        PendingTeleportActor = OtherActor;
+
+        // 타이머 등록 ? TeleportPendingActor 를 호출
+        GetWorldTimerManager().SetTimer(TeleportTimerHandle, this, &ATeleportVolume::TeleportPendingActor, DelayBeforeTeleport, false);
+
+        // (선택) 디버그 로그/카운트다운 UI 트리거 가능
+        if (GEngine)
+        {
+            GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, TEXT("Teleport countdown started"));
         }
     }
+}
+
+void ATeleportVolume::TeleportPendingActor()
+{
+    AActor* ActorToTeleport = PendingTeleportActor.Get();
+    if (!ActorToTeleport) return;
+
+    if (GEngine)
+    {
+        GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, FString::Printf(TEXT("Teleporting to level: %s"), *NextLevelName.ToString()));
+    }
+
+    // 컨트롤러가 있다면 그 컨텍스트로 열고 아니라면 World로 열기
+    UWorld* World = GetWorld();
+    if (!World) return;
+
+    UGameplayStatics::OpenLevel(World, NextLevelName);
 }

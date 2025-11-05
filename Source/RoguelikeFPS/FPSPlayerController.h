@@ -6,6 +6,7 @@
 
 class UInputMappingContext;
 class UInputAction;
+//class UTitleWidget;	//타이틀 테스트
 
 UCLASS()
 class ROGUELIKEFPS_API AFPSPlayerController : public APlayerController
@@ -33,6 +34,9 @@ public:
 	TObjectPtr<UInputAction> Weapon_Fire_AutoAction;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	TObjectPtr<UInputAction> Weapon_ReloadAction;
+
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")	//Title 테스트
+	//TSubclassOf<UTitleWidget> TitleWidgetClass;
 
 protected:
 	virtual void BeginPlay() override;

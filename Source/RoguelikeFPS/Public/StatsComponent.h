@@ -1,114 +1,151 @@
-// StatsComponent.h
-
-#pragma once
-
-#include "CoreMinimal.h"
-#include "Components/ActorComponent.h"
-#include "StatsComponent.generated.h"
-
-// 델리게이트: 레벨업 이벤트 발생 시 GameMode에게 알리기 위해 사용
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLevelUp, APlayerController*, PlayerController);
-// 체력 변경 알림 델리게이트
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHealthChanged, int32, NewHealth, int32, MaxHealth);
-
-
-UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
-class ROGUELIKEFPS_API UStatsComponent : public UActorComponent
-{
-	GENERATED_BODY()
-
-public:
-	UStatsComponent();
-
-protected:
-	virtual void BeginPlay() override;
-
-protected:
-	// Core Stats (Health & Movement)
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats|Core")
-	int32 CurrentHealth = 100;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stats|Core")
-	int32 MaxHealth = 100;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stats|Core")
-	float BaseMovementSpeed = 600.0f; // 캐릭터 이동속도 관리용
-
-	// Combat Stats (Attack & Defense)
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stats|Combat")
-	float AttackDamage = 10.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stats|Combat")
-	float DefenseValue = 5.0f; // 데미지 감소량
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stats|Combat")
-	float CritChance = 0.05f; // 치명타 확률 (5%)
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stats|Combat")
-	float CritDamageMultiplier = 1.5f; // 치명타 대미지 배율 (150%)
-
-
-	// Experience Stats
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats|Experience")
-	float CurrentXP = 0.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stats|Experience")
-	float XPToNextLevel = 100.0f;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats|Experience")
-	int32 CurrentLevel = 1;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats|Experience")
-	int32 StatPointsAvailable = 0; // 선택 가능한 증강 횟수 <- 한번에 2레벨 이상 업 했을 경우 1번만 뜨는 것을 방지하기 위해
-
-public:
-	// 델리게이트
-	UPROPERTY(BlueprintAssignable, Category = "Events")
-	FOnLevelUp OnLevelUp;
-
-	UPROPERTY(BlueprintAssignable, Category = "Events")
-	FOnHealthChanged OnHealthChanged;
-
-	// BlueprintPure (Getter) 함수
-	UFUNCTION(BlueprintPure, Category = "Stats|Core")
-	int32 GetCurrentHealth() const { return CurrentHealth; }
-
-	UFUNCTION(BlueprintPure, Category = "Stats|Core")
-	float GetMovementSpeed() const { return BaseMovementSpeed; }
-
-	UFUNCTION(BlueprintPure, Category = "Stats|Core")
-	float GetDefenseValue() const { return DefenseValue; }
-
-	UFUNCTION(BlueprintPure, Category = "Stats|Core")
-	int32 GetLevel() const { return CurrentLevel; }
-
-	UFUNCTION(BlueprintPure, Category = "Stats|Experience")
-	float GetCurrentXP() const { return CurrentXP; }
-
-	UFUNCTION(BlueprintPure, Category = "Stats|Experience")
-	float GetXPToNextLevel() const { return XPToNextLevel; }
-
-	UFUNCTION(BlueprintPure, Category = "Stats|Core")
-	int32 GetMaxHealth() const { return MaxHealth; }
-
-	// 핵심 로직 함수
-	UFUNCTION(BlueprintCallable, Category = "Combat")
-	float CalculateFinalDamage(float BaseDamage, bool& bWasCriticalHit);
-
-	UFUNCTION(BlueprintCallable, Category = "Combat")
-	float ApplyDamage(float DamageToApply);
-
-	UFUNCTION(BlueprintCallable, Category = "Combat")
-	void Heal(int32 HealAmount);
-
-	// Experience Functions
-	UFUNCTION(BlueprintCallable, Category = "Stats")
-	void AddXP(float Amount);
-
-	UFUNCTION(BlueprintCallable, Category = "Stats")
-	void ApplyAugment(int32 AugmentIndex); // 증강을 적용하는 함수 (UI에서 호출)
-
-private:
-	void TryLevelUp();
-	void ClampHealth();
-};
+//#pragma once
+//
+//#include "CoreMinimal.h"
+//#include "GameFramework/Character.h"
+//#include "FPSCharacter.generated.h"
+//
+//class USpringArmComponent;
+//class UCameraComponent;
+//struct FInputActionValue;
+//
+//UCLASS()
+//class ROGUELIKEFPS_API AFPSCharacter : public ACharacter
+//{
+//    GENERATED_BODY()
+//
+//public:
+//    AFPSCharacter();
+//
+//protected:
+//    virtual void BeginPlay() override;
+//
+//public:
+//    virtual void Tick(float DeltaTime) override;
+//    virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+//
+//    //  UStatsComponent 멤버들이 캐릭터 스탯으로 통합됨 
+//    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
+//    int PlayerLevel = 1;
+//
+//    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
+//    float CurrentXP = 0.0f;
+//
+//    // 이전 코드에 있던 Status 변수들
+//    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
+//    int32 Health = 100;
+//    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
+//    int32 MaxHealth = 100;
+//    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
+//    int32 Attack = 10;
+//    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
+//    int32 Defence = 10;
+//    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
+//    int32 AttackSpeed = 5;
+//    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
+//    int32 MovingSpeed = 600;
+//    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
+//    int32 Stamina = 500;
+//    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
+//    int32 Experience = 0;
+//    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
+//    int32 MaxExperience = 100;
+//    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
+//    bool bIsAlive = true;
+//
+//    //  Combat State 변수들 (이전 오류 해결을 위해 추가됨) 
+//    UPROPERTY(BlueprintReadWrite, Category = "CombatState")
+//    bool bIsFiring = false;
+//
+//    UPROPERTY(BlueprintReadWrite, Category = "CombatState")
+//    float FireCooltime = 0.5f;
+//
+//    UPROPERTY(BlueprintReadWrite, Category = "CombatState")
+//    bool bIsDashing2 = false;
+//
+//    UPROPERTY(BlueprintReadWrite, Category = "CombatState")
+//    bool bIsDashing = false;
+//
+//    UPROPERTY(BlueprintReadWrite, Category = "CombatState")
+//    bool bIsReloading = false;
+//
+//    //  Dash 관련 변수들 
+//    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash")
+//    float DashMultifly = 10.0f;
+//    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Dash")
+//    float DashSpeed;
+//    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash")
+//    float DashTime = 1.0f;
+//    FTimerHandle DashTimerHandle;
+//
+//    //  카메라 컴포넌트 (이전 코드에 있던 것으로 가정하고 추가) 
+//    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
+//    TObjectPtr<USpringArmComponent> SpringArmComp;
+//    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
+//    TObjectPtr<UCameraComponent> CameraComp;
+//
+//    //  Weapon Meshes 
+//    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapons")
+//    USkeletalMeshComponent* PistolMesh;
+//
+//    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapons")
+//    USkeletalMeshComponent* RifleMesh;
+//
+//    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapons")
+//    USkeletalMeshComponent* ShotgunMesh;
+//
+//
+//    // --- 함수 ---
+//    void StartFire();
+//    void StopFire();
+//    void FireWeapon();
+//
+//    UFUNCTION(BlueprintCallable, Category = "Weapon")
+//    void InitializeWeapon(FName SelectedWeaponName);
+//
+//    UFUNCTION()
+//    void Move(const FInputActionValue& value);
+//    UFUNCTION()
+//    void Look(const FInputActionValue& value);
+//    UFUNCTION()
+//    void StartJump(const FInputActionValue& value);
+//    UFUNCTION()
+//    void StopJump(const FInputActionValue& value);
+//    UFUNCTION()
+//    void StartDash(const FInputActionValue& value);
+//    UFUNCTION()
+//    void StopDash();
+//    UFUNCTION()
+//    void StartCrouch(const FInputActionValue& value);
+//    UFUNCTION()
+//    void StopCrouch(const FInputActionValue& value);
+//
+//    //  UStatsComponent에서 통합된 함수 
+//    UFUNCTION()
+//    void LevelUp();
+//
+//    UFUNCTION()
+//    void OnDeath();
+//
+//    UFUNCTION(BlueprintCallable, Category = "Stats")
+//    void LevelUpWithOptions(); // 레벨업 증강 선택 트리거 함수
+//
+//    UFUNCTION()
+//    void HandleDeath(); // 사망 이벤트 처리
+//
+//    UFUNCTION()
+//    void HandleStageClear(); // 스테이지 클리어 이벤트 처리
+//
+//    UFUNCTION()
+//    void AddXP(float AmountToAdd); // 경험치 획득
+//
+//    UFUNCTION(BlueprintCallable, Category = "Stats")
+//    void ApplyAugment(FName AugmentID); // 증강 적용
+//
+//    // 피격 함수 (ACharacter 오버라이드)
+//    virtual float TakeDamage(
+//        float DamageAmount,
+//        FDamageEvent const& DamageEvent,
+//        TObjectPtr<AController> EventInstigator,
+//        TObjectPtr<AActor> DamageCauser);
+//
+//};

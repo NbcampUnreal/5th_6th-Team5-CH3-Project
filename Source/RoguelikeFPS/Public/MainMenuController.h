@@ -4,38 +4,48 @@
 #include "GameFramework/PlayerController.h"
 #include "MainMenuController.generated.h"
 
+// 전방 선언 (헤더 경량화)
 class UTitleWidget;
 class UMainMenuWidget;
-class UUserWidget;
 
+/**
+ * 메인 메뉴 전용 PlayerController
+ * - 타이틀 화면 → 무기 선택 메뉴 전환 관리
+ * - UI 입력 모드 및 포커스 관리
+ */
 UCLASS()
 class ROGUELIKEFPS_API AMainMenuController : public APlayerController
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 public:
-	virtual void BeginPlay() override;
+    AMainMenuController() = default;
 
-	// 에디터에서 MainMenuWidget 블루프린트를 할당받을 변수
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widgets")
-	TSubclassOf<UTitleWidget> TitleWidgetClass;
+protected:
+    virtual void BeginPlay() override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widgets")
-	TSubclassOf<UMainMenuWidget> MainMenuWidgetClass;
+    // 타이틀 화면 위젯 클래스
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
+    TSubclassOf<UTitleWidget> TitleWidgetClass;
 
-private:
-	// 생성된 위젯 인스턴스를 저장
-	UPROPERTY()
-	TObjectPtr<UTitleWidget> TitleWidgetInstance;
+    // 메인 메뉴(무기 선택) 위젯 클래스
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
+    TSubclassOf<UMainMenuWidget> MainMenuWidgetClass;
 
-	UPROPERTY()
-	TObjectPtr<UMainMenuWidget> MainMenuWidgetInstance;
+    // 현재 활성화된 타이틀 위젯 인스턴스
+    UPROPERTY()
+    TObjectPtr<UTitleWidget> TitleWidgetInstance;
 
-	UFUNCTION()
-	void ShowWeaponSelectMenu();
+    // 현재 활성화된 메인 메뉴 위젯 인스턴스
+    UPROPERTY()
+    TObjectPtr<UMainMenuWidget> MainMenuWidgetInstance;
 
-	UFUNCTION()
-	void ShowTitleScreen();
+public:
+    //타이틀 화면을 표시
+    UFUNCTION()
+    void ShowTitleScreen();
 
-
+    // 무기 선택 화면을 표시
+    UFUNCTION()
+    void ShowWeaponSelectMenu();
 };

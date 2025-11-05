@@ -1,18 +1,15 @@
-// FPSCharacter.h (최종 수정)
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "FPSCharacter.generated.h"
 
-// StatsComponent 및 델리게이트 정의
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerDeath, AController*, KillerController);
-
 class USpringArmComponent;
 class UCameraComponent;
-class UStatsComponent;
-class UUserWidget;
+struct FInputActionValue;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLevelUpSignature, APlayerController*, PlayerController);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerDeathSignature, AController*, KillerController);
 
 UCLASS()
 class ROGUELIKEFPS_API AFPSCharacter : public ACharacter
@@ -22,80 +19,118 @@ class ROGUELIKEFPS_API AFPSCharacter : public ACharacter
 public:
 	AFPSCharacter();
 
-	// StatsComponent 포인터
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UStatsComponent> StatsComp;
-
-	// UI/델리게이트
-	UPROPERTY(EditAnywhere, Category = "UI")
-	TSubclassOf<UUserWidget> MiniHUDClass;
-
-	UPROPERTY(EditDefaultsOnly, Category = "UI")
-	TSubclassOf<UUserWidget> DeathWidgetClass;
-
-	UPROPERTY(BlueprintAssignable, Category = "Events")
-	FOnPlayerDeath OnPlayerDeath;
-
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-protected:
-	virtual void BeginPlay() override;
+	UFUNCTION(BlueprintCallable)
+	void AddXP(float Amount);
 
-	// 컴포넌트
+	UFUNCTION(BlueprintCallable)
+	void ApplyAugment(FName AugmentName);
+
+	// ===== 레벨업 델리게이트 =====
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnLevelUpSignature OnLevelUp;
+
+	// ===== 사망 델리게이트 =====
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnPlayerDeathSignature OnPlayerDeath;
+
+protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
 	TObjectPtr<USpringArmComponent> SpringArmComp;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
 	TObjectPtr<UCameraComponent> CameraComp;
 
-	// 캐릭터 생존여부
+	// Status
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
-	bool bIsAlive = true;
+	int32 Level;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
+	int32 Health;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
+	int32 MaxHealth;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
+	int32 Attack;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
+	int32 Defence;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
+	int32 AttackSpeed;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
+	int32 MovingSpeed;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
+	int32 Stamina;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
+	int32 Experience;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
+	int32 MaxExperience;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
+	bool bIsAlive;
 
-	// Dash 관련 변수
+	// 대시
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash")
-	float DashMultifly = 10.0f; // 기본값 설정
-
+	float DashMultifly;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Dash")
+	float DashSpeed;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash")
-	float DashTime = 1.0f; // 기본값 설정
-
-	FTimerHandle DashTimerHandle; // 타이머 핸들러
-
-
-	// 액션 함수들 (Traditional Input)
-	UFUNCTION(BlueprintCallable, Category = "Input")
-	void MoveForward(float AxisValue);
-
-	// 나머지 Input 함수
-	UFUNCTION(BlueprintCallable, Category = "Input")
-	void MoveRight(float AxisValue);
-	UFUNCTION(BlueprintCallable, Category = "Input")
-	void LookYaw(float AxisValue);
-	UFUNCTION(BlueprintCallable, Category = "Input")
-	void LookPitch(float AxisValue);
-
-	UFUNCTION(BlueprintCallable, Category = "Input")
-	void StartJump();
-	UFUNCTION(BlueprintCallable, Category = "Input")
-	void StopJump();
-	UFUNCTION(BlueprintCallable, Category = "Input")
-	void StartDash();
-	UFUNCTION() // 타이머에서 호출되므로 UFUNCTION 유지
-		void StopDash();
-	UFUNCTION(BlueprintCallable, Category = "Input")
-	void StartCrouch();
-	UFUNCTION(BlueprintCallable, Category = "Input")
-	void StopCrouch();
+	float DashTime;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash")
+	bool bIsDashing;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dash")
+	bool bIsDashing2;
 
 
+	FTimerHandle DashTimerHandle;
 
-	// 사망
+	// 총 발사 변수
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fire")
+	bool bIsFiring;
+	FTimerHandle FireCooltimeHandle;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Fire")
+	float FireCooltime;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Fire")
+	float AutoFireTime;
+	void PerformFire();
+
+	// 장전 변수
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fire")
+	bool bIsReloading;
+	FTimerHandle ReloadTimeHandle;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Fire")
+	float ReloadTime;
+
+	// Action Value
+
+	UFUNCTION()
+	void Move(const FInputActionValue& value);
+	UFUNCTION()
+	void Look(const FInputActionValue& value);
+	UFUNCTION()
+	void StartJump(const FInputActionValue& value);
+	UFUNCTION()
+	void StopJump(const FInputActionValue& value);
+	UFUNCTION()
+	void StartDash(const FInputActionValue& value);
+	UFUNCTION()
+	void StopDash();
+	UFUNCTION()
+	void StartCrouch(const FInputActionValue& value);
+	UFUNCTION()
+	void StopCrouch(const FInputActionValue& value);
+	UFUNCTION()
+	void Fire(const FInputActionValue& value);
+	UFUNCTION()
+	void StopFire();
+	UFUNCTION()
+	void StartFire_Auto(const FInputActionValue& value);
+	UFUNCTION()
+	void StopFire_Auto(const FInputActionValue& value);
+	UFUNCTION()
+	void Reload(const FInputActionValue& value);
+	void StopReload();
+
+	void LevelUp();
 	void OnDeath(AController* KillerController);
 
-	// 피격 함수 (StatsComp에 위임)
-	virtual float TakeDamage(
-		float DamageAmount,
-		FDamageEvent const& DamageEvent,
-		AController* EventInstigator,
-		AActor* DamageCauser) override;
 
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
+		AController* EventInstigator, AActor* DamageCauser) override;
 };

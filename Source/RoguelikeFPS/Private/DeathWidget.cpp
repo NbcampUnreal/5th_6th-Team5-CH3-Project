@@ -11,7 +11,6 @@ bool UDeathWidget::Initialize()
         return false;
     }
 
-    // 버튼 이벤트 바인딩
     if (RestartButton)
     {
         RestartButton->OnClicked.AddDynamic(this, &UDeathWidget::OnRestartClicked);
@@ -22,38 +21,50 @@ bool UDeathWidget::Initialize()
         ExitButton->OnClicked.AddDynamic(this, &UDeathWidget::OnExitClicked);
     }
 
-    // OwningController는 AFPSCharacter의 OnDeath에서 설정된다고 가정합니다.
-
     return true;
 }
 
 void UDeathWidget::OnRestartClicked()
 {
-    if (!OwningController) return;
+    UWorld* World = GetWorld();
+    if (!World) return;
 
-    // 1. GameInstance를 가져와 스탯 초기화 (Level 1로 초기화)
-    UGameDataInstance* GameInstance = Cast<UGameDataInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+    UGameDataInstance* GameInstance = Cast<UGameDataInstance>(UGameplayStatics::GetGameInstance(World));
     if (GameInstance)
     {
         GameInstance->ResetGameStatsToLevelOne();
     }
 
-    // 2. 현재 레벨을 다시 로드 (다시하기)
-    FString CurrentLevelName = UGameplayStatics::GetCurrentLevelName(GetWorld());
-    UGameplayStatics::OpenLevel(OwningController, FName(*CurrentLevelName));
+    FString CurrentLevelName = UGameplayStatics::GetCurrentLevelName(World, true);
+    // OwningController가 유효하면 그 컨텍스트로, 아니면 World로 열기
+    if (OwningController)
+    {
+        UGameplayStatics::OpenLevel(OwningController, FName(*CurrentLevelName));
+    }
+    else
+    {
+        UGameplayStatics::OpenLevel(World, FName(*CurrentLevelName));
+    }
 }
 
 void UDeathWidget::OnExitClicked()
 {
-    if (!OwningController) return;
+    UWorld* World = GetWorld();
+    if (!World) return;
 
-    // 1. GameInstance를 가져와 스탯 초기화 (메인 메뉴로 나가기 전에도 초기화)
-    UGameDataInstance* GameInstance = Cast<UGameDataInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+    UGameDataInstance* GameInstance = Cast<UGameDataInstance>(UGameplayStatics::GetGameInstance(World));
     if (GameInstance)
     {
         GameInstance->ResetGameStatsToLevelOne();
     }
 
-    // 2. 메인 메뉴 레벨로 이동 (끝내기)
-    UGameplayStatics::OpenLevel(OwningController, TEXT("L_MainMenu"));
+    // 메인 메뉴로 (L_MainMenu)
+    if (OwningController)
+    {
+        UGameplayStatics::OpenLevel(OwningController, TEXT("L_MainMenu"));
+    }
+    else
+    {
+        UGameplayStatics::OpenLevel(World, TEXT("L_MainMenu"));
+    }
 }

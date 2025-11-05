@@ -1,39 +1,45 @@
-// TeleportVolume.h
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "TeleportVolume.generated.h"
 
-// 컴포넌트 전방 선언
-class UBoxComponent;
-class UPrimitiveComponent;
-class AController;
-
 UCLASS()
 class ROGUELIKEFPS_API ATeleportVolume : public AActor
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 public:
-	ATeleportVolume();
+    ATeleportVolume();
 
 protected:
-	virtual void BeginPlay() override;
-
-	// 1. 트리거 볼륨 컴포넌트 (액터가 겹치는 영역을 감지)
-	// [수정] TObjectPtr 적용
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Teleport")
-	TObjectPtr<UBoxComponent> OverlapVolume;
-
-	// 2. 목적지 레벨 이름 (에디터에서 설정)
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Teleport")
-	FName DestinationLevelName = TEXT("L_GameMap02"); // 기본값 설정 (다음 레벨)
+    virtual void BeginPlay() override;
 
 public:
-	// 3. 오버랩 이벤트 핸들러 함수 선언
-	UFUNCTION()
-	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+    UPROPERTY(VisibleAnywhere, Category = "Trigger")
+    class UBoxComponent* TeleportTrigger;
 
+    UPROPERTY(EditAnywhere, Category = "Teleport")
+    float DelayBeforeTeleport = 5.0f;
+
+    UPROPERTY(EditAnywhere, Category = "Teleport", meta = (ToolTip = "다음으로 이동할 맵의 레벨 이름"))
+    FName NextLevelName = TEXT("NextMap");
+
+    UFUNCTION()
+    void OnOverlapBegin(class UPrimitiveComponent* OverlappedComp,
+        class AActor* OtherActor,
+        class UPrimitiveComponent* OtherComp,
+        int32 OtherBodyIndex,
+        bool bFromSweep,
+        const FHitResult& SweepResult);
+
+private:
+    // 타이머에서 참조할 대상 저장
+    TWeakObjectPtr<AActor> PendingTeleportActor;
+
+    // 타이머 핸들러
+    FTimerHandle TeleportTimerHandle;
+
+    // 타이머에서 호출할 함수
+    void TeleportPendingActor();
 };

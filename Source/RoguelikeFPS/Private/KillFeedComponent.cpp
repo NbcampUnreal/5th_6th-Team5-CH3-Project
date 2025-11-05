@@ -1,6 +1,7 @@
 #include "KillFeedComponent.h"
-#include "StatsComponent.h"
-#include "GameFramework/Character.h" 
+#include "FPSCharacter.h"
+#include "GameFramework/Actor.h"
+#include "GameFramework/Pawn.h"
 
 UKillFeedComponent::UKillFeedComponent()
 {
@@ -11,12 +12,20 @@ void UKillFeedComponent::ReportDeathToKiller(AActor* KillerActor)
 {
     if (!KillerActor) return;
 
-    // 킬러 액터(플레이어)에서 UStatsComponent 찾음
-    UStatsComponent* KillerStats = KillerActor->FindComponentByClass<UStatsComponent>();
-
-    if (KillerStats)
+    // KillerActor가 Pawn/Character일 가능성 고려
+    AFPSCharacter* KillerCharacter = Cast<AFPSCharacter>(KillerActor);
+    if (!KillerCharacter)
     {
-        // XP 부여 루프 실행
-        KillerStats->AddXP(XPAmountOnDeath);
+        // 만약 KillerActor가 Pawn이고 그 Pawn의 소유자가 캐릭터라면 시도
+        APawn* Pawn = Cast<APawn>(KillerActor);
+        if (Pawn)
+        {
+            KillerCharacter = Cast<AFPSCharacter>(Pawn);
+        }
+    }
+
+    if (KillerCharacter)
+    {
+        KillerCharacter->AddXP(XPAmountOnDeath);
     }
 }
