@@ -1,12 +1,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ItemBase.h"
 #include "PartData.h"
+#include "ItemBase.h"
 #include "PartItem.generated.h"
 
 
-UCLASS()
+UCLASS(BlueprintType)
 class ROGUELIKEFPS_API UPartItem : public UItemBase
 {
 	GENERATED_BODY()
@@ -20,15 +20,16 @@ public:
 	EPartType PartType;//종류
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Part")
-	float Damage;	//데미지
+	float Damage;//데미지
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Part")
-	int32 MaxAmmo;	//장탄수 증가
+	int32 Ammo;//장탄
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Part")
-	float AttackSpeed; //공격속도 증가
+	float AttackSpeed;//공격속도
+
+	float ApplyDamage(float BaseDamage) const;//데미지
+	int32 ApplyAmmo(int32 BaseAmmo) const;//탄창
+	float ApplyAttackSpeed(float BaseAttackSpeed) const;//공격속도
 
 	void InitializeFromData(const FPartData& Data);
-
-	float ApplyDamage(float BaseDamage) const;
-	int32 ApplyMaxAmmo(int32 BaseAmmo) const;
-	float ApplyAttackSpeed(float BaseAttackSpeed) const;
+	void ApplyToWeapon(float& InOutDamage, int32& InOutAmmo, float& InOutAttackSpeed) const;
 };

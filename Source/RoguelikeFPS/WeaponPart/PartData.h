@@ -15,10 +15,10 @@ enum class EPartGrade : uint8
 UENUM(BlueprintType)
 enum class EPartType : uint8
 {
-	Muzzle UMETA(DisplayName = "총구"),
-	Magazin UMETA(DisplayName = "탄창"),
-	Stock UMETA(DisplayName = "개머리판"),
-	HandGrip UMETA(DisplayName = "손잡이")
+	Muzzle UMETA(DisplayName = "Muzzle"),
+	Magazin UMETA(DisplayName = "Magazin"),
+	Stock UMETA(DisplayName = "Stock"),
+	HandGrip UMETA(DisplayName = "HandGrip")
 };
 USTRUCT(BlueprintType)
 struct FPartData : public FTableRowBase
@@ -33,14 +33,18 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EPartType PartType;//종류
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float Damage;	//데미지
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float MaxAmmo;	//장탄수 증가
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float AttackSpeed; //공격속도 증가
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	//float ;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Part")
+	float MinDamage;	//최소 데미지
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Part")
+	float MaxDamage;	//최대 데미지
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Part")
+	int32 MinAmmo;	//최소 장탄수
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Part")
+	int32 MaxAmmo;	//최대 장탄수
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Part")
+	float MinAttackSpeed; //최소 공격속도 증가
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Part")
+	float MaxAttackSpeed; //최대 공격속도 증가
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UTexture2D* Thumbnail;

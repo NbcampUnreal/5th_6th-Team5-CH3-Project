@@ -37,6 +37,7 @@ public:
 	//아이템 타입
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
 	FString ItemType;
+	//이미지
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
 	UTexture2D* Thumbnail;
 };
