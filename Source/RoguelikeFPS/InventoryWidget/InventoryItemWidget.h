@@ -6,6 +6,7 @@
 
 class UTextBlock;
 class UItemBase;
+class UImage;
 
 UCLASS()
 class ROGUELIKEFPS_API UInventoryItemWidget : public UUserWidget
@@ -20,6 +21,10 @@ public:
 
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* ItemName;
+	
+	UPROPERTY(meta = (BindWidget))
+	UImage* ItemImage;
+	
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* ItemAmount;
 	

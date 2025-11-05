@@ -32,11 +32,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
 	int32 BuyPrice;
 	//판매 가격
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
 	int32 SellPrice;
 	//아이템 타입
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
 	FString ItemType;
+	//이미지
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
 	UTexture2D* Thumbnail;
 };

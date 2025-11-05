@@ -22,6 +22,12 @@ public:
 protected:
     UPROPERTY(meta = (BindWidget))
     UTextBlock* ItemNameText;
+   
+    UPROPERTY(meta = (BindWidget))
+    UTextBlock* PriceText;
+    
+    UPROPERTY(meta = (BindWidget))
+    UImage* ItemImage;
 
     UPROPERTY(meta = (BindWidget))
     UButton* BuyButton;
