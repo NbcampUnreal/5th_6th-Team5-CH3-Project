@@ -11,6 +11,7 @@ AFPSCharacter::AFPSCharacter()		//초기 스텟 설정
 	MaxHealth(100),
 	Attack(10),
 	Defence(10),
+	Shield(100),
 	AttackSpeed(5),
 	MovingSpeed(600),
 	Stamina(500),
