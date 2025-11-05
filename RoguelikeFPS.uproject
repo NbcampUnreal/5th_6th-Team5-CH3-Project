@@ -10,22 +10,16 @@
 			"LoadingPhase": "Default",
 			"AdditionalDependencies": [
 				"Engine",
-				"AIModule",
-				"CoreUObject",
-				"UMG"
+				"AIModule"
 			]
 		}
 	],
 	"Plugins": [
 		{
 			"Name": "ModelingToolsEditorMode",
-			"Enabled": true
-		},
-		{
-			"Name": "VisualStudioTools",
 			"Enabled": true,
-			"SupportedTargetPlatforms": [
-				"Win64"
+			"TargetAllowList": [
+				"Editor"
 			]
 		}
 	]

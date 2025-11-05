@@ -53,6 +53,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
 	int32 Defence;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
+	int32 Shield;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
 	int32 AttackSpeed;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
 	int32 MovingSpeed;
@@ -126,10 +128,8 @@ protected:
 	UFUNCTION()
 	void Reload(const FInputActionValue& value);
 	void StopReload();
-
 	void LevelUp();
 	void OnDeath(AController* KillerController);
-
 
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
 		AController* EventInstigator, AActor* DamageCauser) override;
