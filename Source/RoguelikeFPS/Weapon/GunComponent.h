@@ -11,7 +11,8 @@
 /**
  * 
  */
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FProjectileSpawn, AProjectile*, Projectile);
+//DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FProjectileSpawn, AProjectile*, Projectile);
+DECLARE_MULTICAST_DELEGATE_OneParam(FProjectileSpawn, AProjectile*);
 
 class UProjectileComponent;
 
@@ -22,10 +23,12 @@ class ROGUELIKEFPS_API UGunComponent : public UWeaponComponent
 	
 
 public:
+
+
 	UGunComponent();
 	~UGunComponent();
 
-	UPROPERTY(BlueprintAssignable, Category = "Interaction")
+	//UPROPERTY(BlueprintAssignable, Category = "Interaction")
 	FProjectileSpawn ProjectileSpawn;
 
 protected:
