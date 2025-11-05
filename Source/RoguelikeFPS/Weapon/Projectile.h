@@ -21,8 +21,6 @@ public:
 	AProjectile();
 
 protected:
-
-private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	UProjectileMovementComponent* _ProjectileMovement;
 
@@ -34,6 +32,7 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Projectile, meta = (AllowPrivateAccess = "true"))
 	AActor* _Instigator;
+private:
 
 public:
 	// Called every frame

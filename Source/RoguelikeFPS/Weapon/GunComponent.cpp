@@ -67,7 +67,6 @@ void UGunComponent::BeginPlay()
 
 void UGunComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-
 	Super::EndPlay(EndPlayReason);
 }
 
@@ -83,7 +82,6 @@ void UGunComponent::Fire()
 		UWorld* const World = GetWorld();
 		if (World != nullptr)
 		{
-			//const FRotator SpawnRotation = CalculateSapwnRotaion();
 			const FRotator SpawnRotation = CalculateSapwnRotaion();
 			const FVector SpawnLocation = this->GetSocketLocation(FName("Muzzle"));
 

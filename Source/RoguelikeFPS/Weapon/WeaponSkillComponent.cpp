@@ -29,17 +29,29 @@ void UWeaponSkillComponent::SetUp()
 
 void UWeaponSkillComponent::SetActionMapping()
 {
-	UWeaponComponent* WeaponComp = Cast<UWeaponComponent>(GetAttachParent());
-	if (WeaponComp)
+	if (_SkillAction)
 	{
-		if (WeaponComp->GetCharacterEnhancedInputComponent())
+		UWeaponComponent* WeaponComp = Cast<UWeaponComponent>(GetAttachParent());
+		if (WeaponComp)
 		{
-			if (_SkillAction)
+			if (WeaponComp->GetCharacterEnhancedInputComponent())
 			{
 				WeaponComp->GetCharacterEnhancedInputComponent()->BindAction(_SkillAction, ETriggerEvent::Triggered, this, &UWeaponSkillComponent::Active);
 			}
 		}
 	}
+
+	//UWeaponComponent* WeaponComp = Cast<UWeaponComponent>(GetAttachParent());
+	//if (WeaponComp)
+	//{
+	//	if (WeaponComp->GetCharacterEnhancedInputComponent())
+	//	{
+	//		if (_SkillAction)
+	//		{
+	//			WeaponComp->GetCharacterEnhancedInputComponent()->BindAction(_SkillAction, ETriggerEvent::Triggered, this, &UWeaponSkillComponent::Active);
+	//		}
+	//	}
+	//}
 }
 
 // Called when the game starts
@@ -74,13 +86,12 @@ void UWeaponSkillComponent::OnAttachmentChanged()
 
 void UWeaponSkillComponent::SetCoolDownTimer()
 {
-	FTimerDelegate Delegate = FTimerDelegate::CreateLambda([this]()
+	UWorld* const World = GetWorld();
+	if (!World) return;
+	World->GetTimerManager().SetTimer(_SkillTimerHandle, FTimerDelegate::CreateLambda([this]()
 		{
 			_isSkillCoolDown = false;
-		});
-
-	UWorld* const World = GetWorld();
-	World->GetTimerManager().SetTimer(_SkillTimerHandle, Delegate, _CoolDown, false);
+		}) , _CoolDown, false);
 }
 
 

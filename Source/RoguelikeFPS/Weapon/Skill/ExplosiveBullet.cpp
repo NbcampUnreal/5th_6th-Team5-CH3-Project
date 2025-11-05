@@ -12,7 +12,8 @@ void UExplosiveBullet::SetUp()
 	UGunComponent* GunComp = Cast<UGunComponent>(GetAttachParent());
 	if (GunComp)
 	{
-		GunComp->ProjectileSpawn.AddDynamic(this, &UExplosiveBullet::Projectile_AddDynamic);
+		//GunComp->ProjectileSpawn.AddDynamic(this, &UExplosiveBullet::Projectile_AddDynamic);
+		GunComp->ProjectileSpawn.AddUObject(this, &UExplosiveBullet::Projectile_AddDynamic);
 		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Blue, FString::Printf(TEXT("SetUp : AddDynamic")));
 	}
 }
