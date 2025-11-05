@@ -1,13 +1,15 @@
 ﻿#include "EnemyAttackBaseComponent.h"
 #include "EnemyConfig.h"
+#include "EnemyStatsComponent.h"
 #include "GameFramework/Actor.h"
 
-void UEnemyAttackBaseComponent::ApplyConfig(const UEnemyConfig* Config)
+void UEnemyAttackBaseComponent::ApplyConfig(const UEnemyConfig* Config, float ConfigDamage)
 {
     if (!Config) return;
-    Damage = Config->ATK;
+    Damage = ConfigDamage;
     Cooldown = Config->AttackCooldown;
 }
+
 
 bool UEnemyAttackBaseComponent::CanAttack() const
 {
@@ -19,6 +21,8 @@ void UEnemyAttackBaseComponent::StartAttack(AActor* Target)
 {
     if (!CanAttack()) return;
     //bAttackInProgress = true;
+    //Damage = GetCurrentDamage();
+    //UE_LOG(LogTemp, Log, TEXT("damage %f"), Damage);
     CurrentTarget = Target;
     bCanceled = false;
     // 파생 클래스에서 몽타주 재생/사운드/예열 등 구현

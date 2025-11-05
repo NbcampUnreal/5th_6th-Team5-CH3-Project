@@ -4,6 +4,15 @@
 #include "AI/Structure/EnemyState.h"
 #include "EnemyAnimInstance.generated.h"
 
+UENUM(BlueprintType)
+enum class EPattern : uint8
+{
+    Idle UMETA(DisplayName = "Idle"),
+    Pattern1 UMETA(DisplayName = "Pattern1"),
+    Pattern2 UMETA(DisplayName = "Pattern2"),
+    Pattern3 UMETA(DisplayName = "Pattern3"),
+
+};
 
 UCLASS()
 class ROGUELIKEFPS_API UEnemyAnimInstance : public UAnimInstance
@@ -19,8 +28,12 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Anim")
     bool bInAttack = false;
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Anim")
     bool bIsDead = false;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Anim")
+    EPattern PatternState = EPattern::Pattern1;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Anim")
     float MoveSpeed = 0.f;
@@ -37,6 +50,9 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "Anim")
     void SetIsDead(bool bNew) { bIsDead = bNew; }
+
+    UFUNCTION(BlueprintCallable, Category = "Anim")
+    void SetPattern(EPattern NewState) { PatternState = NewState; }
 
     UFUNCTION(BlueprintCallable, Category = "Anim")
     void SetMoveSpeed(float InSpeed) { MoveSpeed = InSpeed; }

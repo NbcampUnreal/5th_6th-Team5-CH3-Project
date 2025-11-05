@@ -24,7 +24,11 @@ public:
     FOnAttackFinished OnAttackFinished;
 
     UFUNCTION(BlueprintCallable, Category = "Attack")
-    virtual void ApplyConfig(const UEnemyConfig* Config);
+    virtual void ApplyConfig(const UEnemyConfig* Config, float ConfigDamage);
+
+    float GetCurrentDamage() const;
+
+
 
     UFUNCTION(BlueprintCallable, Category = "Attack")
     virtual bool CanAttack() const;

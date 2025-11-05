@@ -4,6 +4,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "MeleeAttackComponent.h"
 #include "RangedAttackComponent.h"
+#include "Stage2BossAttackComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Engine/Engine.h"
@@ -23,6 +24,7 @@ void UEnemyStateMachineComponent::BeginPlay()
     {
         MeleeComp = Owner->FindComponentByClass<UMeleeAttackComponent>();
         RangedComp = Owner->FindComponentByClass<URangedAttackComponent>();
+        Boss2Comp = Owner->FindComponentByClass< UStage2BossAttackComponent>();
     }
     if (const ACharacter* C = Cast<ACharacter>(GetOwner()))
     {
@@ -82,6 +84,7 @@ void UEnemyStateMachineComponent::HandleAttackFinished()
     if (MeleeComp.IsValid())
         MeleeComp->OnAttackFinished.RemoveDynamic(this, &UEnemyStateMachineComponent::HandleAttackFinished);
     ChangeState(EEnemyState::Chase);
+    CachedAnim->SetPattern(EPattern::Idle);
 }
 
 float UEnemyStateMachineComponent::Dist2DToTarget(AActor* Target) const
@@ -93,6 +96,7 @@ float UEnemyStateMachineComponent::Dist2DToTarget(AActor* Target) const
 
 void UEnemyStateMachineComponent::OnEnterState(EEnemyState State)
 {
+    int rand = FMath::RandRange(0, 2);
     switch (State)
     {
     case EEnemyState::Idle:
@@ -122,6 +126,25 @@ void UEnemyStateMachineComponent::OnEnterState(EEnemyState State)
         CachedAnim->SetAnimState(EEnemyState::Attack);
         CachedAnim->SetInAttack(true);
         CachedAnim->SetHasTarget(true);
+
+        UE_LOG(LogTemp, Log, TEXT("AnimNotify_AttackHit start"));
+        switch (rand)
+        {
+        case 0:
+            //HitShape = EHitShape::Capsule;
+            CachedAnim->SetPattern(EPattern::Pattern1);
+            break;
+        case 1:
+            //HitShape = EHitShape::Box;
+            CachedAnim->SetPattern(EPattern::Pattern2);
+            break;
+        case 2:
+            //HitShape = EHitShape::Sector;
+            CachedAnim->SetPattern(EPattern::Pattern3);
+            break;
+        default:
+            break;
+        }
         OnEnter_Attack();
         break;
 
@@ -143,6 +166,7 @@ void UEnemyStateMachineComponent::OnExitState(EEnemyState State)
         //UE_LOG(LogTemp, Log, TEXT("Exit Idle"));
         break;
     case EEnemyState::Attack:
+        //CachedAnim->SetPattern(EPattern::Idle);
         //UE_LOG(LogTemp, Log, TEXT("Exit Attack"));
         break;
     case EEnemyState::Chase:
@@ -190,6 +214,12 @@ void UEnemyStateMachineComponent::OnEnter_Attack()
         RangedComp->OnAttackFinished.RemoveDynamic(this, &UEnemyStateMachineComponent::HandleAttackFinished);
         RangedComp->OnAttackFinished.AddDynamic(this, &UEnemyStateMachineComponent::HandleAttackFinished);
         RangedComp->StartAttack(Target);
+    }//Boss2Comp
+    else if (Boss2Comp.IsValid() && Dist <= MeleeThreshold && Boss2Comp->CanAttack())
+    {
+        Boss2Comp->OnAttackFinished.RemoveDynamic(this, &UEnemyStateMachineComponent::HandleAttackFinished);
+        Boss2Comp->OnAttackFinished.AddDynamic(this, &UEnemyStateMachineComponent::HandleAttackFinished);
+        
     }
     else
     {

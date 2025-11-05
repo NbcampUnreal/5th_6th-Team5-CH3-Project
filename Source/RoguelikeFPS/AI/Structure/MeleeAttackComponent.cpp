@@ -7,10 +7,10 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Animation/AnimInstance.h"
 
-void UMeleeAttackComponent::ApplyMeleeConfig(const UEnemyConfig* Config)
+void UMeleeAttackComponent::ApplyMeleeConfig(const UEnemyConfig* Config, float ConfigDamage)
 {
     if (!Config) return;
-    ApplyConfig(Config);            // 공통(Damage/Cooldown)
+    ApplyConfig(Config, ConfigDamage);            // 공통(Damage/Cooldown)
     Range = Config->MeleeRange;        // 공격 길이
     Radius = Config->MeleeHitRadius;   // 공격 두께
     AttackRange = Config->AttackRange;   // 공격 가능 판정

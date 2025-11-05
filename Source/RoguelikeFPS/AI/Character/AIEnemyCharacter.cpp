@@ -11,6 +11,8 @@ AAIEnemyCharacter::AAIEnemyCharacter()
     PrimaryActorTick.bCanEverTick = true;
 }
 
+
+
 void AAIEnemyCharacter::BeginPlay()
 {
     Super::BeginPlay();
@@ -20,16 +22,15 @@ void AAIEnemyCharacter::BeginPlay()
 
     ensureMsgf(Config, TEXT("Enemy Config is null on %s"), *GetName());
 
-    ApplyConfigToComponents();
 
-    if (Config)
+    if (ensure(Config))
     {
         // 스탯 적용
-        Level = Config->Level + (int)FMath::FRandRange(1.f, 3.f);
-        MAXHP = Config->MaxHP + (Level - 1) * Config->HPperLevel - 1;
-        HP = MAXHP;
-        ATK = Config->ATK + (Level - 1) * Config->ATKperLevel - 1;
-        DEF = Config->DEF + (Level - 1) * Config->DEFperLevel - 1;
+        Level = Config->Level + FMath::RandRange(0, 3); 
+        MAXHP = Config->MaxHP + Level * Config->HPperLevel; 
+        HP = MAXHP; 
+        ATK = Config->ATK + Level * Config->ATKperLevel; 
+        DEF = Config->DEF + Level * Config->DEFperLevel;
 
         UE_LOG(LogTemp, Log, TEXT("Level : %d"), Level);
         UE_LOG(LogTemp, Log, TEXT("HP : %f"), MAXHP);
@@ -38,6 +39,7 @@ void AAIEnemyCharacter::BeginPlay()
         // 이동 속도
         ApplyWalkSpeed();
     }
+    ApplyConfigToComponents(ATK);
 }
 
 void AAIEnemyCharacter::ApplyWalkSpeed()
@@ -79,20 +81,20 @@ void AAIEnemyCharacter::Tick(float DeltaSeconds)
 #endif
 }
 
-void AAIEnemyCharacter::ApplyConfigToComponents()
+void AAIEnemyCharacter::ApplyConfigToComponents(float Damage)
 {
     if (!Config) return;
 
     if (auto* Melee = FindComponentByClass<UMeleeAttackComponent>())
     {
-        Melee->ApplyMeleeConfig(Config);
+        Melee->ApplyMeleeConfig(Config, Damage);
         //UE_LOG(LogTemp, Log, TEXT("ApplyMeleeConfig Complete"));
     }
 
 
     if (auto* Ranged = FindComponentByClass<URangedAttackComponent>())
     {
-        Ranged->ApplyRangeConfig(Config);
+        Ranged->ApplyRangeConfig(Config, Damage);
         //UE_LOG(LogTemp, Log, TEXT("ApplyRangeConfig Complete"));
     }
 
@@ -189,7 +191,7 @@ void AAIEnemyCharacter::OnDeath()
     {
         AICon->SendDeadToBT();
     }
-
+    AActor* Proj = GetWorld()->SpawnActor<AActor>(DropItemClass, GetActorLocation(), GetActorRotation());
 
 
     //SetLifeSpan(2.0f);           // Destroy() 즉시 호출 대신 권장
@@ -199,8 +201,10 @@ float AAIEnemyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Dama
 {
     // 기본 데미지 처리 로직 호출 (필수는 아님)
     float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-
-    // 체력을 데미지만큼 감소시키고, 0 이하로 떨어지지 않도록 Clamp
+    // EventInstigator == 컨트롤러, DamageCauser == 액터
+    // 이걸 이용해서 스턴을 넣는 float를 받아와서 이걸 확률로 이용하기
+    // 
+    
     HP = FMath::Clamp(HP - DamageAmount, 0.0f, MAXHP);
     //UE_LOG(LogTemp, Warning, TEXT("Health decreased to: %f"), HP);
 

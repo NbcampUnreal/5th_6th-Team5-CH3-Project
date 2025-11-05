@@ -13,7 +13,7 @@ class ROGUELIKEFPS_API UMeleeAttackComponent : public UEnemyAttackBaseComponent
 public:
 
     UFUNCTION(BlueprintCallable, Category = "Attack|Melee")
-    void ApplyMeleeConfig(const UEnemyConfig* Config);
+    void ApplyMeleeConfig(const UEnemyConfig* Config, float ConfigDamage);
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Melee")
     float Range = 220.f;
