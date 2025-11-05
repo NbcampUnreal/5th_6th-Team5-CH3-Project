@@ -32,7 +32,7 @@ void UWeaponComponent::AttachWeapon(ACharacter* TargetCharacter)
 
 	// Attach the weapon to the First Person Character
 	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
-	GetOwner()->AttachToComponent(_Character->GetMesh(), AttachmentRules, FName(TEXT("GripPoint")));
+	GetOwner()->AttachToComponent(_Character->GetMesh(), AttachmentRules, FName(WeaponSocketName));
 
 	// Set up action bindings
 	if (APlayerController* PlayerController = Cast<APlayerController>(_Character->GetController()))

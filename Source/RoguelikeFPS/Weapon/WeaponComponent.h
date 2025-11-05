@@ -42,6 +42,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Skill, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UWeaponSkillComponent> _TSubSkillComponent;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Mesh, meta = (AllowPrivateAccess = "true"))
+	FName WeaponSocketName;
+
 	UPROPERTY()
 	UWeaponSkillComponent* _SkillComponent;
 
