@@ -5,7 +5,7 @@
 #include "Components/Button.h" 
 #include "TitleWidget.generated.h"
 
-class APlayerController;
+class UButton;
 class UMainMenuWidget;
 
 UCLASS()
@@ -18,7 +18,7 @@ public:
 	virtual bool Initialize() override;
 
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UButton> GameStartButton;
+	TObjectPtr<UButton> StartButton;
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UButton> OptionButton;

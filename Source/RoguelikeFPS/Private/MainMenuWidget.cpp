@@ -1,5 +1,6 @@
 #include "MainMenuWidget.h"
 #include "Components/Button.h"
+#include "FPSGameMode.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "GameDataInstance.h"
@@ -18,7 +19,7 @@ bool UMainMenuWidget::Initialize()
     if (Button_Weapon4) Button_Weapon4->OnClicked.AddDynamic(this, &UMainMenuWidget::OnButtonWeapon4Clicked);
 
     if (Button_Start) Button_Start->OnClicked.AddDynamic(this, &UMainMenuWidget::OnStartGameClicked);
-    if (Button_Exit) Button_Exit->OnClicked.AddDynamic(this, &UMainMenuWidget::OnExitButtonClicked);
+    if (Button_Exit) Button_Exit->OnClicked.AddDynamic(this, &UMainMenuWidget::OnBackToTitleClicked);
 
     // 시작 시 Start 버튼 비활성화 (무기 선택 전)
     if (Button_Start)
@@ -27,19 +28,26 @@ bool UMainMenuWidget::Initialize()
     return true;
 }
 
-// ===================== 무기 선택 래퍼 ===================== //
+//  무기 선택 래퍼 
 void UMainMenuWidget::OnButtonWeapon1Clicked() { HandleWeaponSelection(1); }
 void UMainMenuWidget::OnButtonWeapon2Clicked() { HandleWeaponSelection(2); }
 void UMainMenuWidget::OnButtonWeapon3Clicked() { HandleWeaponSelection(3); }
 void UMainMenuWidget::OnButtonWeapon4Clicked() { HandleWeaponSelection(4); }
 
-// ===================== 공통 무기 선택 로직 ===================== //
+// 공통 무기 선택 로직 
 void UMainMenuWidget::HandleWeaponSelection(int32 WeaponIndex)
 {
     UGameDataInstance* GameInstance = Cast<UGameDataInstance>(GetGameInstance());
+
     if (!GameInstance)
     {
-        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("GameInstance Cast Failed."));
+        // 오류 메시지를 더 명확하게 변경
+        GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red,
+            TEXT("ERROR: GetGameInstance() is NOT UGameDataInstance! Check Project Settings -> Maps & Modes."));
+
+        // 이 시점에서 Start 버튼 활성화/비활성화가 무의미해지므로 종료
+        if (Button_Start) Button_Start->SetIsEnabled(false);
+        CurrentSelectedWeaponIndex = 0; // 안전하게 초기화
         return;
     }
 
@@ -56,11 +64,9 @@ void UMainMenuWidget::HandleWeaponSelection(int32 WeaponIndex)
         CurrentSelectedWeaponIndex = WeaponIndex;
         GameInstance->SetSelectedOption(WeaponIndex);
         GameInstance->bIsReadyToStart = true;
-
-        FString LogMsg = FString::Printf(TEXT("Weapon %d Selected"), WeaponIndex);
-        GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, LogMsg);
+        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green,
+            FString::Printf(TEXT("Weapon Selected: %d"), WeaponIndex));
     }
-
     // Start 버튼 활성화 / 비활성화
     if (Button_Start)
         Button_Start->SetIsEnabled(GameInstance->bIsReadyToStart);
@@ -70,27 +76,28 @@ void UMainMenuWidget::HandleWeaponSelection(int32 WeaponIndex)
 void UMainMenuWidget::OnStartGameClicked()
 {
     UGameDataInstance* GameInstance = Cast<UGameDataInstance>(GetGameInstance());
-    if (!GameInstance)
+    if (!GameInstance || !GameInstance->bIsReadyToStart)
     {
-        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("GameInstance not found."));
+        GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, TEXT("Cannot start game"));
         return;
     }
-
-    if (!GameInstance->bIsReadyToStart || GameInstance->SelectedWeaponIndex == 0)
-    {
-        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Cannot start: No weapon selected."));
-        return;
-    }
-
-    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow,
-        FString::Printf(TEXT("Starting Game with Weapon %d"), GameInstance->SelectedWeaponIndex));
 
     RemoveFromParent();
     UGameplayStatics::OpenLevel(GetWorld(), TEXT("L_Map1"));
 }
 
 // ===================== 뒤로가기 버튼 ===================== //
-void UMainMenuWidget::OnExitButtonClicked()
+void UMainMenuWidget::OnBackToTitleClicked()
 {
-    OnBackButtonClicked.Broadcast();
+    RemoveFromParent();
+    UGameDataInstance* GameInstance = Cast<UGameDataInstance>(GetGameInstance());
+    AFPSGameMode* FPSGameMode = Cast<AFPSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+    if (FPSGameMode)
+    {
+        FPSGameMode->OnMainMenuBackClicked();
+    }
+    else
+    {
+        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("GameMode Cast Failed in MainMenuWidget::OnBackToTitleClicked"));
+    }
 }

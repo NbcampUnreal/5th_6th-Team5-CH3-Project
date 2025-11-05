@@ -25,7 +25,6 @@ public:
     UPROPERTY(meta = (BindWidget)) TObjectPtr<UButton> Button_Weapon2;
     UPROPERTY(meta = (BindWidget)) TObjectPtr<UButton> Button_Weapon3;
     UPROPERTY(meta = (BindWidget)) TObjectPtr<UButton> Button_Weapon4;
-
     UPROPERTY(meta = (BindWidget)) TObjectPtr<UButton> Button_Start;
     UPROPERTY(meta = (BindWidget)) TObjectPtr<UButton> Button_Exit;
 
@@ -38,7 +37,7 @@ protected:
 
     // ===== 시작 / 종료 버튼 =====
     UFUNCTION() void OnStartGameClicked();
-    UFUNCTION() void OnExitButtonClicked();
+    UFUNCTION() void OnBackToTitleClicked();
 
     // ===== 공통 선택 로직 =====
     void HandleWeaponSelection(int32 WeaponIndex);

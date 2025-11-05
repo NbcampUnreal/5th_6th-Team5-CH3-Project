@@ -1,6 +1,7 @@
 #include "TitleWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "MainMenuWidget.h"
+#include "FPSGameMode.h"
 #include "TimerManager.h"
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/PlayerController.h"
@@ -9,8 +10,8 @@ bool UTitleWidget::Initialize()
 {
     if (!Super::Initialize()) return false;
 
-    if (GameStartButton)
-        GameStartButton->OnClicked.AddDynamic(this, &UTitleWidget::OnGameStartClicked);
+    if (StartButton)
+        StartButton->OnClicked.AddDynamic(this, &UTitleWidget::OnGameStartClicked);
 
     if (OptionButton)
         OptionButton->OnClicked.AddDynamic(this, &UTitleWidget::OnOptionClicked);
@@ -36,29 +37,30 @@ void UTitleWidget::NativeConstruct()
 
 void UTitleWidget::OnGameStartClicked()
 {
-    UWorld* World = GetWorld();
-    if (!World) return;
-
-    // 현재 타이틀 위젯 제거
-    RemoveFromParent();
-
-    // MainMenuWidgetClass가 지정되어 있다면 생성
-    if (MainMenuWidgetClass)
+    // GameMode에 이벤트 전달
+    AFPSGameMode* FPSGameMode = Cast<AFPSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+    if (FPSGameMode)
     {
-        APlayerController* PC = UGameplayStatics::GetPlayerController(World, 0);
-        UMainMenuWidget* MainMenu = CreateWidget<UMainMenuWidget>(PC, MainMenuWidgetClass);
-
-        if (MainMenu)
-        {
-            MainMenu->AddToViewport();
-            FInputModeUIOnly InputMode;
-            PC->SetInputMode(InputMode);
-            PC->bShowMouseCursor = true;
-        }
+        // GameMode의 OnTitleStartClicked 호출 (Title 제거 및 MainMenu 띄우기 담당)
+        FPSGameMode->OnTitleStartClicked();
     }
     else
     {
-        UE_LOG(LogTemp, Error, TEXT("MainMenuWidgetClass not set in TitleWidget"));
+        // GameMode를 찾을 수 없으면, 직접 MainMenu를 띄우는 로직 실행 (Fallback)
+        RemoveFromParent();
+        if (MainMenuWidgetClass)
+        {
+            APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+            UMainMenuWidget* MainMenu = CreateWidget<UMainMenuWidget>(PC, MainMenuWidgetClass);
+
+            if (MainMenu)
+            {
+                MainMenu->AddToViewport();
+                PC->bShowMouseCursor = true;
+                FInputModeUIOnly InputMode;
+                PC->SetInputMode(InputMode);
+            }
+        }
     }
 }
 

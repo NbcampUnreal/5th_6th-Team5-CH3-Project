@@ -9,11 +9,13 @@ class UAugmentWidget;
 class UTitleWidget;
 class UMainMenuWidget;
 
-
 UCLASS()
 class ROGUELIKEFPS_API AFPSGameMode : public AGameModeBase
 {
     GENERATED_BODY()
+
+    friend class UTitleWidget;
+    friend class UMainMenuWidget;
 
 public:
     AFPSGameMode(const FObjectInitializer& ObjectInitializer);
@@ -55,4 +57,7 @@ protected:
 
     UFUNCTION()
     void HandlePlayerDeath(AController* KillerController);
+
+    UFUNCTION()
+    void CloseCurrentUIAndResumeGame(bool bResumeGameInput = true);
 };
