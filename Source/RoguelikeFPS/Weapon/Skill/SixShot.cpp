@@ -9,12 +9,12 @@ void USixShot::Active()
 	Super::Active();
 
 	if (_isSkillCoolDown) return;
+	_isSkillCoolDown = true;
 	
 	UWorld* World = GetWorld();
 	if (!World) return;
 
 	BurstCount = 0;
-	_isSkillCoolDown = true;
 
 	World->GetTimerManager().SetTimer(
 		BurstTimerHandle,
