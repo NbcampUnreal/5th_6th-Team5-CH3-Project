@@ -16,6 +16,7 @@ AFPSCharacter::AFPSCharacter()		//초기 스텟 설정
 	Stamina(500),
 	Experience(0),
 	MaxExperience(100),
+	shield(100),
 	bIsAlive(true)
 {
 	PrimaryActorTick.bCanEverTick = false;
