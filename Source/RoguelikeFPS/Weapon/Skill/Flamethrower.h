@@ -13,7 +13,7 @@
  */
 class ACharacter;
 
-UCLASS(Blueprintable, BlueprintType, ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
+UCLASS()
 class ROGUELIKEFPS_API UFlamethrower : public UWeaponSkillComponent
 {
 	GENERATED_BODY() 
@@ -53,7 +53,7 @@ private:
 	UNiagaraComponent* _VFXComponent;
 
 	UPROPERTY()
-	ACharacter* _Instigator;
+	AActor* _Instigator;
 
 	UPROPERTY()
 	TSet<TWeakObjectPtr<ACharacter>> OverlappedCharacters;

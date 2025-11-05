@@ -47,7 +47,6 @@ void UFlamethrower::Active()
     FTimerHandle FlamethrowerDurationHandle;
     World->GetTimerManager().SetTimer(FlamethrowerDurationHandle, FTimerDelegate::CreateLambda([this]() {
         _Collision->SetGenerateOverlapEvents(false);
-        _isSkillCoolDown = false;
         GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Blue, FString::Printf(TEXT("SetGenerateOverlapEvents : false")));
         }), _FlamethrowerDuration, false);
 
@@ -65,9 +64,6 @@ void UFlamethrower::SetUp()
 
         if (GetAttachParent())
         {
-            /*FVector Direction = (RibbonStart->GetRelativeLocation()) - (RibbonEnd->GetRelativeLocation());
-            RibbonParticleComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(RibbonParticle, RibbonStart, NAME_None, -(Direction / 2), FRotator::ZeroRotator, EAttachLocation::SnapToTarget, false, false);*/
-            
             _Collision->AttachToComponent(GetAttachParent(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("Muzzle"));
             UGunComponent* Guncomp = Cast<UGunComponent>(GetAttachParent());
             if (Guncomp) _Instigator = Guncomp->GetOwnerCharacter();
@@ -78,7 +74,6 @@ void UFlamethrower::SetUp()
                 GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, FString::Printf(TEXT("Degrees : %f"), Degrees));
                 _VFXComponent->SetVectorParameter(TEXT("MaximumRotation"), FVector(_Angle * 0.5, Degrees * 0.5, 0));
                 _VFXComponent->SetVectorParameter(TEXT("MinimumRotation"), FVector(-_Angle * 0.5, -Degrees * 0.5, 0));
-                //RibbonParticleComponent->SetVectorParameter(TEXT("Direction"), Direction);  
             }
         }
     }
