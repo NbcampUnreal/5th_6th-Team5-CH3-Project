@@ -11,7 +11,6 @@ AFPSCharacter::AFPSCharacter()		//초기 스텟 설정
 	MaxHealth(100),
 	Attack(10),
 	Defence(10),
-	Shield(100),
 	AttackSpeed(5),
 	MovingSpeed(600),
 	Stamina(500),
@@ -315,7 +314,6 @@ void AFPSCharacter::LevelUp()
 		Defence += 3;
 		Experience = 0;
 	}
-	
 	if (APlayerController* PC = Cast<APlayerController>(GetController()))
 	{
 		OnLevelUp.Broadcast(PC);
@@ -326,17 +324,6 @@ void AFPSCharacter::OnDeath(AController* KillerController)
 {
 	if (Health <= 0) bIsAlive = false;
 	OnPlayerDeath.Broadcast(KillerController);
-}
-
-float AFPSCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
-	AController* EventInstigator, AActor* DamageCauser)
-{
-
-}
-
-void AFPSCharacter::OnDeath()
-{
-	if (Health <= 0) bIsAlive = false;
 }
 
 float AFPSCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,

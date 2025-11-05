@@ -46,8 +46,8 @@ void AFPSGameMode::BeginPlay()
 }
 
 // Ingame
-//void AFPSGameMode::PostLogin(APlayerController* NewPlayer)
-//{
+void AFPSGameMode::PostLogin(APlayerController* NewPlayer)
+{
 //    Super::PostLogin(NewPlayer);
 //
 //    if (!NewPlayer || !NewPlayer->GetPawn()) return;
@@ -58,7 +58,7 @@ void AFPSGameMode::BeginPlay()
 //        FPSChar->OnLevelUp.AddDynamic(this, &AFPSGameMode::HandlePlayerLevelUp);
 //        FPSChar->OnPlayerDeath.AddDynamic(this, &AFPSGameMode::HandlePlayerDeath);
 //    }
-//}
+}
 //
 //// 타이틀 / 메인 메뉴 이벤트
 void AFPSGameMode::OnTitleStartClicked()
@@ -172,29 +172,6 @@ void AFPSGameMode::CloseCurrentUIAndResumeGame(bool bResumeGameInput)
 }
 
 // 레벨업 처리
-    // DefaultPawnClass는 FPSCharacter로
-    DefaultPawnClass = AFPSCharacter::StaticClass();
-}
-
-void AFPSGameMode::PostLogin(APlayerController* NewPlayer)
-{
-    //Super::PostLogin(NewPlayer);
-
-    //if (!NewPlayer || !NewPlayer->GetPawn()) return;
-
-    //// 레벨업 이벤트 구독
-    //if (UStatsComponent* StatsComp = NewPlayer->GetPawn()->FindComponentByClass<UStatsComponent>())
-    //{
-    //    StatsComp->OnLevelUp.AddDynamic(this, &AFPSGameMode::HandlePlayerLevelUp);
-    //}
-
-    //// 사망 이벤트 구독
-    //if (AFPSCharacter* FPSChar = Cast<AFPSCharacter>(NewPlayer->GetPawn()))
-    //{
-    //    FPSChar->OnPlayerDeath.AddDynamic(this, &AFPSGameMode::HandlePlayerDeath);
-    //}
-}
-
 void AFPSGameMode::HandlePlayerLevelUp(APlayerController* PlayerController)
 {
     if (!PlayerController || !AugmentWidgetClass) return;
