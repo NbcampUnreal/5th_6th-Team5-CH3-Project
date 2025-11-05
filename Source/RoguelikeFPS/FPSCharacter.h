@@ -8,6 +8,9 @@ class USpringArmComponent;
 class UCameraComponent;
 struct FInputActionValue;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLevelUpSignature, APlayerController*, PlayerController);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerDeathSignature, AController*, KillerController);
+
 UCLASS()
 class ROGUELIKEFPS_API AFPSCharacter : public ACharacter
 {
@@ -24,6 +27,13 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ApplyAugment(FName AugmentName);
 
+	// ===== 레벨업 델리게이트 =====
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnLevelUpSignature OnLevelUp;
+
+	// ===== 사망 델리게이트 =====
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnPlayerDeathSignature OnPlayerDeath;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
@@ -55,46 +65,21 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
 	bool bIsAlive;
 
+	// 대시
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash")
 	float DashMultifly;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Dash")
 	float DashSpeed;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash")
 	float DashTime;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash")
+	bool bIsDashing;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dash")
+	bool bIsDashing2;
 
 
 	FTimerHandle DashTimerHandle;
 
-	UFUNCTION()
-	void Move(const FInputActionValue& value);
-	UFUNCTION()
-	void Look(const FInputActionValue& value);
-	UFUNCTION()
-	void StartJump(const FInputActionValue& value);
-	UFUNCTION()
-	void StopJump(const FInputActionValue& value);
-	UFUNCTION()
-	void StartDash(const FInputActionValue& value);
-	UFUNCTION()
-	void StopDash();
-	UFUNCTION()
-	void StartCrouch(const FInputActionValue& value);
-	UFUNCTION()
-	void StopCrouch(const FInputActionValue& value);
-
-	UFUNCTION()
-	void Fire(const FInputActionValue& value);
-	UFUNCTION()
-	void StopFire();
-	UFUNCTION()
-	void StartFire_Auto(const FInputActionValue& value);
-	UFUNCTION()
-	void StopFire_Auto(const FInputActionValue& value);
-
-	UFUNCTION()
-	void Reload(const FInputActionValue& value);
-	void StopReload();
-	
 	// 총 발사 변수
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fire")
 	bool bIsFiring;
@@ -112,9 +97,38 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Fire")
 	float ReloadTime;
 
+	// Action Value
+
+	UFUNCTION()
+	void Move(const FInputActionValue& value);
+	UFUNCTION()
+	void Look(const FInputActionValue& value);
+	UFUNCTION()
+	void StartJump(const FInputActionValue& value);
+	UFUNCTION()
+	void StopJump(const FInputActionValue& value);
+	UFUNCTION()
+	void StartDash(const FInputActionValue& value);
+	UFUNCTION()
+	void StopDash();
+	UFUNCTION()
+	void StartCrouch(const FInputActionValue& value);
+	UFUNCTION()
+	void StopCrouch(const FInputActionValue& value);
+	UFUNCTION()
+	void Fire(const FInputActionValue& value);
+	UFUNCTION()
+	void StopFire();
+	UFUNCTION()
+	void StartFire_Auto(const FInputActionValue& value);
+	UFUNCTION()
+	void StopFire_Auto(const FInputActionValue& value);
+	UFUNCTION()
+	void Reload(const FInputActionValue& value);
+	void StopReload();
 
 	void LevelUp();
-	void OnDeath();
+	void OnDeath(AController* KillerController);
 
 
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
