@@ -11,6 +11,9 @@ const FName AAIEnemyController::BB_TargetDistance = TEXT("TargetDistance");
 const FName AAIEnemyController::BB_InAttackRange = TEXT("InAttackRange");
 const FName AAIEnemyController::BB_LastSeenLocation = TEXT("LastSeenLocation");
 const FName AAIEnemyController::BB_HasLastSeen = TEXT("HasLastSeen");
+const FName AAIEnemyController::BB_LastHeardLocation = TEXT("LastHeardLocation");
+const FName AAIEnemyController::BB_InSoundRange = TEXT("InSoundRange");
+
 
 AAIEnemyController::AAIEnemyController()
 {
@@ -19,6 +22,7 @@ AAIEnemyController::AAIEnemyController()
     // === Perception 구성 ===
     PerceptionComp = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("PerceptionComp"));
     SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SightConfig"));
+    HearingConfig = CreateDefaultSubobject<UAISenseConfig_Hearing>(TEXT("HearingConfig"));
 
     SightConfig->SightRadius = SightRadius;
     SightConfig->LoseSightRadius = LoseSightRadius;
@@ -31,6 +35,15 @@ AAIEnemyController::AAIEnemyController()
 
     // '기억' 만료 시간
     SightConfig->SetMaxAge(ForgetDelaySeconds);
+
+
+    HearingConfig->HearingRange = HearingRange;
+    HearingConfig->LoSHearingRange = LoSHearingRange;
+    HearingConfig->DetectionByAffiliation.bDetectEnemies = true;
+    HearingConfig->DetectionByAffiliation.bDetectNeutrals = true;
+    HearingConfig->DetectionByAffiliation.bDetectFriendlies = true;
+    HearingConfig->SetMaxAge(HearingForgetSeconds);
+
 
     PerceptionComp->ConfigureSense(*SightConfig);
     PerceptionComp->SetDominantSense(SightConfig->GetSenseImplementation());
@@ -51,6 +64,7 @@ void AAIEnemyController::OnPossess(APawn* InPawn)
     if (InPawn && BlackboardComp)
     {
         BlackboardComp->SetValueAsVector(TEXT("HomeLocation"), InPawn->GetActorLocation());
+        InPawn->OnTakeAnyDamage.AddDynamic(this, &AAIEnemyController::OnTakeAnyDamage_Handled);
     }
 
     const auto* Enemy = Cast<AAIEnemyCharacter>(InPawn);
@@ -130,43 +144,62 @@ void AAIEnemyController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus St
     }
 
     // 시야 센스만 처리
-    if (Stimulus.Type != UAISense::GetSenseID(UAISense_Sight::StaticClass()))
-        return;
-
-    const bool bSensed = Stimulus.WasSuccessfullySensed();
-    BlackboardComp->SetValueAsBool(BB_HasLOS, bSensed);
-
-    if (bSensed)
+    if (Stimulus.Type == UAISense::GetSenseID(UAISense_Sight::StaticClass()))
     {
-        // 본 즉시 타깃 지정 및 마지막 본 위치 갱신
-        BlackboardComp->SetValueAsObject(BB_TargetActor, Actor);
-        //BlackboardComp->SetValueAsVector(BB_LastSeenLocation, Actor->GetActorLocation());
-        BlackboardComp->SetValueAsVector(BB_LastSeenLocation, Stimulus.StimulusLocation);
-        BlackboardComp->SetValueAsBool(BB_HasLastSeen, true);
-    }
-    else
-    {
-        // 이번 프레임에 '안 보임' 이벤트 발생.
-        // 아직 활성 자극(Active Stimulus)이 남아 있는지 확인 → 없으면 완전 해제.
+        const bool bSensed = Stimulus.WasSuccessfullySensed();
+        BlackboardComp->SetValueAsBool(BB_HasLOS, bSensed);
 
-        BlackboardComp->SetValueAsVector(BB_LastSeenLocation, Stimulus.StimulusLocation);
-
-        FActorPerceptionBlueprintInfo Info;
-        PerceptionComp->GetActorsPerception(Actor, Info);
-
-        const bool bAnyActive =
-            Info.LastSensedStimuli.ContainsByPredicate(
-                [](const FAIStimulus& S) { return S.IsActive(); });
-
-        if (!bAnyActive)
+        if (bSensed)
         {
-            if (BlackboardComp->GetValueAsObject(BB_TargetActor) == Actor)
+            // 본 즉시 타깃 지정 및 마지막 본 위치 갱신
+            BlackboardComp->SetValueAsObject(BB_TargetActor, Actor);
+            //BlackboardComp->SetValueAsVector(BB_LastSeenLocation, Actor->GetActorLocation());
+            BlackboardComp->SetValueAsVector(BB_LastSeenLocation, Stimulus.StimulusLocation);
+            BlackboardComp->SetValueAsBool(BB_HasLastSeen, true);
+        }
+        else
+        {
+            // 이번 프레임에 '안 보임' 이벤트 발생.
+            // 아직 활성 자극(Active Stimulus)이 남아 있는지 확인 → 없으면 완전 해제.
+
+            BlackboardComp->SetValueAsVector(BB_LastSeenLocation, Stimulus.StimulusLocation);
+
+            FActorPerceptionBlueprintInfo Info;
+            PerceptionComp->GetActorsPerception(Actor, Info);
+
+            const bool bAnyActive =
+                Info.LastSensedStimuli.ContainsByPredicate(
+                    [](const FAIStimulus& S) { return S.IsActive(); });
+
+            if (!bAnyActive)
             {
-                BlackboardComp->ClearValue(BB_TargetActor);
-                BlackboardComp->SetValueAsBool(BB_HasLOS, false);
+                if (BlackboardComp->GetValueAsObject(BB_TargetActor) == Actor)
+                {
+                    BlackboardComp->ClearValue(BB_TargetActor);
+                    BlackboardComp->SetValueAsBool(BB_HasLOS, false);
+                }
             }
         }
     }
+    if (Stimulus.Type == UAISense::GetSenseID(UAISense_Hearing::StaticClass()))
+    {
+        const bool bHeard = Stimulus.WasSuccessfullySensed();
+        if (bHeard)
+        {
+            // 소리 난 위치 기록
+            BlackboardComp->SetValueAsVector(BB_LastHeardLocation, Stimulus.StimulusLocation);
+            BlackboardComp->SetValueAsBool(BB_InSoundRange, true);
+        }
+        else
+        {
+            // 소리가 사라진 경우 정리(선택). MaxAge 경과 시 자동으로 잊혀지기도 함
+            BlackboardComp->ClearValue(BB_LastHeardLocation);
+            BlackboardComp->SetValueAsBool(BB_InSoundRange, false);
+        }
+        return;
+    }
+
+
 }
 
 void AAIEnemyController::OnPerceptionUpdated(const TArray<AActor*>&)
@@ -184,6 +217,50 @@ void AAIEnemyController::OnPerceptionUpdated(const TArray<AActor*>&)
         }
     }
 }
+
+void AAIEnemyController::OnTakeAnyDamage_Handled(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
+{
+    if (!BlackboardComp) return;
+
+    // 우선순위: DamageCauser(프로젝타일/무기 등) → Instigator Pawn
+    AActor* Attacker = nullptr;
+
+    if (DamageCauser && DamageCauser != DamagedActor)
+    {
+        // 프로젝타일이면 그 Owner/Instigator를 따라 올라가는 것도 방법
+        if (APawn* CauserPawn = Cast<APawn>(DamageCauser))
+            Attacker = CauserPawn;
+        else if (AActor* CauserOwner = DamageCauser->GetOwner())
+            Attacker = CauserOwner;
+        else
+            Attacker = DamageCauser;
+    }
+
+    if (!Attacker && InstigatedBy)
+        Attacker = InstigatedBy->GetPawn();
+
+    if (Attacker && Attacker != DamagedActor)
+    {
+        // 바로 타깃 지정(시야 없어도 추격 시작)
+        BlackboardComp->SetValueAsObject(BB_TargetActor, Attacker);
+        BlackboardComp->SetValueAsVector(BB_LastSeenLocation, Attacker->GetActorLocation());
+
+        // 피격 플래그 (BT에서 우선 추격 시퀀스 선택하도록 쓰기 좋음)
+        //BlackboardComp->SetValueAsBool(BB_WasDamagedRecently, true);
+
+        // 일정 시간 뒤 자동 해제(옵션)
+        GetWorld()->GetTimerManager().ClearTimer(Timer_DamagedFlagReset);
+        GetWorld()->GetTimerManager().SetTimer(
+            Timer_DamagedFlagReset, this, &AAIEnemyController::ClearDamagedFlag, 3.0f, false);
+    }
+}
+
+void AAIEnemyController::ClearDamagedFlag()
+{
+    //if (BlackboardComp)
+        //BlackboardComp->SetValueAsBool(BB_WasDamagedRecently, false);
+}
+
 
 void AAIEnemyController::SendDeadToBT()
 {

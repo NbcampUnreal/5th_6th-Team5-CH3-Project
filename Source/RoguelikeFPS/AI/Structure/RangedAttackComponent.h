@@ -13,7 +13,7 @@ class ROGUELIKEFPS_API URangedAttackComponent : public UEnemyAttackBaseComponent
     GENERATED_BODY()
 public:
     UFUNCTION(BlueprintCallable, Category = "Attack|Melee")
-    void ApplyRangeConfig(const UEnemyConfig* Config);
+    void ApplyRangeConfig(const UEnemyConfig* Config, float ConfigDamage);
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ranged")
     TSubclassOf<AProjectile> ProjectileClass;

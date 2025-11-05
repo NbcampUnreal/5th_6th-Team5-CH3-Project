@@ -9,6 +9,7 @@ class UBehaviorTreeComponent;
 class UBlackboardComponent;
 class UMeleeAttackComponent;
 class URangedAttackComponent;
+class UStage2BossAttackComponent;
 
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
@@ -44,6 +45,7 @@ public:
 private:
     TWeakObjectPtr<UMeleeAttackComponent>  MeleeComp;
     TWeakObjectPtr<URangedAttackComponent> RangedComp;
+    TWeakObjectPtr<UStage2BossAttackComponent> Boss2Comp;
 
     UFUNCTION()
     void HandleAttackFinished();

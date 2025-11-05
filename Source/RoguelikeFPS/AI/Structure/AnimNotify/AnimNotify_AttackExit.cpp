@@ -2,6 +2,7 @@
 #include "AnimNotify_AttackExit.h"
 #include "../MeleeAttackComponent.h"
 #include "../RangedAttackComponent.h"
+#include "../Stage2BossAttackComponent.h"
 
 void UAnimNotify_AttackExit::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
@@ -15,6 +16,12 @@ void UAnimNotify_AttackExit::Notify(USkeletalMeshComponent* MeshComp, UAnimSeque
         {
             Melee->FinishAttack();
             Melee->bAttackEnded = true;
+            bHandled = true;
+        }
+        if (auto* Boss2 = Owner->FindComponentByClass<UStage2BossAttackComponent>())
+        {
+            Boss2->FinishAttack();
+            Boss2->bAttackEnded = true;
             bHandled = true;
         }
         if (!bHandled)

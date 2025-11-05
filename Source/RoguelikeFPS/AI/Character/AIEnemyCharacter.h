@@ -28,7 +28,7 @@ public:
     UEnemyConfig* Config = nullptr;   
 
     UFUNCTION(BlueprintCallable, Category = "AI|Config")
-    void ApplyConfigToComponents();
+    void ApplyConfigToComponents(float Damage);
 
     // FSM 컴포넌트 (상태 전이/상태별 로직 담당)
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
@@ -66,7 +66,7 @@ public:
     void DrawPerceptionGizmos();
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stats")
-    int Level;
+    int32 Level;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stats")
     float MAXHP;
@@ -79,6 +79,9 @@ public:
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stats")
     float DEF;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly)
+    TSubclassOf<AActor> DropItemClass;
 
 
     // 체력 회복

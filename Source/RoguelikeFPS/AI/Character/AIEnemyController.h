@@ -4,6 +4,8 @@
 #include "AIController.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
+#include "Perception/AISenseConfig_Hearing.h"
+#include "Perception/AISense_Hearing.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "AIEnemyController.generated.h"
@@ -55,6 +57,22 @@ public:
     UPROPERTY(EditAnywhere, Category = "AI|Combat")
     float AttackRange = 200.f;           // InAttackRange 판정용
 
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI|Perception")
+    UAISenseConfig_Hearing* HearingConfig = nullptr;
+
+    // 튜닝값 (Config에서 받아도 OK)
+    UPROPERTY(EditAnywhere, Category = "AI|Perception")
+    float HearingRange = 2000.f;
+
+    UPROPERTY(EditAnywhere, Category = "AI|Perception")
+    float LoSHearingRange = 2500.f;
+
+    UPROPERTY(EditAnywhere, Category = "AI|Perception")
+    float HearingForgetSeconds = 3.f;
+
+
+
+
     UFUNCTION()
     void SendDeadToBT();
 
@@ -65,6 +83,9 @@ public:
     static const FName BB_InAttackRange;
     static const FName BB_LastSeenLocation;
     static const FName BB_HasLastSeen;
+    static const FName BB_LastHeardLocation;
+    static const FName BB_InSoundRange;
+    //static const FName BB_WasDamagedRecently;
 
 protected:
     /** Perception 이벤트 */
@@ -74,8 +95,13 @@ protected:
     UFUNCTION()
     void OnPerceptionUpdated(const TArray<AActor*>& UpdatedActors);
 
+    // 피격 시 가해자 추격
+    UFUNCTION()
+    void OnTakeAnyDamage_Handled(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser);
 
+    void ClearDamagedFlag();
 
     /** 타깃 및 관련 키 초기화 */
+    FTimerHandle Timer_DamagedFlagReset;
     void ClearTarget();
 };

@@ -8,10 +8,10 @@
 #include "Weapon/Projectile.h"
 
 
-void URangedAttackComponent::ApplyRangeConfig(const UEnemyConfig* Config)
+void URangedAttackComponent::ApplyRangeConfig(const UEnemyConfig* Config, float ConfigDamage)
 {
     if (!Config) return;
-    ApplyConfig(Config);            // 공통(Damage/Cooldown)
+    ApplyConfig(Config, ConfigDamage);            // 공통(Damage/Cooldown)
     ProjectileClass = Config->ProjectileClass;
     MuzzleSocket = Config->MuzzleSocket;
     MuzzleSpeed = Config->ProjectileSpeed;
@@ -27,7 +27,7 @@ void URangedAttackComponent::DoHit()
 {
     if (bCanceled) return;
     if (!HasServerAuthority()) return;
-    if (!bAttackInProgress) return;
+    //if (!bAttackInProgress) return;
     if (!ProjectileClass) return;
 
     FVector Loc; FRotator Rot;
@@ -39,7 +39,12 @@ void URangedAttackComponent::DoHit()
 
     if (AProjectile* Proj = GetWorld()->SpawnActor<AProjectile>(ProjectileClass, Loc, Rot, P))
     {
+        UE_LOG(LogTemp, Log, TEXT("SpawnActor if"));
         Proj->SetMovementSpeed(MuzzleSpeed);
+    }
+    else
+    {
+        UE_LOG(LogTemp, Log, TEXT("SpawnActor else"));
     }
 }
 
