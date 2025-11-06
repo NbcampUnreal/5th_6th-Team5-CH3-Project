@@ -24,6 +24,8 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Melee")
     float AttackRange = 200.f;
 
+    float GetAttackRange() { return AttackRange; }
+
     bool bAttackEnded = true;
 
     UPROPERTY(EditAnywhere, Category = "Debug|Melee")

@@ -75,11 +75,14 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Patrol")
     float AcceptanceRadius = 120.f;
 
+
+    // 근거리 전용
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack|Melee")
     float MeleeRange = 220.f;  // 스윕 길이(초록 캡슐 길이)
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack|Melee")
     float MeleeHitRadius = 60.f;   // 스윕 두께(초록 캡슐 반지름)
 
+    // 원거리 전용
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack|Ranged")
     TSubclassOf<AActor> ProjectileClass;
 
@@ -89,7 +92,10 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack|Ranged")
     FName MuzzleSocket = TEXT("Muzzle");
 
+    // 보스 전용
 
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack|Boss")
+    float AddtionalRange = 0.f;
 
 
 

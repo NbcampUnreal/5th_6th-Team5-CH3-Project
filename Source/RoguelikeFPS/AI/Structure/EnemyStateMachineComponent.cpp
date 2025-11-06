@@ -203,11 +203,16 @@ void UEnemyStateMachineComponent::OnEnter_Attack()
     const float Dist = Dist2DToTarget(Target);
 
     // 우선순위: 근접 가능하면 근접, 아니면 원거리
-    if (MeleeComp.IsValid() && Dist <= MeleeThreshold && MeleeComp->CanAttack())
+    if (MeleeComp.IsValid() && MeleeComp->CanAttack())
     {
-        MeleeComp->OnAttackFinished.RemoveDynamic(this, &UEnemyStateMachineComponent::HandleAttackFinished);
-        MeleeComp->OnAttackFinished.AddDynamic(this, &UEnemyStateMachineComponent::HandleAttackFinished);
-        MeleeComp->StartAttack(Target);
+        MeleeThreshold = MeleeComp->GetAttackRange();
+        if (Dist <= MeleeThreshold)
+        {
+            MeleeComp->OnAttackFinished.RemoveDynamic(this, &UEnemyStateMachineComponent::HandleAttackFinished);
+            MeleeComp->OnAttackFinished.AddDynamic(this, &UEnemyStateMachineComponent::HandleAttackFinished);
+            MeleeComp->StartAttack(Target);
+        }
+
     }
     else if (RangedComp.IsValid() && RangedComp->CanAttack())
     {
@@ -215,11 +220,28 @@ void UEnemyStateMachineComponent::OnEnter_Attack()
         RangedComp->OnAttackFinished.AddDynamic(this, &UEnemyStateMachineComponent::HandleAttackFinished);
         RangedComp->StartAttack(Target);
     }//Boss2Comp
-    else if (Boss2Comp.IsValid() && Dist <= MeleeThreshold && Boss2Comp->CanAttack())
+    else if (Boss2Comp.IsValid() && Boss2Comp->CanAttack())
     {
-        Boss2Comp->OnAttackFinished.RemoveDynamic(this, &UEnemyStateMachineComponent::HandleAttackFinished);
-        Boss2Comp->OnAttackFinished.AddDynamic(this, &UEnemyStateMachineComponent::HandleAttackFinished);
-        
+        MeleeThreshold = Boss2Comp->GetAttackRange();
+        if (Dist <= MeleeThreshold)
+        {
+            Boss2Comp->OnAttackFinished.RemoveDynamic(this, &UEnemyStateMachineComponent::HandleAttackFinished);
+            Boss2Comp->OnAttackFinished.AddDynamic(this, &UEnemyStateMachineComponent::HandleAttackFinished);
+            Boss2Comp->StartAttack(Target);
+            switch (CachedAnim->PatternState)
+            {
+            case EPattern::Pattern1:
+                Boss2Comp->patternNum = 1;
+                break;
+            case EPattern::Pattern2:
+                Boss2Comp->patternNum = 2;
+                break;
+            case EPattern::Pattern3:
+                Boss2Comp->patternNum = 3;
+                break;
+            }
+        }
+
     }
     else
     {

@@ -1,10 +1,19 @@
-﻿#include "AI/Character/AIEnemyCharacter.h"
+﻿
+#include "AI/Character/AIEnemyCharacter.h"
+#include "GameFramework/Controller.h"
+#include "Kismet/GameplayStatics.h"  
+#include "Engine/DamageEvents.h"
 #include "AI/Character/AIEnemyController.h"
 #include "AI/Structure/MeleeAttackComponent.h"
 #include "AI/Structure/RangedAttackComponent.h"
+#include "AI/Structure/Stage2BossAttackComponent.h"
 #include "DrawDebugHelpers.h"
 #include "GameFramework/CharacterMovementComponent.h"
+
+#include "GameFramework/DamageType.h"
 #include "Components/CapsuleComponent.h"
+
+
 
 AAIEnemyCharacter::AAIEnemyCharacter()
 {
@@ -96,6 +105,12 @@ void AAIEnemyCharacter::ApplyConfigToComponents(float Damage)
     {
         Ranged->ApplyRangeConfig(Config, Damage);
         //UE_LOG(LogTemp, Log, TEXT("ApplyRangeConfig Complete"));
+    }
+
+    if (auto* Boss2 = FindComponentByClass<UStage2BossAttackComponent>())
+    {
+        Boss2->ApplyMeleeConfig(Config, Damage);
+        //UE_LOG(LogTemp, Log, TEXT("ApplyMeleeConfig Complete"));
     }
 
 
@@ -197,23 +212,47 @@ void AAIEnemyCharacter::OnDeath()
     //SetLifeSpan(2.0f);           // Destroy() 즉시 호출 대신 권장
 }
 
-float AAIEnemyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+
+
+float AAIEnemyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) 
 {
-    // 기본 데미지 처리 로직 호출 (필수는 아님)
-    float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-    // EventInstigator == 컨트롤러, DamageCauser == 액터
-    // 이걸 이용해서 스턴을 넣는 float를 받아와서 이걸 확률로 이용하기
-    // 
-    
-    HP = FMath::Clamp(HP - DamageAmount, 0.0f, MAXHP);
-    //UE_LOG(LogTemp, Warning, TEXT("Health decreased to: %f"), HP);
+    UE_LOG(LogTemp, Log, TEXT("TakeDamage"));
+    float FinalDamage = DamageAmount; // 포인트 데미지(부위 판정)인 경우만 헤드샷 배율 적용 
+    if (DamageEvent.GetTypeID() == FPointDamageEvent::ClassID) 
+    { 
+        const FPointDamageEvent* PDE = static_cast<const FPointDamageEvent*>(&DamageEvent); 
+        if (PDE)
+        {
+            const FName HitBone = PDE->HitInfo.BoneName;
 
-    // 체력이 0 이하가 되면 사망 처리
-    if (HP <= 0.0f)
-    {
-        OnDeath();
-    }
+            if (HitBone != NAME_None)
+            {
+                UE_LOG(LogTemp, Warning, TEXT("[DEBUG] Hit bone: %s"), *HitBone.ToString());
+            }
+            else
+            {
+                UE_LOG(LogTemp, Warning, TEXT("[DEBUG] Hit bone: (None)"));
+            }
 
-    // 실제 적용된 데미지를 반환
-    return ActualDamage;
+            if (IsHeadBone(HitBone))
+            {
+                FinalDamage *= HeadshotMultiplier;
+                UE_LOG(LogTemp, Error, TEXT("[HEADSHOT] %s  x%.2f"), *HitBone.ToString(), HeadshotMultiplier);
+            }
+        }
+        if (PDE && IsHeadBone(PDE->HitInfo.BoneName)) 
+        { 
+            FinalDamage *= HeadshotMultiplier; 
+            UE_LOG(LogTemp, Log, TEXT("HEADSHOT %s x%.2f"), *PDE->HitInfo.BoneName.ToString(), HeadshotMultiplier); 
+        } 
+    } // Super가 블루프린트 이벤트/데미지 라우팅을 처리하니 반드시 호출 
+
+    const float Applied = Super::TakeDamage(FinalDamage, DamageEvent, EventInstigator, DamageCauser); 
+    // HP 처리 
+    HP = FMath::Clamp(HP - Applied, 0.f, MAXHP); 
+    if (HP <= 0.f) 
+    { 
+        OnDeath(); 
+    } 
+    return Applied;
 }

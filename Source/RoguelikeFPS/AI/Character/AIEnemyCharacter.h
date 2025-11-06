@@ -1,5 +1,5 @@
 ﻿#pragma once
-//JMS
+
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "AI/Structure/EnemyState.h"
@@ -7,6 +7,8 @@
 #include "AI/Structure/EnemyStateMachineComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "AIEnemyCharacter.generated.h"
+
+
 
 UCLASS()
 class ROGUELIKEFPS_API AAIEnemyCharacter : public ACharacter
@@ -84,12 +86,24 @@ public:
     TSubclassOf<AActor> DropItemClass;
 
 
+    UPROPERTY(EditAnywhere, Category = "Combat")
+    float HeadshotMultiplier = 2.0f;
+
+    UPROPERTY(EditAnywhere, Category = "Combat")
+    TSet<FName> HeadBones = { TEXT("head"), TEXT("Head"), TEXT("Head_top") /* 등 프로젝트 본명에 맞춰 */ };
+
+    UFUNCTION(BlueprintCallable)
+    bool IsHeadBone(FName Bone) const { return HeadBones.Contains(Bone); }
+
+
     // 체력 회복
     UFUNCTION(BlueprintCallable, Category = "Stats")
     void AddHealth(float Amount);
     // 사망 처리 함수 (체력이 0 이하가 되었을 때 호출)
     UFUNCTION(BlueprintCallable, Category = "Stats")
     virtual void OnDeath();
+
+
 
     // 데미지 처리 함수 - 외부로부터 데미지를 받을 때 호출됨
     // 또는 AActor의 TakeDamage()를 오버라이드

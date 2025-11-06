@@ -31,20 +31,28 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item|Component")
 	UStaticMeshComponent* StaticMesh;
 
+	//UFUNCTION()
+	//virtual void OnItemOverlap(
+	//	UPrimitiveComponent* OverlappedComp,
+	//	AActor* OtherActor,
+	//	UPrimitiveComponent* OtherComp,
+	//	int32 OtherBodyIndex,
+	//	bool bFromSweep,
+	//	const FHitResult& SweepResult);
+	//UFUNCTION()
+	//virtual void OnItemEndOverlap(
+	//	UPrimitiveComponent* OverlappedComp,
+	//	AActor* OtherActor,
+	//	UPrimitiveComponent* OtherComp,
+	//	int32 OtherBodyIndex);
+
 	UFUNCTION()
-	virtual void OnItemOverlap(
-		UPrimitiveComponent* OverlappedComp,
+	void OnProjectileHit(
+		UPrimitiveComponent* HitComp,
 		AActor* OtherActor,
 		UPrimitiveComponent* OtherComp,
-		int32 OtherBodyIndex,
-		bool bFromSweep,
-		const FHitResult& SweepResult);
-	UFUNCTION()
-	virtual void OnItemEndOverlap(
-		UPrimitiveComponent* OverlappedComp,
-		AActor* OtherActor,
-		UPrimitiveComponent* OtherComp,
-		int32 OtherBodyIndex);
+		FVector NormalImpulse,
+		const FHitResult& Hit);
 
 public:	
 	// Called every frame
