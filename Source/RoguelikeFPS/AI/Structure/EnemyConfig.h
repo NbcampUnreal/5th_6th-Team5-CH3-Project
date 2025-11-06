@@ -92,6 +92,15 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack|Ranged")
     FName MuzzleSocket = TEXT("Muzzle");
 
+    // 발사 위치 보정
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack|Ranged")
+    float CorrectX = 0.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack|Ranged")
+    float CorrectY = 0.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack|Ranged")
+    float CorrectZ = 0.f;
     // 보스 전용
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack|Boss")
