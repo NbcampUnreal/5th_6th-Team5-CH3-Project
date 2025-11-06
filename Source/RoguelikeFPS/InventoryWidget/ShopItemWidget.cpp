@@ -1,6 +1,6 @@
 #include "ShopItemWidget.h"
-#include "MyCharacter.h"
-#include "MyPlayerController.h"
+#include "FPSCharacter.h"
+#include "FPSPlayerController.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 #include "Components/Border.h"
@@ -48,11 +48,11 @@ void UShopItemWidget::OnBuyClicked()
     {
         return;
     }
-    if (AMyCharacter* Player = Cast<AMyCharacter>(GetOwningPlayerPawn()))
+    if (AFPSCharacter* Player = Cast<AFPSCharacter>(GetOwningPlayerPawn()))
     {
         if (Player->Inventory && Player->Inventory->BuyItem(ItemData))
         {
-            if (AMyPlayerController* PC = Cast<AMyPlayerController>(Player->GetController()))
+            if (AFPSPlayerController* PC = Cast<AFPSPlayerController>(Player->GetController()))
             {
                 if (PC->InventoryWidget)
                 {
@@ -68,11 +68,11 @@ void UShopItemWidget::OnSellClicked()
     {
         return;
     }
-    if (AMyCharacter* Player = Cast<AMyCharacter>(GetOwningPlayerPawn()))
+    if (AFPSCharacter* Player = Cast<AFPSCharacter>(GetOwningPlayerPawn()))
     {
         if (Player->Inventory && Player->Inventory->SellItem(ItemData, 1))
         {
-            if (AMyPlayerController* PC = Cast<AMyPlayerController>(Player->GetController()))
+            if (AFPSPlayerController* PC = Cast<AFPSPlayerController>(Player->GetController()))
             {
                 if (PC->InventoryWidget)
                 {
