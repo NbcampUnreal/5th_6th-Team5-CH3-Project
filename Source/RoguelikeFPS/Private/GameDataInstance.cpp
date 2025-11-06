@@ -2,11 +2,22 @@
 
 UGameDataInstance::UGameDataInstance()
 {
+    // ===== 기본값 설정 =====
     SelectedWeaponIndex = 0;
     bIsReadyToStart = false;
     PlayerXP = 0.f;
     PlayerLevel = 1;
     XPToLevelUp = 100.f;
+
+    // 맵 순환 관리 초기화
+    CurrentStageIndex = 1; // 첫 번째 맵부터 시작
+
+    // 기본 맵 목록 (에디터에서 수정 가능)
+    StageLevelNames.Add(FName("L_GameMap1"));
+    StageLevelNames.Add(FName("L_GameMap2"));
+    StageLevelNames.Add(FName("L_GameMap3"));
+
+    MainMenuLevelName = FName("L_MainMenu");
 }
 
 void UGameDataInstance::SetSelectedOption(int32 WeaponIndex)
@@ -25,4 +36,5 @@ void UGameDataInstance::ResetGameStatsToLevelOne()
     PlayerXP = 0.f;
     SelectedWeaponIndex = 0;
     bIsReadyToStart = false;
+    // CurrentStageIndex는 주로 GameMode에서 리셋됩니다.
 }

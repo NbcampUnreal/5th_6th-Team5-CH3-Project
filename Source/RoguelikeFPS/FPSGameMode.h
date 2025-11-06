@@ -16,6 +16,7 @@ class ROGUELIKEFPS_API AFPSGameMode : public AGameModeBase
 
     friend class UTitleWidget;
     friend class UMainMenuWidget;
+    friend class UGameClearWidget;
 
 public:
     AFPSGameMode(const FObjectInitializer& ObjectInitializer);
