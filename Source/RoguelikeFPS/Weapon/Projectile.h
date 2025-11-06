@@ -9,7 +9,8 @@
 class USphereComponent;
 class UProjectileMovementComponent;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDestroyed);
+//DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDestroyed);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnDamagedEnemy, ACharacter*);
 
 UCLASS()
 class ROGUELIKEFPS_API AProjectile : public AActor
@@ -19,6 +20,8 @@ class ROGUELIKEFPS_API AProjectile : public AActor
 public:
 	// Sets default values for this actor's properties
 	AProjectile();
+
+	FOnDamagedEnemy OnDamagedEnemy;
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
@@ -32,6 +35,7 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Projectile, meta = (AllowPrivateAccess = "true"))
 	AActor* _Instigator;
+
 private:
 
 public:

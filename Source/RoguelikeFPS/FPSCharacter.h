@@ -35,6 +35,10 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnPlayerDeathSignature OnPlayerDeath;
 
+	void AddShield(int32 amount) {
+		shield += amount;
+	}
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
 	TObjectPtr<USpringArmComponent> SpringArmComp;
@@ -64,6 +68,7 @@ protected:
 	int32 MaxExperience;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
 	int32 shield;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
 	bool bIsAlive;
 

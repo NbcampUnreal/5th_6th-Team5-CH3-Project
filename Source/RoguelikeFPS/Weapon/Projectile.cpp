@@ -5,6 +5,9 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Weapon/WeaponComponent.h"
 #include "Components/SphereComponent.h"
+#include "FPSCharacter.h"
+#include "AI/Character/AIEnemyCharacter.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AProjectile::AProjectile()
@@ -63,7 +66,29 @@ void AProjectile::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 {
 	if (OtherComp->IsA(UWeaponComponent::StaticClass())) return;
 	if (!IsValid(_Instigator)) return;
-	if (_Instigator != OtherActor) Destroy();	
+	if (_Instigator == OtherActor) return;
+	
+	ACharacter* Victim = Cast<ACharacter>(OtherActor);	
+
+	if (!Victim)
+	{
+		Destroy();
+		return;
+	}
+
+	ACharacter* Attacker = Cast<ACharacter>(_Instigator);
+
+	AActor* ActualDamageCauser = this;
+	AController* AttackerController = nullptr;
+	if (IsValid(Attacker))
+	{
+		AttackerController = Attacker->GetController();
+	}
+
+	UGameplayStatics::ApplyDamage(Victim, _Damage, AttackerController, ActualDamageCauser, UDamageType::StaticClass());
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("ApplyDamage : %d"), _Damage));
+	OnDamagedEnemy.Broadcast(Victim);
+	Destroy();
 }
 
 
