@@ -10,6 +10,7 @@ struct FInputActionValue;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLevelUpSignature, APlayerController*, PlayerController);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerDeathSignature, AController*, KillerController);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHUDStatChangedSignature, FName, StatName); // HUD 업데이트 신호
 
 UCLASS()
 class ROGUELIKEFPS_API AFPSCharacter : public ACharacter
@@ -27,13 +28,42 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ApplyAugment(FName AugmentName);
 
-	// ===== 레벨업 델리게이트 =====
+	//HUD 업데이트를 외부에서 호출할 경우 사용
+	void UpdateHUDStats(FName StatName);
+
+	// ===== 델리게이트 =====
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnLevelUpSignature OnLevelUp;
 
-	// ===== 사망 델리게이트 =====
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnPlayerDeathSignature OnPlayerDeath;
+
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnHUDStatChangedSignature OnHUDStatChanged;
+
+	// --- HUD Getter 함수들 (StatsHUD에서 접근 가능하도록 PUBLIC) ---
+	UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
+	void GainGold(int32 Amount);
+	UFUNCTION(BlueprintPure, Category = "CharacterStatus")
+	int32 GetHealth() const { return Health; }
+	UFUNCTION(BlueprintPure, Category = "CharacterStatus")
+	int32 GetMaxHealth() const { return MaxHealth; }
+	UFUNCTION(BlueprintPure, Category = "CharacterStatus")
+	int32 GetGoldAmount() const { return GoldAmount; }
+	UFUNCTION(BlueprintPure, Category = "WeaponInfo")
+	int32 GetCurrentAmmo() const { return CurrentAmmo; }
+	UFUNCTION(BlueprintPure, Category = "WeaponInfo")
+	int32 GetMaxAmmo() const { return MaxAmmo; }
+	UFUNCTION(BlueprintPure, Category = "CharacterStatus")
+	float GetCurrentExperience() const { return CurrentExperience; }
+	UFUNCTION(BlueprintPure, Category = "CharacterStatus")
+	int32 GetMaxExperience() const { return MaxExperience; }
+	UFUNCTION(BlueprintPure, Category = "WeaponInfo")
+	FName GetCurrentWeaponName() const { return CurrentWeaponName; }
+	UFUNCTION(BlueprintPure, Category = "Skills")
+	float GetSkill1CooldownRemaining() const { return Skill1CooldownRemaining; }
+	UFUNCTION(BlueprintPure, Category = "Skills")
+	float GetSkill2CooldownRemaining() const { return Skill2CooldownRemaining; }
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
@@ -41,7 +71,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
 	TObjectPtr<UCameraComponent> CameraComp;
 
-	// Status
+	// Status (기존 변수들)
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
 	int32 Level;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
@@ -65,7 +95,24 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
 	bool bIsAlive;
 
-	// 대시
+	// --- HUD 관련 변수 ---
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterStatus")
+	int32 GoldAmount = 100;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterStatus")
+	int32 CurrentAmmo = 30;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterStatus")
+	int32 MaxAmmo = 300;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterStatus")
+	float CurrentExperience = 0.0f;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Skills")
+	float Skill1CooldownRemaining = 0.0f;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Skills")
+	float Skill2CooldownRemaining = 0.0f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "WeaponInfo")
+	FName CurrentWeaponName = TEXT("Pistol");
+
+	// --- Dash 관련 코드 ---
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash")
 	float DashMultifly;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Dash")
@@ -76,11 +123,13 @@ protected:
 	bool bIsDashing;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dash")
 	bool bIsDashing2;
-
-
 	FTimerHandle DashTimerHandle;
+	UFUNCTION()
+	void StartDash(const FInputActionValue& value);
+	UFUNCTION()
+	void StopDash();
 
-	// 총 발사 변수
+	// --- 총/장전 관련 ---
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fire")
 	bool bIsFiring;
 	FTimerHandle FireCooltimeHandle;
@@ -89,16 +138,14 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Fire")
 	float AutoFireTime;
 	void PerformFire();
-
-	// 장전 변수
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fire")
 	bool bIsReloading;
 	FTimerHandle ReloadTimeHandle;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Fire")
 	float ReloadTime;
+	void StopReload();
 
-	// Action Value
-
+	// Action Value 함수 선언들
 	UFUNCTION()
 	void Move(const FInputActionValue& value);
 	UFUNCTION()
@@ -107,10 +154,6 @@ protected:
 	void StartJump(const FInputActionValue& value);
 	UFUNCTION()
 	void StopJump(const FInputActionValue& value);
-	UFUNCTION()
-	void StartDash(const FInputActionValue& value);
-	UFUNCTION()
-	void StopDash();
 	UFUNCTION()
 	void StartCrouch(const FInputActionValue& value);
 	UFUNCTION()
@@ -125,7 +168,6 @@ protected:
 	void StopFire_Auto(const FInputActionValue& value);
 	UFUNCTION()
 	void Reload(const FInputActionValue& value);
-	void StopReload();
 
 	void LevelUp();
 	void OnDeath(AController* KillerController);
@@ -133,4 +175,6 @@ protected:
 
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
 		AController* EventInstigator, AActor* DamageCauser) override;
+
+	virtual void Tick(float DeltaTime) override; // Tick 활성화
 };

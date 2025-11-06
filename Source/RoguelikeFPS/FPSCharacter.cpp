@@ -5,7 +5,7 @@
 #include "FPSPlayerController.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
-AFPSCharacter::AFPSCharacter()		//초기 스텟 설정
+AFPSCharacter::AFPSCharacter()		// Initial setup
 	: Level(1),
 	Health(100),
 	MaxHealth(100),
@@ -18,10 +18,10 @@ AFPSCharacter::AFPSCharacter()		//초기 스텟 설정
 	MaxExperience(100),
 	bIsAlive(true)
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = false; // Tick 비활성화 (필요하면 BeginPlay 또는 생성자에서 true로 변경 필요)
 
 
-	// 카메라 부착
+	// Camera Setup
 	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComp"));
 	SpringArmComp->SetupAttachment(RootComponent);
 	SpringArmComp->TargetArmLength = 50.0f;
@@ -31,14 +31,14 @@ AFPSCharacter::AFPSCharacter()		//초기 스텟 설정
 	CameraComp->SetupAttachment(SpringArmComp, USpringArmComponent::SocketName);
 	CameraComp->bUsePawnControlRotation = false;
 
-	// 대시 스피드
+	// Movement Setup
 	GetCharacterMovement()->MaxWalkSpeed = MovingSpeed;
 	DashMultifly = 2.0f;
 	DashSpeed = MovingSpeed * DashMultifly;
 	DashTime = 0.5f;
 
 
-	// Crouch 활성화
+	// Crouch Activation
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
 	GetCharacterMovement()->SetCrouchedHalfHeight(60.0f);
 
@@ -46,7 +46,7 @@ AFPSCharacter::AFPSCharacter()		//초기 스텟 설정
 	FireCooltime = 2.0f;
 	AutoFireTime = 1.0f;
 
-	// Reload
+	// Reload Time
 	ReloadTime = 1.5f;
 }
 
@@ -333,6 +333,9 @@ float AFPSCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	if (ActualDamage > 0)
 	{
 		Health -= ActualDamage;
+
+		UpdateHUDStats(TEXT("Health"));
+
 		if (Health <= 0.f) OnDeath(EventInstigator);
 	}
 	return ActualDamage;
@@ -341,10 +344,44 @@ float AFPSCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 void AFPSCharacter::ApplyAugment(FName AugmentName)
 {
 	UE_LOG(LogTemp, Warning, TEXT("ApplyAugment called with: %s"), *AugmentName.ToString());
-	// 강화 효과 적용 로직 (예: 스탯 증가, 능력 부여 등)
+	// Augment Logic Here (Example: Stat increase, ability unlock)
 }
 void AFPSCharacter::AddXP(float Amount)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Gained XP: %f"), Amount);
-	// 실제 경험치시스템 여기 반영
+	CurrentExperience += Amount;
+	UpdateHUDStats(TEXT("Experience"));
+	LevelUp();
+	// Add XP logic here //레벨업 체크
+}
+
+void AFPSCharacter::GainGold(int32 Amount) // 이 함수는 필요하다면 새로 만드세요.
+{
+	GoldAmount += Amount;
+
+	// 골드 변경 시 HUD 업데이트 신호 전송
+	UpdateHUDStats(TEXT("Gold"));
+}
+
+void AFPSCharacter::UpdateHUDStats(FName StatName)
+{
+	// HUD 업데이트 로직이 여기에 추가되어야 합니다.
+	// 예: OnHUDStatChanged.Broadcast(StatName);
+	OnHUDStatChanged.Broadcast(StatName);
+}
+
+void AFPSCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime); // Tick을 사용하려면 생성자에서 PrimaryActorTick.bCanEverTick = true; 로 변경해야 함
+
+	// 예시: 쿨다운 감소 로직 등
+	if (Skill1CooldownRemaining > 0.0f)
+	{
+		Skill1CooldownRemaining -= DeltaTime;
+		if (Skill1CooldownRemaining <= 0.0f)
+		{
+			OnHUDStatChanged.Broadcast(TEXT("Skill1CD"));
+		}
+	}
+	// ...
 }

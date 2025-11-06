@@ -31,7 +31,7 @@ void UGameClearWidget::OnExitButtonClicked() // 함수 이름 통일
     if (GM && PC)
     {
         // GameMode의 protected 함수 호출 (AFPSGameMode.h에 friend 선언 필수)
-        GM->ReturnToMainMenu(PC);
+        //GM->ReturnToMainMenu(PC);
 
         RemoveFromParent(); // UUserWidget의 멤버 함수
     }
