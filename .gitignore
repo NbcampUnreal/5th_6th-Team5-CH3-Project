@@ -108,7 +108,15 @@ Content/**/*.wav
 Content/**/*.fbx
 Content/**/*.psd
 
+# 압축 파일
+*.zip
+*.7z
+
 # 임시/변환 파일
 Saved/**
+
+# 압축 파일
+*.zip
+*.7z
 
 # End of https://www.toptal.com/developers/gitignore/api/unrealengine
