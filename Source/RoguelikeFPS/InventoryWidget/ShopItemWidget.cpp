@@ -1,6 +1,6 @@
 #include "ShopItemWidget.h"
-#include "FPSCharacter.h"
-#include "FPSPlayerController.h"
+#include "RoguelikeFPS/FPSCharacter.h"
+#include "RoguelikeFPS/FPSPlayerController.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 #include "Components/Border.h"
