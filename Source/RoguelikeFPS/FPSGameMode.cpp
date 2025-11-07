@@ -5,6 +5,7 @@
 #include "TitleWidget.h"
 #include "MainMenuWidget.h"
 #include "GameDataInstance.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "GameFramework/PlayerController.h"
@@ -13,28 +14,31 @@
 AFPSGameMode::AFPSGameMode(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
 {
-    // 현재 아무것도 초기화하지 않아도 괜찮음.
+    static ConstructorHelpers::FObjectFinder<UDataTable> AugmentDataTableFinder(TEXT("/Game/Data/DT_Augments.DT_Augments"));
+    if (AugmentDataTableFinder.Succeeded())
+    {
+        AugmentDataTable = AugmentDataTableFinder.Object;
+    }
+    // 기본 가중치 설정
+    RarityWeights.Add(EAugmentRarity::Normal, 0.50f);
+    RarityWeights.Add(EAugmentRarity::Rare, 0.30f);
+    RarityWeights.Add(EAugmentRarity::Epic, 0.15f);
+    RarityWeights.Add(EAugmentRarity::Legendary, 0.05f);
 }
 
-// BeginPlay
 void AFPSGameMode::BeginPlay()
 {
     Super::BeginPlay();
-
     if (TitleWidgetClass)
     {
         TitleWidgetInstance = CreateWidget<UTitleWidget>(GetWorld(), TitleWidgetClass);
         if (TitleWidgetInstance)
         {
             TitleWidgetInstance->AddToViewport();
-
-            // Title 위젯에 MainMenu 클래스 설정 (Blueprint에서 설정 안 했을 경우 대비)
             if (MainMenuWidgetClass)
             {
                 TitleWidgetInstance->MainMenuWidgetClass = MainMenuWidgetClass;
             }
-
-            // 마우스 모드 세팅
             APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
             if (PC)
             {
@@ -45,23 +49,17 @@ void AFPSGameMode::BeginPlay()
     }
 }
 
-// Ingame
 void AFPSGameMode::PostLogin(APlayerController* NewPlayer)
 {
     Super::PostLogin(NewPlayer);
-//    Super::PostLogin(NewPlayer);
-//
-//    if (!NewPlayer || !NewPlayer->GetPawn()) return;
-//
-//    // 레벨업 이벤트 구독
-//    if (AFPSCharacter* FPSChar = Cast<AFPSCharacter>(NewPlayer->GetPawn()))
-//    {
-//        FPSChar->OnLevelUp.AddDynamic(this, &AFPSGameMode::HandlePlayerLevelUp);
-//        FPSChar->OnPlayerDeath.AddDynamic(this, &AFPSGameMode::HandlePlayerDeath);
-//    }
+    if (!NewPlayer || !NewPlayer->GetPawn()) return;
+    if (AFPSCharacter* FPSChar = Cast<AFPSCharacter>(NewPlayer->GetPawn()))
+    {
+        FPSChar->OnLevelUp.AddDynamic(this, &AFPSGameMode::HandlePlayerLevelUp);
+        FPSChar->OnPlayerDeath.AddDynamic(this, &AFPSGameMode::HandlePlayerDeath);
+    }
 }
-//
-//// 타이틀 / 메인 메뉴 이벤트
+
 void AFPSGameMode::OnTitleStartClicked()
 {
     if (TitleWidgetInstance)
@@ -69,15 +67,12 @@ void AFPSGameMode::OnTitleStartClicked()
         TitleWidgetInstance->RemoveFromParent();
         TitleWidgetInstance = nullptr;
     }
-
     if (MainMenuWidgetClass)
     {
         MainMenuWidgetInstance = CreateWidget<UMainMenuWidget>(GetWorld(), MainMenuWidgetClass);
         if (MainMenuWidgetInstance)
         {
             MainMenuWidgetInstance->AddToViewport();
-
-            // 입력 모드 재설정 (MainMenu가 포커스를 가짐)
             APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
             if (PC)
             {
@@ -87,7 +82,7 @@ void AFPSGameMode::OnTitleStartClicked()
         }
     }
 }
-////무기 선택
+
 void AFPSGameMode::OnMainMenuBackClicked()
 {
     if (MainMenuWidgetInstance)
@@ -95,17 +90,12 @@ void AFPSGameMode::OnMainMenuBackClicked()
         MainMenuWidgetInstance->RemoveFromParent();
         MainMenuWidgetInstance = nullptr;
     }
-
     if (TitleWidgetClass)
     {
         TitleWidgetInstance = CreateWidget<UTitleWidget>(GetWorld(), TitleWidgetClass);
         if (TitleWidgetInstance)
         {
             TitleWidgetInstance->AddToViewport();
-            // Title 위젯 이벤트 구독
-            TitleWidgetInstance->OnStartButtonClicked.AddDynamic(this, &AFPSGameMode::OnTitleStartClicked);
-
-            // 입력 모드 재설정 (Title 화면으로 복귀)
             APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
             if (PC)
             {
@@ -115,55 +105,56 @@ void AFPSGameMode::OnMainMenuBackClicked()
         }
     }
 }
-//
+
 void AFPSGameMode::OnMainMenuStartClicked()
 {
-    // 게임 레벨로 전환 시 입력 모드를 게임으로 돌려놔야 함 (중요!)
     APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
     if (PC)
     {
         PC->bShowMouseCursor = false;
         PC->SetInputMode(FInputModeGameOnly());
     }
-    const FName NextLevelName = TEXT("L_Map1");
-    GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Yellow,
-        FString::Printf(TEXT("Opening Level: %s"), *NextLevelName.ToString()));
-
+    UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(GetWorld());
+    FName NextLevelName = TEXT("L_GameMap01");
+    if (UGameDataInstance* GameDataInstance = Cast<UGameDataInstance>(GameInstance))
+    {
+        if (GameDataInstance->CurrentStageIndex >= 1 &&
+            GameDataInstance->CurrentStageIndex <= GameDataInstance->StageLevelNames.Num())
+        {
+            NextLevelName = GameDataInstance->StageLevelNames[GameDataInstance->CurrentStageIndex - 1];
+            GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Yellow,
+                FString::Printf(TEXT("Opening Level: %s (Stage Index: %d)"), *NextLevelName.ToString(), GameDataInstance->CurrentStageIndex));
+            GameDataInstance->CurrentStageIndex++;
+        }
+        else
+        {
+            GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red,
+                FString::Printf(TEXT("Error: CurrentStageIndex %d out of bounds for StageLevelNames array size %d. Using fallback."),
+                    GameDataInstance->CurrentStageIndex, GameDataInstance->StageLevelNames.Num()));
+        }
+    }
     UGameplayStatics::OpenLevel(GetWorld(), NextLevelName);
 }
 
-//UI닫기 및 게임 재개
 void AFPSGameMode::CloseCurrentUIAndResumeGame(bool bResumeGameInput)
 {
-    // 모든 Viewport 위젯 제거 (강력한 방법)
     APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
     if (PC)
     {
-        TArray<UUserWidget*> Widgets;
-        // Viewport에 있는 모든 위젯을 가져옵니다.
-        APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-        if (PlayerController)
+        for (TObjectIterator<UUserWidget> It; It; ++It)
         {
-            // 모든 Viewport 위젯을 순회하며 제거
-            for (TObjectIterator<UUserWidget> It; It; ++It)
+            if (It->IsInViewport())
             {
-                if (It->IsInViewport())
-                {
-                    It->RemoveFromParent();
-                }
+                It->RemoveFromParent();
             }
         }
-
-        // 입력 모드 복구
         if (bResumeGameInput)
         {
-            // 게임 플레이 모드로 전환
             PC->SetInputMode(FInputModeGameOnly());
             PC->bShowMouseCursor = false;
         }
         else
         {
-            // UI 모드 유지 (예: MainMenu에서 게임으로 돌아가지 않을 때)
             FInputModeUIOnly InputMode;
             PC->SetInputMode(InputMode);
             PC->bShowMouseCursor = true;
@@ -172,37 +163,71 @@ void AFPSGameMode::CloseCurrentUIAndResumeGame(bool bResumeGameInput)
     }
 }
 
-// 레벨업 처리
 void AFPSGameMode::HandlePlayerLevelUp(APlayerController* PlayerController)
 {
-    if (!PlayerController || !AugmentWidgetClass) return;
+    if (!PlayerController || !AugmentWidgetClass || !AugmentDataTable) return;
 
     PlayerController->SetPause(true);
-
-    // UI 모드로 전환
     FInputModeUIOnly InputMode;
     PlayerController->SetInputMode(InputMode);
-    PlayerController->bShowMouseCursor = true; // 커서 보이기
+    PlayerController->bShowMouseCursor = true;
+
+    TArray<FAugmentData*> AllAugments;
+    AugmentDataTable->GetAllRows(TEXT(""), AllAugments);
+    TArray<FAugmentData> SelectedAugments;
+
+    if (AllAugments.Num() > 0)
+    {
+        for (int32 i = 0; i < 3 && AllAugments.Num() > 0; ++i)
+        {
+            float TotalWeight = 0.0f;
+            TArray<FAugmentData*> WeightedAugments;
+
+            for (FAugmentData* Augment : AllAugments)
+            {
+                float Weight = RarityWeights.FindRef(Augment->Rarity);
+                TotalWeight += Weight;
+                for (int32 j = 0; j < Weight * 100; ++j)
+                {
+                    WeightedAugments.Add(Augment);
+                }
+            }
+
+            int32 RandomIndex = FMath::RandRange(0, WeightedAugments.Num() - 1);
+            FAugmentData* Selected = WeightedAugments[RandomIndex];
+            SelectedAugments.Add(*Selected);
+            AllAugments.Remove(Selected);
+        }
+    }
 
     UAugmentWidget* AugmentWidget = CreateWidget<UAugmentWidget>(PlayerController, AugmentWidgetClass);
     if (AugmentWidget)
     {
-        AugmentWidget->AddToViewport();
-        UKismetSystemLibrary::PrintString(GetWorld(), TEXT("Augment Selection Screen Opened."), true, true, FColor::Orange, 10.f);
+        AFPSCharacter* Character = Cast<AFPSCharacter>(PlayerController->GetPawn());
+        if (Character)
+        {
+            AugmentWidget->Setup(Character, SelectedAugments);
+            AugmentWidget->AddToViewport();
+            UKismetSystemLibrary::PrintString(GetWorld(), TEXT("증강 선택 화면이 열렸습니다."), true, true, FColor::Orange, 10.f);
+        }
     }
 }
 
-// 플레이어 사망 처리
 void AFPSGameMode::HandlePlayerDeath(AController* KillerController)
 {
     UKismetSystemLibrary::PrintString(GetWorld(), TEXT("GAME OVER!"), true, true, FColor::Red, 10.f);
-    // 게임 일시정지
+    FName MenuLevelName = TEXT("L_MainMenu");
+    UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(GetWorld());
+    if (UGameDataInstance* GameDataInstance = Cast<UGameDataInstance>(GameInstance))
+    {
+        MenuLevelName = GameDataInstance->MainMenuLevelName;
+        GameDataInstance->ResetGameStatsToLevelOne();
+    }
     if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
     {
         PC->SetPause(true);
         PC->bShowMouseCursor = true;
         PC->SetInputMode(FInputModeUIOnly());
     }
-    // 죽으면 메인 메뉴 씬으로
-    UGameplayStatics::OpenLevel(GetWorld(), TEXT("L_MainMenu"));
+    UGameplayStatics::OpenLevel(GetWorld(), MenuLevelName);
 }
