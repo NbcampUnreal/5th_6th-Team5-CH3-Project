@@ -46,6 +46,7 @@ AAIEnemyController::AAIEnemyController()
 
 
     PerceptionComp->ConfigureSense(*SightConfig);
+    PerceptionComp->ConfigureSense(*HearingConfig);
     PerceptionComp->SetDominantSense(SightConfig->GetSenseImplementation());
 
     // 이벤트 바인딩
@@ -265,6 +266,11 @@ void AAIEnemyController::ClearDamagedFlag()
 void AAIEnemyController::SendDeadToBT()
 {
     BlackboardComp->SetValueAsBool(TEXT("IsDead"), true);
+}
+
+void AAIEnemyController::SendStunToBT(bool b)
+{
+    BlackboardComp->SetValueAsBool(TEXT("IsStunned"), b);
 }
 
 void AAIEnemyController::ClearTarget()

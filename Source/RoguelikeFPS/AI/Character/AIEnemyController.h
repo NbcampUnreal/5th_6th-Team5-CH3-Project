@@ -76,6 +76,9 @@ public:
     UFUNCTION()
     void SendDeadToBT();
 
+    UFUNCTION()
+    void SendStunToBT(bool b);
+
     /** BB 키 이름들 (한 곳에서 관리) */
     static const FName BB_TargetActor;
     static const FName BB_HasLOS;

@@ -103,6 +103,13 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Stats")
     virtual void OnDeath();
 
+    bool bIsStunned = false;
+
+    FTimerHandle StunTimerHandle;
+
+    UFUNCTION(BlueprintCallable)
+    void ApplyStun(float Duration);
+
 
 
     // 데미지 처리 함수 - 외부로부터 데미지를 받을 때 호출됨

@@ -33,6 +33,9 @@ public:
     bool bIsDead = false;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Anim")
+    bool bIsStun = false;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Anim")
     EPattern PatternState = EPattern::Pattern1;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Anim")
@@ -50,6 +53,9 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "Anim")
     void SetIsDead(bool bNew) { bIsDead = bNew; }
+
+    UFUNCTION(BlueprintCallable, Category = "Anim")
+    void SetIsStun(bool bNew) { bIsStun = bNew; }
 
     UFUNCTION(BlueprintCallable, Category = "Anim")
     void SetPattern(EPattern NewState) { PatternState = NewState; }

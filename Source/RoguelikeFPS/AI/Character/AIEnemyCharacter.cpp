@@ -49,6 +49,7 @@ void AAIEnemyCharacter::BeginPlay()
         ApplyWalkSpeed();
     }
     ApplyConfigToComponents(ATK);
+
 }
 
 void AAIEnemyCharacter::ApplyWalkSpeed()
@@ -192,25 +193,59 @@ void AAIEnemyCharacter::AddHealth(float Amount)
 
 void AAIEnemyCharacter::OnDeath()
 {
-    if (StateMachine)            // 널가드
-        StateMachine->ChangeState(EEnemyState::Dead);
+    if (StateMachine)
+    {
+        GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        if (AAIController* AICon = Cast<AAIController>(GetController()))
+        {
+            AICon->StopMovement();
+        }
+        if (AAIEnemyController* AICon = Cast<AAIEnemyController>(GetController()))
+        {
+            AICon->SendDeadToBT();
+        }
+        AActor* Proj = GetWorld()->SpawnActor<AActor>(DropItemClass, GetActorLocation(), GetActorRotation());
 
-    //UE_LOG(LogTemp, Warning, TEXT("Monster is DEAD"));
-    // 충돌/이동 정지
-    GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        StateMachine->ChangeState(EEnemyState::Dead);
+    }
+}
+
+void AAIEnemyCharacter::ApplyStun(float Duration)
+{
+    if (bIsStunned) return;
+    bIsStunned = true;
+
+    if (UCharacterMovementComponent* Move = GetCharacterMovement())
+    {
+        Move->DisableMovement();
+    }
+    if (AAIEnemyController* AICon = Cast<AAIEnemyController>(GetController()))
+    {
+        AICon->SendStunToBT(true);
+    }
     if (AAIController* AICon = Cast<AAIController>(GetController()))
     {
         AICon->StopMovement();
     }
-    if (AAIEnemyController* AICon = Cast<AAIEnemyController>(GetController()))
+
+    GetWorldTimerManager().SetTimer(StunTimerHandle, [this]()
     {
-        AICon->SendDeadToBT();
-    }
-    AActor* Proj = GetWorld()->SpawnActor<AActor>(DropItemClass, GetActorLocation(), GetActorRotation());
+        bIsStunned = false;
+        if (UCharacterMovementComponent* Move = GetCharacterMovement())
+        {
+            Move->SetMovementMode(MOVE_Walking);
+        }
+        if (AAIEnemyController* AICon = Cast<AAIEnemyController>(GetController()))
+        {
+            AICon->SendStunToBT(false);
+        }
 
+        UE_LOG(LogTemp, Warning, TEXT("[STUN END] Enemy recovered"));
+    }, Duration, false);
 
-    //SetLifeSpan(2.0f);           // Destroy() 즉시 호출 대신 권장
+    UE_LOG(LogTemp, Warning, TEXT("[STUN START] Enemy stunned for %.1f sec"), Duration);
 }
+
 
 
 

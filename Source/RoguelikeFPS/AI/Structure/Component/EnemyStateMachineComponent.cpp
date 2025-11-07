@@ -121,6 +121,14 @@ void UEnemyStateMachineComponent::OnEnterState(EEnemyState State)
         CachedAnim->SetHasTarget(true);
         break;
 
+    case EEnemyState::Stun:
+        //UE_LOG(LogTemp, Log, TEXT("Entered Chase"));
+        CachedAnim->SetAnimState(EEnemyState::Stun);
+        CachedAnim->SetIsStun(true);
+        CachedAnim->SetInAttack(false);
+        CachedAnim->SetHasTarget(false);
+        break;
+
     case EEnemyState::Attack:
         //UE_LOG(LogTemp, Log, TEXT("Entered Attack"));
         CachedAnim->SetAnimState(EEnemyState::Attack);
@@ -171,6 +179,10 @@ void UEnemyStateMachineComponent::OnExitState(EEnemyState State)
         break;
     case EEnemyState::Chase:
         //UE_LOG(LogTemp, Log, TEXT("Exit Chase"));
+        break;
+    case EEnemyState::Stun:
+        //UE_LOG(LogTemp, Log, TEXT("Exit Chase"));
+        CachedAnim->SetIsStun(false);
         break;
     default:
         break;

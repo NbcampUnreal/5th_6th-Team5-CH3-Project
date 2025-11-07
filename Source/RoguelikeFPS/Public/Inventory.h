@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "ItemBase.h"
@@ -34,7 +34,31 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ShowInventory() const;
 
-	//�˻�
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "InventoryGold")
+	int32 Goods1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "InventoryGold")
+	int32 Goods2;
+
+	UFUNCTION(BlueprintCallable)
+	int32 GetGoods1() { return Goods1; }
+
+	UFUNCTION(BlueprintCallable)
+	int32 GetGoods2() { return Goods2; }
+
+	UFUNCTION(BlueprintCallable)
+	void SetGoods1(int32 input) { 
+		Goods1 = input; 
+		UE_LOG(LogTemp, Log, TEXT("Goods1 : %d"), Goods1);
+	}
+
+	UFUNCTION(BlueprintCallable)
+	void SetGoods2(int32 input) { 
+		Goods2 = input; 
+		UE_LOG(LogTemp, Log, TEXT("Goods2 : %d"), Goods2);
+	}
+
+	//검색
 	UFUNCTION(BlueprintCallable)
 	UItemBase* SearchItemName(const FName& Name) const;
 	UFUNCTION(BlueprintCallable)
