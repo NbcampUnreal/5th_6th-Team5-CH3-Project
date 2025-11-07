@@ -1,4 +1,7 @@
 #include "Inventory.h"
+#include "ItemData.h"
+#include "InventoryWidget.h"
+#include "Engine/DataTable.h"
 
 UInventory::UInventory()
 {
@@ -8,32 +11,62 @@ UInventory::UInventory()
 
 }
 
-void UInventory::AddItem(UItemBase* Item)
+UItemBase* UInventory::AddItem(UItemBase* Item, int32 AddAmount, const FName& ItemName)
 {
-	if (!Item)
+	if (!Item && ItemName == NAME_None)
 	{
-		return;
+		return nullptr;
 	}
-	for (UItemBase* BuyItem : InventoryItems)
+	UItemBase* ItemAdd = nullptr;
+	int32 EndAmount = FMath::Max(AddAmount, 1);
+
+	if (Item)
 	{
-		if (BuyItem && BuyItem->ItemName == Item->ItemName)
+		ItemAdd = Item;
+		if (ItemAdd->Amount <= 0)
+			ItemAdd->Amount = EndAmount;
+	}
+	else if (ItemDataTable)
+	{
+		FItemData* Row = ItemDataTable->FindRow<FItemData>(ItemName, TEXT("AddItem"));
+		if (Row)
 		{
-			BuyItem->Amount += Item->Amount;
-			return;
+			ItemAdd = NewObject<UItemBase>(this);
+			ItemAdd->ItemNumber = Row->ItemNumber;
+			ItemAdd->ItemName = Row->ItemName;
+			ItemAdd->Description = Row->Description;
+			ItemAdd->EffectDescription = Row->EffectDescription;
+			ItemAdd->Amount = EndAmount;
+			ItemAdd->BuyPrice = Row->BuyPrice;
+			ItemAdd->SellPrice = Row->SellPrice;
+			ItemAdd->ItemType = Row->ItemType;
+			ItemAdd->Thumbnail = Row->Thumbnail;
 		}
 	}
-	UItemBase* NewItem = NewObject<UItemBase>(this);
-	NewItem->ItemNumber = Item->ItemNumber;
-	NewItem->ItemName = Item->ItemName;
-	NewItem->Description = Item->Description;
-	NewItem->EffectDescription = Item->EffectDescription;
-	NewItem->Amount = Item->Amount;
-	NewItem->BuyPrice = Item->BuyPrice;
-	NewItem->SellPrice = Item->SellPrice;
-	NewItem->ItemType = Item->ItemType;
-	NewItem->Thumbnail = Item->Thumbnail;
-	InventoryItems.Add(NewItem);
 
+	if (!ItemAdd)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Add Item Failed!"));
+		return nullptr;
+	}
+
+	for (UItemBase* InItem : InventoryItems)
+	{
+		if (InItem && InItem->ItemName == ItemAdd->ItemName)
+		{
+			InItem->Amount += ItemAdd->Amount;
+			return InItem;
+		}
+	}
+
+	InventoryItems.Add(ItemAdd);
+
+	if (InventoryUI)
+	{
+		InventoryUI->UpdateUI();
+	}
+
+	return ItemAdd;
 }
 
 bool UInventory::RemoveItem(UItemBase* Item, int32 Amount)

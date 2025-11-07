@@ -3,7 +3,10 @@
 #include "CoreMinimal.h"
 #include "ItemBase.h"
 #include "Components/ActorComponent.h"
+#include "Engine/DataTable.h"
 #include "Inventory.generated.h"
+
+class UInventoryWidget;
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class ROGUELIKEFPS_API UInventory : public UActorComponent
@@ -13,11 +16,14 @@ class ROGUELIKEFPS_API UInventory : public UActorComponent
 public:	
 	UInventory();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	UDataTable* ItemDataTable;
+
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly, Category = "Inventory")
 	TArray<UItemBase*> InventoryItems;
 
 	UFUNCTION(BlueprintCallable)
-	void AddItem(UItemBase* Item);
+	UItemBase* AddItem(UItemBase* Item, int32 AddAmount, const FName& ItemName);
 
 	UFUNCTION(BlueprintCallable)
 	bool RemoveItem(UItemBase* Item, int32 Amount = 1);
@@ -33,6 +39,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void ShowInventory() const;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	UInventoryWidget* InventoryUI;
 
 	//°Ë»ö
 	UFUNCTION(BlueprintCallable)
