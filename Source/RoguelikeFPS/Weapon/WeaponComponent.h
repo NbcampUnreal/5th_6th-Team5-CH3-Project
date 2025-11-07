@@ -56,7 +56,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	virtual void DoAttack();
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void AttachWeapon(ACharacter* TargetCharacter); // 델리게이트용 (void)
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon")

@@ -6,6 +6,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "PickUpComponent.h"
+#include "FPSPlayerController.h"
 
 
 UWeaponComponent::UWeaponComponent()
@@ -24,6 +25,7 @@ void UWeaponComponent::AttachWeapon(ACharacter* TargetCharacter)
 {
 	_Character = TargetCharacter;
 
+
 	// Check that the character is valid, and has no weapon component yet
 	if (_Character == nullptr || _Character->GetInstanceComponents().FindItemByClass<UWeaponComponent>())
 	{
@@ -39,7 +41,6 @@ void UWeaponComponent::AttachWeapon(ACharacter* TargetCharacter)
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
-			// Set the priority of the mapping to 1, so that it overrides the Jump action with the Fire action when using touch input
 			Subsystem->AddMappingContext(_AttackMappingContext, 1);
 		}
 
@@ -64,7 +65,7 @@ UEnhancedInputComponent* UWeaponComponent::GetCharacterEnhancedInputComponent()
 {
 	if (_Character)
 	{
-		APlayerController* PlayerController = Cast<APlayerController>(_Character->GetController());
+		AFPSPlayerController* PlayerController = Cast<AFPSPlayerController>(_Character->GetController());
 		if (PlayerController)
 		{
 			UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent);
@@ -72,7 +73,16 @@ UEnhancedInputComponent* UWeaponComponent::GetCharacterEnhancedInputComponent()
 			{
 				return EnhancedInputComponent;
 			}
+			else {
+				UE_LOG(LogTemp, Warning, TEXT("EnhancedInputComponent:: PlayerController is null"));
+			}
 		}
+		else {
+			UE_LOG(LogTemp, Warning, TEXT("UWeaponComponent:: PlayerController is null"));
+		}
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("UWeaponComponent:: _Character is null"));
 	}
 
 	return nullptr;
@@ -90,10 +100,7 @@ void UWeaponComponent::BeginPlay()
 		if (PickUp)
 		{
 			PickUp->OnPickUp.AddDynamic(this, &UWeaponComponent::AttachWeapon);
-			UE_LOG(LogTemp, Warning, TEXT("AddDynamic"));
-		}
-		else {
-			UE_LOG(LogTemp, Warning, TEXT("Can't find UPickUpComponent"));
+			//UE_LOG(LogTemp, Warning, TEXT("AddDynamic"));
 		}
 	}
 

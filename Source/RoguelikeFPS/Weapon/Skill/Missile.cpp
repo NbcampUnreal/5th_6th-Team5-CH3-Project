@@ -45,10 +45,10 @@ void UMissile::OnCollsionBeginOverlap(UPrimitiveComponent* OverlappedComp, AActo
     if (!IsValid(_Instigator)) return;
     if (_Instigator == OtherActor) return;
 
-    GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Blue, FString::Printf(TEXT("UMissile :: OnCollsionBeginOverlap")));
-
     ACharacter* HitChar = Cast<ACharacter>(OtherActor);
     if (!HitChar) return;
+    GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Blue, FString::Printf(TEXT("UMissile :: OnCollsionBeginOverlap")));
+    GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Blue, FString::Printf(TEXT("UMissile :: HitChar Name : %s"), *HitChar->GetName()));
     OverlappedCharacters.Add(HitChar);
 }
 
@@ -65,7 +65,7 @@ void UMissile::CreateCollision()
         _Collision->SetHiddenInGame(false);
         _Collision->SetGenerateOverlapEvents(true);
         _Collision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-        _Collision->SetCollisionProfileName(TEXT("Projectile"));
+        _Collision->SetCollisionProfileName(TEXT("OverlapAll"));
         
         _Collision->AttachToComponent(ParentComp, FAttachmentTransformRules::KeepRelativeTransform);
 
@@ -114,7 +114,7 @@ void UMissile::SpawnMissiles()
                 FVector Location = SpawnLocation;
                 Location.X += FMath::FRandRange(-100.f, 100.f);
                 Location.Y += FMath::FRandRange(-100.f, 100.f);
-                Location.Z += FMath::FRandRange(-50.f, 50.f);
+                Location.Z += FMath::FRandRange(0.f, 100.f);
                 MissilesToFire[i]->SetInstigator(_Instigator);
                 MissilesToFire[i]->SetTarget(Cast<AActor>(OverlappedCharacters[FMath::RandRange(0, OverlappedCharacters.Num() - 1)]));
                 MissilesToFire[i]->SetDamage(_Damage);

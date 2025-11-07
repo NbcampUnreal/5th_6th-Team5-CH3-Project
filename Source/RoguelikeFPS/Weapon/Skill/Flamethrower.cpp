@@ -11,7 +11,7 @@
 UFlamethrower::UFlamethrower()
 {
     _Collision = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("Collision"));
-    _Collision->SetCollisionProfileName("Projectile");
+    _Collision->SetCollisionProfileName("OverlapAll");
     _Collision->OnComponentBeginOverlap.AddDynamic(this, &UFlamethrower::OnCollsionBeginOverlap);
     _Collision->OnComponentEndOverlap.AddDynamic(this, &UFlamethrower::OnCollsionEndOverlap);
     _Collision->SetVisibility(false);

@@ -7,6 +7,9 @@
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
+#include "InputMappingContext.h" // 엔진 헤더 경로에 따라 조정
+#include "EnhancedActionKeyMapping.h"
+
 UChargeableDash::UChargeableDash()
 {
 	_ChargedDashCount = _MaxDashCount;
@@ -29,26 +32,7 @@ void UChargeableDash::SetUp()
 
 void UChargeableDash::SetDashMapping()
 {
-	//PlayerInputComponent->BindAction(TEXT("Dash"), EInputEvent::IE_Pressed, this, &AFPSCharacter::StartDash);
-	UWeaponComponent* WeaponComp = Cast<UWeaponComponent>(GetAttachParent());
-	if (WeaponComp)
-	{
-		if (WeaponComp->GetCharacterEnhancedInputComponent()) {
-			UInputComponent* IC = Cast<UInputComponent>(WeaponComp->GetCharacterEnhancedInputComponent());
-			if (IC)
-			{
-				// Remove existing Dash action binding.
-				const FName DashName = TEXT("Dash");
-				for (int32 i = IC->GetNumActionBindings() - 1; i >= 0; --i)
-				{
-					if (IC->GetActionBinding(i).GetActionName() == DashName) IC->RemoveActionBinding(i);
-				}
 
-				//Add new Dash action binding.
-				IC->BindAction(TEXT("Dash"), EInputEvent::IE_Pressed, this, &UChargeableDash::Active);
-			}
-		}
-	}
 }
 
 void UChargeableDash::IncreaseDashCharge()

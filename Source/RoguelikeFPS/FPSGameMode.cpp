@@ -48,6 +48,7 @@ void AFPSGameMode::BeginPlay()
 // Ingame
 void AFPSGameMode::PostLogin(APlayerController* NewPlayer)
 {
+    Super::PostLogin(NewPlayer);
 //    Super::PostLogin(NewPlayer);
 //
 //    if (!NewPlayer || !NewPlayer->GetPawn()) return;
