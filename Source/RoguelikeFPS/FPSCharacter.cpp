@@ -1,8 +1,8 @@
 #include "FPSCharacter.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
-#include "EnhancedInputComponent.h"
 #include "FPSPlayerController.h"
+#include "EnhancedInputComponent.h
 #include "GameFramework/CharacterMovementComponent.h"
 
 AFPSCharacter::AFPSCharacter()		//초기 스텟 설정
