@@ -7,7 +7,9 @@
 class USpringArmComponent;
 class UCameraComponent;
 class UInventory;
+class UUpgradeSystem;
 struct FInputActionValue;
+
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLevelUpSignature, APlayerController*, PlayerController);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerDeathSignature, AController*, KillerController);
@@ -20,6 +22,7 @@ class ROGUELIKEFPS_API AFPSCharacter : public ACharacter
 public:
 	AFPSCharacter();
 
+	virtual void BeginPlay() override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UFUNCTION(BlueprintCallable)
@@ -38,6 +41,8 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
 	UInventory* Inventory;//인벤토리 정보
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
+	UUpgradeSystem* UpgradeSystem;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")

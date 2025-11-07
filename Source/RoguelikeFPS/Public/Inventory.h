@@ -30,6 +30,12 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "InventoryGold")
 	int32 Gold;
+	
+	UFUNCTION(BlueprintCallable)
+	int32 GetGold() const;
+
+	UFUNCTION(BlueprintCallable)
+	void SetGold(int32 NewGold);
 
 	UFUNCTION(BlueprintCallable)
 	bool BuyItem(UItemBase* Item);

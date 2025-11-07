@@ -182,3 +182,17 @@ UItemBase* UInventory::SearchItemNumber(int32 ItemNumber) const
 	}
 	return nullptr;
 }
+
+int32 UInventory::GetGold() const
+{
+	return Gold;
+}
+
+void UInventory::SetGold(int32 NewGold)
+{
+	Gold = FMath::Max(0, NewGold);
+	if (InventoryUI)
+	{
+		InventoryUI->UpdateUI();
+	}
+}
