@@ -121,7 +121,7 @@ void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimi
 	const FVector ShotDir = (OtherActor->GetActorLocation() - GetActorLocation()).GetSafeNormal();
 	UGameplayStatics::ApplyPointDamage(OtherActor, _Damage, ShotDir, Hit, AttackerController, this, UDamageType::StaticClass()
 	);
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("ApplyDamage : %d"), _Damage));
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("ApplyDamage : %d"), _Damage));
 	OnDamagedEnemy.Broadcast(Victim);
 	Destroy();
 }

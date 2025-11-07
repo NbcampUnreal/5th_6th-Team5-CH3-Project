@@ -14,7 +14,6 @@ void UShieldGainOnAttack::SetUp()
 	{
 
 		GunComp->ProjectileSpawn.AddUObject(this, &UShieldGainOnAttack::Projectile_AddDynamic);
-		//GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Blue, FString::Printf(TEXT("SetUp : AddDynamic")));
 	}
 }
 
@@ -35,7 +34,8 @@ void UShieldGainOnAttack::GetShield(ACharacter* Victim)
 		{
 			AFPSCharacter* WeaponOwner = Cast<AFPSCharacter>(GunComp->GetOwnerCharacter());
 			WeaponOwner->AddShield(_ShieldAmountGained);
-			//WeaponOwner
+			
+			GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Blue, FString::Printf(TEXT("Shield : %d"), WeaponOwner->GetShieldValue()));
 		}
 	}
 }

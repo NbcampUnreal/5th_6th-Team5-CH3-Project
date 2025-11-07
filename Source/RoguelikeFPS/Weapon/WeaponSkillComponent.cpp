@@ -40,18 +40,6 @@ void UWeaponSkillComponent::SetActionMapping()
 			}
 		}
 	}
-
-	//UWeaponComponent* WeaponComp = Cast<UWeaponComponent>(GetAttachParent());
-	//if (WeaponComp)
-	//{
-	//	if (WeaponComp->GetCharacterEnhancedInputComponent())
-	//	{
-	//		if (_SkillAction)
-	//		{
-	//			WeaponComp->GetCharacterEnhancedInputComponent()->BindAction(_SkillAction, ETriggerEvent::Triggered, this, &UWeaponSkillComponent::Active);
-	//		}
-	//	}
-	//}
 }
 
 // Called when the game starts
