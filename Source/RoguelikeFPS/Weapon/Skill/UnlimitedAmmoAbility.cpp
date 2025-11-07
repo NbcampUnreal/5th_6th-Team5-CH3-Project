@@ -4,7 +4,7 @@
 #include "Weapon/Skill/UnlimitedAmmoAbility.h"
 #include "Weapon/GunComponent.h"
 
-void UUnlimitedAmmoAbility::GetAmmo(AProjectile* projectile)
+void UUnlimitedAmmoAbility::GetAmmo()
 {
 	UGunComponent* GunComp = Cast<UGunComponent>(GetAttachParent());
 	if (GunComp) {
@@ -21,7 +21,7 @@ void UUnlimitedAmmoAbility::SetUp()
 	UGunComponent* GunComp = Cast<UGunComponent>(GetAttachParent());
 	if (GunComp)
 	{
-		GunComp->ProjectileSpawn.AddUObject(this, &UUnlimitedAmmoAbility::GetAmmo);
+		GunComp->OnDoAttack.AddUObject(this, &UUnlimitedAmmoAbility::GetAmmo);
 	}
 }
 
@@ -32,6 +32,7 @@ void UUnlimitedAmmoAbility::Active()
 	if (_isSkillCoolDown) return;
 	_isSkillCoolDown = true;
 	IsBuffActive = true;
+	GEngine->AddOnScreenDebugMessage(-1, 3, FColor::Red, FString::Printf(TEXT("Active")));
 
 	UWorld* const World = GetWorld();
 	if (!World) return;
@@ -41,5 +42,5 @@ void UUnlimitedAmmoAbility::Active()
 
 void UUnlimitedAmmoAbility::EndBuff()
 {
-	IsBuffActive = true;
+	IsBuffActive = false;
 }

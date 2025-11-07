@@ -22,6 +22,9 @@ protected:
 	float _CoolDown = 0.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Skill, meta = (AllowPrivateAccess = "true"))
+	float _AttackDamageMultiplier = 1.f;
+
+	UPROPERTY()
 	float _Damage = 0.f;
 
 	UPROPERTY()
@@ -47,6 +50,7 @@ protected:
 	virtual void OnAttachmentChanged() override;
 	void SetActionMapping();
 	void SetCoolDownTimer();
+	void SetDamge();
 private:
 		
 };

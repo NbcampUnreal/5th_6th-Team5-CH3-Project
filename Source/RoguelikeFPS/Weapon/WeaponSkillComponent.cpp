@@ -20,6 +20,7 @@ void UWeaponSkillComponent::Active()
 {
 	if (_isSkillCoolDown) return;
 	SetCoolDownTimer();
+	SetDamge();
 }
 
 void UWeaponSkillComponent::SetUp()
@@ -80,6 +81,12 @@ void UWeaponSkillComponent::SetCoolDownTimer()
 		{
 			_isSkillCoolDown = false;
 		}) , _CoolDown, false);
+}
+
+void UWeaponSkillComponent::SetDamge()
+{
+	UGunComponent* GunComp = Cast<UGunComponent>(GetAttachParent());
+	if (GunComp) _Damage = GunComp->ReturnDamage() * _AttackDamageMultiplier;
 }
 
 

@@ -166,8 +166,11 @@ void UFlamethrower::ApplyDamageOnTick()
 
     GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Red, FString::Printf(TEXT("ApplyDamageOnTick")));
 
+
     for (auto& character : OverlappedCharacters)
     {
+        UGameplayStatics::ApplyDamage(character.Get(), _Damage, nullptr, _Instigator, UDamageType::StaticClass());
+        //UGameplayStatics::ApplyDamage(character.Get(), _Damage, ShotDir, AttackerController, this, UDamageType::StaticClass());
         //character->TakeDamage();
     }
 }

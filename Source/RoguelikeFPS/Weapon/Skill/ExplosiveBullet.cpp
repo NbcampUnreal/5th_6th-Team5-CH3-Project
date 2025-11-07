@@ -27,8 +27,6 @@ void UExplosiveBullet::Projectile_AddDynamic(AProjectile* projectile)
 
 void UExplosiveBullet::Spawn_Explosion(AActor* DestroyedActor)
 {
-	UpdateDamge();
-
 	if (_Explosion)
 	{
 		UWorld* World = GetWorld();
@@ -39,14 +37,9 @@ void UExplosiveBullet::Spawn_Explosion(AActor* DestroyedActor)
 
 			AExplosiveActor* ExplosiveActor = World->SpawnActorDeferred<AExplosiveActor>(_Explosion, FTransform(SpawnRotation, SpawnLocation));
 			if (!IsValid(ExplosiveActor)) return;
+			SetDamge();
 			ExplosiveActor->_Damage = this->_Damage;
 			UGameplayStatics::FinishSpawningActor(ExplosiveActor, FTransform(SpawnRotation, SpawnLocation));
 		}
 	}
-}
-
-void UExplosiveBullet::UpdateDamge()
-{
-	UGunComponent* GunComp = Cast<UGunComponent>(GetAttachParent());
-	if (GunComp) _Damage = GunComp->ReturnDamage();
 }
