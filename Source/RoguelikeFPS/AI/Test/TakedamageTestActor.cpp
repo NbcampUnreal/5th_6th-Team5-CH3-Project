@@ -67,37 +67,24 @@ void ATakedamageTestActor::OnProjectileHit(
     FVector NormalImpulse,
     const FHitResult& Hit)
 {
-    if (!OtherActor || OtherActor == this)
-        return;
+    if (!OtherActor || OtherActor == this) return;
 
-    if (!OtherActor->ActorHasTag(TEXT("Enemy")))
-        return;
+    if (!OtherActor->ActorHasTag(TEXT("Enemy"))) return;
 
-    // 충돌 방향 계산
     const FVector ShotDir = (OtherActor->GetActorLocation() - GetActorLocation()).GetSafeNormal();
 
-    // 디버그용: 맞은 본 출력
-    UE_LOG(LogTemp, Log, TEXT("Projectile Hit Bone: %s"), *Hit.BoneName.ToString());
-    DrawDebugPoint(GetWorld(), Hit.ImpactPoint, 10.f, FColor::Red, false, 2.f);
-
-    // 데미지 적용
+    // 피격 데미지 적용
     UGameplayStatics::ApplyPointDamage(
         OtherActor,
-        200.f,                 // 기본 데미지
-        ShotDir,
-        Hit,                   // BoneName 포함된 Hit 구조체
+        200.f,                 // 데미지 값
+        ShotDir,               // 피격 방향
+        Hit,                   // Bone 정보 포함된 Hit 결과
         GetInstigatorController(),
         this,
         UDamageType::StaticClass()
     );
 
-    // 디버그 메시지
-    GEngine->AddOnScreenDebugMessage(-1, 1.5f, FColor::Green,
-        FString::Printf(TEXT("Hit: %s (Bone=%s)"),
-            *GetNameSafe(OtherActor),
-            *Hit.BoneName.ToString()));
-
-    // 충돌 후 총알 제거 (필요 시)
+    // 총알 제거
     Destroy();
 }
 

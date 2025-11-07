@@ -1,7 +1,7 @@
 ﻿#include "BTTask_SetState.h"
 #include "AIController.h"
 #include "GameFramework/Pawn.h"
-#include "AI/Structure/EnemyStateMachineComponent.h"          // FSM 컴포넌트
+#include "AI/Structure/Component/EnemyStateMachineComponent.h"          // FSM 컴포넌트
 #include "AI/Character/AIEnemyCharacter.h"                    // 캐릭터 클래스(컴포넌트 찾기용)
 
 UBTTask_SetState::UBTTask_SetState()

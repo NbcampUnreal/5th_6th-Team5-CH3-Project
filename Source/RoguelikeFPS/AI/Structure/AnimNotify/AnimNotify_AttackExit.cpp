@@ -1,8 +1,8 @@
 ﻿// AnimNotify_AttackExit.cpp
 #include "AnimNotify_AttackExit.h"
-#include "../MeleeAttackComponent.h"
-#include "../RangedAttackComponent.h"
-#include "../Stage2BossAttackComponent.h"
+#include "../Component/MeleeAttackComponent.h"
+#include "../Component/RangedAttackComponent.h"
+#include "../Component/Stage2BossAttackComponent.h"
 
 void UAnimNotify_AttackExit::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {

@@ -4,7 +4,7 @@
 #include "GameFramework/Character.h"
 #include "AI/Structure/EnemyState.h"
 #include "AI/Structure/EnemyConfig.h"
-#include "AI/Structure/EnemyStateMachineComponent.h"
+#include "AI/Structure/Component/EnemyStateMachineComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "AIEnemyCharacter.generated.h"
 

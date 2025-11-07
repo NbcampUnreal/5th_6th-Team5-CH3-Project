@@ -4,9 +4,9 @@
 #include "Kismet/GameplayStatics.h"  
 #include "Engine/DamageEvents.h"
 #include "AI/Character/AIEnemyController.h"
-#include "AI/Structure/MeleeAttackComponent.h"
-#include "AI/Structure/RangedAttackComponent.h"
-#include "AI/Structure/Stage2BossAttackComponent.h"
+#include "AI/Structure/Component/MeleeAttackComponent.h"
+#include "AI/Structure/Component/RangedAttackComponent.h"
+#include "AI/Structure/Component/Stage2BossAttackComponent.h"
 #include "DrawDebugHelpers.h"
 #include "GameFramework/CharacterMovementComponent.h"
 

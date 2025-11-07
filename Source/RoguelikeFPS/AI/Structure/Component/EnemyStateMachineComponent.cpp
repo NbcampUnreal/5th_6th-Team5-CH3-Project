@@ -1,6 +1,6 @@
 ﻿#include "EnemyStateMachineComponent.h"
 #include "AIController.h"
-#include "EnemyAnimInstance.h"
+#include "../EnemyAnimInstance.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "MeleeAttackComponent.h"
 #include "RangedAttackComponent.h"

@@ -1,5 +1,5 @@
 ﻿#include "AnimNotify_Boss2.h"
-#include "../Stage2BossAttackComponent.h"
+#include "../Component/Stage2BossAttackComponent.h"
 
 void UAnimNotify_Boss2::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {

@@ -1,5 +1,5 @@
 ﻿#include "EnemyAttackBaseComponent.h"
-#include "EnemyConfig.h"
+#include "../EnemyConfig.h"
 #include "EnemyStatsComponent.h"
 #include "GameFramework/Actor.h"
 

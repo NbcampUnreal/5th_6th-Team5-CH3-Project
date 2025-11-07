@@ -1,7 +1,7 @@
 ﻿#include "RangedAttackComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Character.h"
-#include "EnemyConfig.h"
+#include "../EnemyConfig.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Animation/AnimInstance.h"
