@@ -56,6 +56,8 @@ public:
 
 	float ReturnDamage();
 
+	void AddBullet(int32 amount);
+
 protected:
 	virtual void BeginPlay() override;
 
