@@ -114,7 +114,7 @@ void UMissile::SpawnMissiles()
                 FVector Location = SpawnLocation;
                 Location.X += FMath::FRandRange(-100.f, 100.f);
                 Location.Y += FMath::FRandRange(-100.f, 100.f);
-                Location.Z += FMath::FRandRange(0.f, 100.f);
+                Location.Z += FMath::FRandRange(200.f, 250.f);
                 MissilesToFire[i]->SetInstigator(_Instigator);
                 MissilesToFire[i]->SetTarget(Cast<AActor>(OverlappedCharacters[FMath::RandRange(0, OverlappedCharacters.Num() - 1)]));
                 MissilesToFire[i]->SetDamage(_Damage);

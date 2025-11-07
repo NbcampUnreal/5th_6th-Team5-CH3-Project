@@ -18,7 +18,7 @@ UWeaponComponent::UWeaponComponent()
 
 void UWeaponComponent::DoAttack()
 {
-
+	OnDoAttack.Broadcast();
 }
 
 void UWeaponComponent::AttachWeapon(ACharacter* TargetCharacter)

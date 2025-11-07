@@ -14,6 +14,8 @@
 class ACharacter;
 class UEnhancedInputComponent;
 
+DECLARE_MULTICAST_DELEGATE(FOnDoAttack);
+
 UCLASS(Blueprintable, BlueprintType, ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class ROGUELIKEFPS_API UWeaponComponent : public USkeletalMeshComponent
 {
@@ -21,6 +23,8 @@ class ROGUELIKEFPS_API UWeaponComponent : public USkeletalMeshComponent
 
 public:
 	UWeaponComponent();
+
+	FOnDoAttack OnDoAttack;
 
 protected:
 	//Owner

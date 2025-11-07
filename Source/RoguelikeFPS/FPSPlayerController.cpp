@@ -50,6 +50,9 @@ void AFPSPlayerController::BeginPlay()
 			{
 				InventoryWidget->InitInventory(MyPlayer->Inventory);
 			}
+			else {
+				UE_LOG(LogTemp, Warning, TEXT("AFPSPlayerController:: MyPlayer is nullptr!"));
+			}
 			InventoryWidget->AddToViewport();
 			InventoryWidget->SetVisibility(ESlateVisibility::Hidden);
 		}

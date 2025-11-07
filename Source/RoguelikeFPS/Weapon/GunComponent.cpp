@@ -31,6 +31,7 @@ void UGunComponent::DoAttack()
 	}
 
 	CurrentBulletCount--;
+	OnDoAttack.Broadcast();
 	//GEngine->AddOnScreenDebugMessage(1, 5.0f, FColor::Green, FString::Printf(TEXT("CurrentBulletCount : %d"), CurrentBulletCount));
 
 	CanAttack = false;
@@ -110,7 +111,6 @@ float UGunComponent::ReturnDamage()
 void UGunComponent::AddBullet(int32 amount)
 {
 	if (amount > 0) CurrentBulletCount += amount;
-
 }
 
 FRotator UGunComponent::CalculateSapwnRotaion()

@@ -36,7 +36,7 @@ public:
 protected:
 
 private:
-	virtual void GetAmmo(AProjectile* projectile);
+	virtual void GetAmmo();
 
 	virtual void SetUp() override;
 

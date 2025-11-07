@@ -77,6 +77,8 @@ AFPSCharacter::AFPSCharacter()		// 초기 설정
 
 	// Reload Time
 	ReloadTime = 1.5f;
+
+	Inventory = CreateDefaultSubobject<UInventory>(TEXT("InventoryComponent"));
 }
 
 // INPUT BINDING
