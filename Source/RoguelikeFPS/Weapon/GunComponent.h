@@ -23,8 +23,6 @@ class ROGUELIKEFPS_API UGunComponent : public UWeaponComponent
 	
 
 public:
-
-
 	UGunComponent();
 	~UGunComponent();
 
@@ -57,6 +55,10 @@ public:
 	float ReturnDamage();
 
 	void AddBullet(int32 amount);
+
+	int32 GetBulletCount() { return CurrentBulletCount; };
+	void SetBulletCount(int32 count);
+	
 
 protected:
 	virtual void BeginPlay() override;

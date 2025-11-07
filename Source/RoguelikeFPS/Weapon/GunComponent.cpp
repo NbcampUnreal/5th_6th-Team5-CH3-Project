@@ -113,6 +113,12 @@ void UGunComponent::AddBullet(int32 amount)
 	if (amount > 0) CurrentBulletCount += amount;
 }
 
+void UGunComponent::SetBulletCount(int32 count)
+{
+	if (count >= 0) CurrentBulletCount = count;
+	GEngine->AddOnScreenDebugMessage(2, 0.5f, FColor::Red, FString::Printf(TEXT("CurrentBulletCount : %d"), CurrentBulletCount));
+}
+
 FRotator UGunComponent::CalculateSapwnRotaion()
 {
 	if (_Character)
