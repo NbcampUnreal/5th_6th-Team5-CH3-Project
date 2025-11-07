@@ -7,7 +7,12 @@
 void UUnlimitedAmmoAbility::GetAmmo(AProjectile* projectile)
 {
 	UGunComponent* GunComp = Cast<UGunComponent>(GetAttachParent());
-	if(GunComp) GunComp->AddBullet(1);
+	if (GunComp) {
+		if (IsBuffActive)
+		{
+			GunComp->AddBullet(1);
+		}
+	}
 }
 
 void UUnlimitedAmmoAbility::SetUp()
@@ -26,4 +31,15 @@ void UUnlimitedAmmoAbility::Active()
 
 	if (_isSkillCoolDown) return;
 	_isSkillCoolDown = true;
+	IsBuffActive = true;
+
+	UWorld* const World = GetWorld();
+	if (!World) return;
+
+	World->GetTimerManager().SetTimer(_BuffDurationTimerHandle, this, &UUnlimitedAmmoAbility::EndBuff, _BuffDuration, false);
+}
+
+void UUnlimitedAmmoAbility::EndBuff()
+{
+	IsBuffActive = true;
 }

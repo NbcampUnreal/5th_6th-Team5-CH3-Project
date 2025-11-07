@@ -9,17 +9,27 @@
 /**
  * 
  */
+
+class AProjectile;
+
 UCLASS()
 class ROGUELIKEFPS_API UUnlimitedAmmoAbility : public UWeaponSkillComponent
 {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Skill, meta = (AllowPrivateAccess = "true"))
-	float _BuffDuration = 5.0f;
+	
 protected:
 
 private:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Skill, meta = (AllowPrivateAccess = "true"))
+	float _BuffDuration = 5.0f;
+
+	UPROPERTY()
+	FTimerHandle _BuffDurationTimerHandle;
+
+	UPROPERTY()
+	bool IsBuffActive = false;
 
 public:
 
@@ -31,4 +41,6 @@ private:
 	virtual void SetUp() override;
 
 	virtual void Active() override;
+
+	void EndBuff();
 };
