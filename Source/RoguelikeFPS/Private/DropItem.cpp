@@ -49,14 +49,15 @@ void ADropItem::DropGoods2(int32 amount)
 	inven->SetGoods2(goods2 + amount);
 }
 
-void ADropItem::DropTestItem(int32 amount)
+void ADropItem::DropTestItem()
 {
-	//Additem
-	//UItemBase* temp;
-	//inven->AddItem();
+	UItemBase* TestItem = NewObject<UItemBase>(inven);
+	TestItem->ItemName = "ItemName";
+	TestItem->Amount = Amount1;
+	inven->AddItem(TestItem);
 }
 
-void ADropItem::Drop(int32 amount)
+void ADropItem::Droptest(int32 amount)
 {
 	switch (GoodsType)
 	{
@@ -69,7 +70,7 @@ void ADropItem::Drop(int32 amount)
 		break;
 
 	case EDropItemType::DropItem:
-		DropTestItem(amount);
+		DropTestItem();
 		break;
 	}
 }
