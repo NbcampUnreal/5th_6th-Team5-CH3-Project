@@ -4,10 +4,10 @@
 #include "GameFramework/GameModeBase.h"
 #include "FPSGameMode.generated.h"
 
-class APlayerController;
-class UAugmentWidget;
 class UTitleWidget;
 class UMainMenuWidget;
+class APlayerController;
+class UAugmentWidget;
 
 UCLASS()
 class ROGUELIKEFPS_API AFPSGameMode : public AGameModeBase
