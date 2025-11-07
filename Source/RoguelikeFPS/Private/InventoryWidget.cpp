@@ -1,6 +1,6 @@
 #include "InventoryWidget.h"
 #include "Inventory.h"
-#include "RoguelikeFPS/InventoryWidget/InventoryItemWidget.h"
+#include "RoguelikeFPS/InventoryWidget/InventorySlotWidget.h"
 #include "Components/ScrollBox.h"
 #include "Components/TextBlock.h"
 
@@ -26,7 +26,7 @@ void UInventoryWidget::UpdateUI()
 		{
 			continue;
 		}
-		UInventoryItemWidget* ItemWidget = CreateWidget<UInventoryItemWidget>(this, InventoryItemWidgetClass);
+		UInventorySlotWidget* ItemWidget = CreateWidget < UInventorySlotWidget > (this, InventorySlotWidgetClass);
 		if (ItemWidget)
 		{
 			ItemWidget->SetItemData(Item);

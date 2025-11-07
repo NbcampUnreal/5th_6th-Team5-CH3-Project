@@ -2,17 +2,16 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "InventoryItemWidget.generated.h"
+#include "InventorySlotWidget.generated.h"
 
 class UTextBlock;
 class UItemBase;
 class UImage;
 
 UCLASS()
-class ROGUELIKEFPS_API UInventoryItemWidget : public UUserWidget
+class ROGUELIKEFPS_API UInventorySlotWidget : public UUserWidget
 {
 	GENERATED_BODY()
-	
 
 public:
 
@@ -21,14 +20,13 @@ public:
 
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* ItemName;
-	
+
 	UPROPERTY(meta = (BindWidget))
 	UImage* ItemImage;
-	
+
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* ItemAmount;
-	
+
 	UPROPERTY()
 	UItemBase* ItemData;
 };
-//

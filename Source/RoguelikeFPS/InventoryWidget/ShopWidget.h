@@ -34,4 +34,6 @@ protected:
 
 	UPROPERTY()
 	TArray<UItemBase*> CurrentShopItems;
+
+	virtual void NativeConstruct() override;
 };

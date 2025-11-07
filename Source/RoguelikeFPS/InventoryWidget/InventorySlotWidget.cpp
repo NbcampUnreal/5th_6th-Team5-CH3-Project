@@ -1,9 +1,9 @@
-#include "RoguelikeFPS/InventoryWidget/InventoryItemWidget.h"
+#include "InventoryWidget/InventorySlotWidget.h"
 #include "ItemBase.h"
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
 
-void UInventoryItemWidget::SetItemData(UItemBase* InItem)
+void UInventorySlotWidget::SetItemData(UItemBase* InItem)
 {
     ItemData = InItem;
     if (ItemData && ItemName && ItemAmount)
@@ -13,4 +13,3 @@ void UInventoryItemWidget::SetItemData(UItemBase* InItem)
         ItemImage->SetBrushFromTexture(ItemData->Thumbnail);
     }
 }
-//

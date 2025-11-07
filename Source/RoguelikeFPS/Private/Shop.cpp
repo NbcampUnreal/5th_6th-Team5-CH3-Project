@@ -70,9 +70,12 @@ void AShop::PlayerInRange(UPrimitiveComponent* OverlappedComp, AActor* OtherActo
     {
         if (AFPSPlayerController* PlayerController = Cast<AFPSPlayerController>(Player->GetController()))
         {
-            if (ShopItems.Num() > 0 && PlayerController->ShopWidget)
+            if (ShopItems.Num() > 0) 
             {
-                PlayerController->ShopWidget->OpenShop(ShopItems);
+                if (PlayerController->ShopWidget)
+                {
+                    PlayerController->ShopWidget->OpenShop(ShopItems);
+                }
             }
         }
     }
