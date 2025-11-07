@@ -39,7 +39,7 @@ public:
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")	//Title 테스트
 	//TSubclassOf<UTitleWidget> TitleWidgetClass;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
-	TSubclassOf<UUserWidget> HUDWidgetClass; // WBP_HUD 블루프린트 클래스 지정
+	TSubclassOf<UUserWidget> StatsHUDClass;
 
 	UPROPERTY()
 	TObjectPtr<UUserWidget> HUDWidgetInstance;

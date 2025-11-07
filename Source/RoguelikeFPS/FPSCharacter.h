@@ -1,6 +1,8 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "InputActionValue.h"
+#include "EnhancedInputComponent.h"
 #include "FPSCharacter.generated.h"
 
 class USpringArmComponent;
@@ -76,6 +78,10 @@ public:
     void SetMaxExperience(int32 maxExperience);
 
 protected:
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input|Debug")
+    class UInputAction* LevelUpTestAction;
+
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
     TObjectPtr<USpringArmComponent> SpringArmComp;
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
