@@ -35,3 +35,4 @@ protected:
 	UPROPERTY()
 	TArray<UItemBase*> CurrentShopItems;
 };
+//

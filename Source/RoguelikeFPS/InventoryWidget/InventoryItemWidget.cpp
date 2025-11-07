@@ -13,3 +13,4 @@ void UInventoryItemWidget::SetItemData(UItemBase* InItem)
         ItemImage->SetBrushFromTexture(ItemData->Thumbnail);
     }
 }
+//
