@@ -1,10 +1,10 @@
 #include "TitleWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "MainMenuWidget.h"
+#include "FPSGameMode.h"
 #include "TimerManager.h"
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/PlayerController.h"
-#include "FPSGameMode.h" // GameMode를 직접 호출할 경우 필요
 
 bool UTitleWidget::Initialize()
 {
@@ -37,16 +37,16 @@ void UTitleWidget::NativeConstruct()
 
 void UTitleWidget::OnGameStartClicked()
 {
-    // GameMode를 통해 로직을 처리하도록 이벤트를 전달하는 것이 더 구조적입니다.
+    // GameMode에 이벤트 전달
     AFPSGameMode* FPSGameMode = Cast<AFPSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
     if (FPSGameMode)
     {
-        // GameMode의 protected 함수를 호출하여 MainMenu 띄우기 및 입력 모드 전환 처리
+        // GameMode의 OnTitleStartClicked 호출 (Title 제거 및 MainMenu 띄우기 담당)
         FPSGameMode->OnTitleStartClicked();
     }
     else
     {
-        // GameMode를 찾을 수 없을 때의 Fallback (직접 MainMenu 띄우기)
+        // GameMode를 찾을 수 없으면, 직접 MainMenu를 띄우는 로직 실행 (Fallback)
         RemoveFromParent();
         if (MainMenuWidgetClass)
         {
@@ -76,6 +76,5 @@ void UTitleWidget::OnExitClicked()
     if (!World) return;
 
     APlayerController* PlayerController = UGameplayStatics::GetPlayerController(World, 0);
-    // 게임 종료 (실제 빌드에서만 작동)
     UKismetSystemLibrary::QuitGame(World, PlayerController, EQuitPreference::Quit, true);
 }

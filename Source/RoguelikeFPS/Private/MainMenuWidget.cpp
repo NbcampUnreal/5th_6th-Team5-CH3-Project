@@ -1,9 +1,9 @@
 #include "MainMenuWidget.h"
 #include "Components/Button.h"
+#include "FPSGameMode.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "GameDataInstance.h"
-#include "FPSGameMode.h" // GameMode 접근을 위해 포함 (OnExitButtonClicked에서 사용)
 
 bool UMainMenuWidget::Initialize()
 {
@@ -19,9 +19,7 @@ bool UMainMenuWidget::Initialize()
     if (Button_Weapon4) Button_Weapon4->OnClicked.AddDynamic(this, &UMainMenuWidget::OnButtonWeapon4Clicked);
 
     if (Button_Start) Button_Start->OnClicked.AddDynamic(this, &UMainMenuWidget::OnStartGameClicked);
-
-    // Title로 돌아가는 버튼 (OnExitButtonClicked 사용)
-    if (Button_Exit) Button_Exit->OnClicked.AddDynamic(this, &UMainMenuWidget::OnExitButtonClicked);
+    if (Button_Exit) Button_Exit->OnClicked.AddDynamic(this, &UMainMenuWidget::OnBackToTitleClicked);
 
     // 시작 시 Start 버튼 비활성화 (무기 선택 전)
     if (Button_Start)
@@ -30,21 +28,26 @@ bool UMainMenuWidget::Initialize()
     return true;
 }
 
-// ===================== 무기 선택 래퍼 ===================== //
+//  무기 선택 래퍼 
 void UMainMenuWidget::OnButtonWeapon1Clicked() { HandleWeaponSelection(1); }
 void UMainMenuWidget::OnButtonWeapon2Clicked() { HandleWeaponSelection(2); }
 void UMainMenuWidget::OnButtonWeapon3Clicked() { HandleWeaponSelection(3); }
 void UMainMenuWidget::OnButtonWeapon4Clicked() { HandleWeaponSelection(4); }
 
-// ===================== 공통 무기 선택 로직 ===================== //
+// 공통 무기 선택 로직 
 void UMainMenuWidget::HandleWeaponSelection(int32 WeaponIndex)
 {
     UGameDataInstance* GameInstance = Cast<UGameDataInstance>(GetGameInstance());
+
     if (!GameInstance)
     {
-        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("GameInstance Cast Failed."));
+        // 오류 메시지를 더 명확하게 변경
+        GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red,
+            TEXT("ERROR: GetGameInstance() is NOT UGameDataInstance! Check Project Settings -> Maps & Modes."));
+
+        // 이 시점에서 Start 버튼 활성화/비활성화가 무의미해지므로 종료
         if (Button_Start) Button_Start->SetIsEnabled(false);
-        CurrentSelectedWeaponIndex = 0;
+        CurrentSelectedWeaponIndex = 0; // 안전하게 초기화
         return;
     }
 
@@ -61,8 +64,8 @@ void UMainMenuWidget::HandleWeaponSelection(int32 WeaponIndex)
         CurrentSelectedWeaponIndex = WeaponIndex;
         GameInstance->SetSelectedOption(WeaponIndex);
         GameInstance->bIsReadyToStart = true;
-
-        GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("Weapon Selected: %d"), WeaponIndex));
+        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green,
+            FString::Printf(TEXT("Weapon Selected: %d"), WeaponIndex));
     }
     // Start 버튼 활성화 / 비활성화
     if (Button_Start)
@@ -80,23 +83,21 @@ void UMainMenuWidget::OnStartGameClicked()
     }
 
     RemoveFromParent();
-
-    // GameInstance에서 다음 맵 이름을 가져와서 로딩 (하드코딩 방지)
-    FName LevelToOpen = GameInstance->StageLevelNames.IsValidIndex(0) ? GameInstance->StageLevelNames[0] : TEXT("L_GameMap1");
-
-    UGameplayStatics::OpenLevel(GetWorld(), LevelToOpen);
+    UGameplayStatics::OpenLevel(GetWorld(), TEXT("L_Map1"));
 }
 
-// ===================== 타이틀로 돌아가기 버튼 (ExitButton 사용) ===================== //
-void UMainMenuWidget::OnExitButtonClicked()
+// ===================== 뒤로가기 버튼 ===================== //
+void UMainMenuWidget::OnBackToTitleClicked()
 {
-    // Title 위젯을 다시 띄우도록 GameMode에 요청
+    RemoveFromParent();
+    UGameDataInstance* GameInstance = Cast<UGameDataInstance>(GetGameInstance());
     AFPSGameMode* FPSGameMode = Cast<AFPSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
     if (FPSGameMode)
     {
-        // Title 위젯을 다시 띄우는 로직을 GameMode에서 처리하도록 호출
         FPSGameMode->OnMainMenuBackClicked();
     }
-
-    RemoveFromParent();
+    else
+    {
+        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("GameMode Cast Failed in MainMenuWidget::OnBackToTitleClicked"));
+    }
 }

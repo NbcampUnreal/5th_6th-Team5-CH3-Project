@@ -5,9 +5,9 @@
 #include "Shop.h"
 #include "RoguelikeFPS/InventoryWidget/ShopWidget.h"
 #include "EnhancedInputSubsystems.h"
+#include "EnhancedInputComponent.h"
 #include "Blueprint/UserWidget.h"
-#include "FPSCharacter.h"
-#include "StatsHUD.h" // UStatsHUD 포함 (캐스팅을 위해 필요)
+//#include "TitleWidget.h"
 
 AFPSPlayerController::AFPSPlayerController()
 	: InputMappingContext(nullptr),
@@ -23,6 +23,7 @@ AFPSPlayerController::AFPSPlayerController()
 	InventoryWidget(nullptr),
 	ShopWidget(nullptr)
 	//,TitleWidgetClass(nullptr) // Title 추가
+
 {
 }
 
@@ -30,7 +31,7 @@ AFPSPlayerController::AFPSPlayerController()
 void AFPSPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
-	// 1. 입력 매핑 설정
+
 	if (TObjectPtr<ULocalPlayer> LocalPlayer = GetLocalPlayer())
 	{
 		if (TObjectPtr<UEnhancedInputLocalPlayerSubsystem> Subsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>())
@@ -39,62 +40,93 @@ void AFPSPlayerController::BeginPlay()
 				Subsystem->AddMappingContext(InputMappingContext, 0);
 			}
 	}
-	// 2. HUD 위젯 생성 및 델리게이트 바인딩
-	if (HUDWidgetClass)
+
+	if (InventoryWidgetClass)
 	{
-		HUDWidgetInstance = CreateWidget<UUserWidget>(this, HUDWidgetClass);
-		if (HUDWidgetInstance)
+		InventoryWidget = CreateWidget<UInventoryWidget>(this, InventoryWidgetClass);
+		if (InventoryWidget)
 		{
-			HUDWidgetInstance->AddToViewport();
-			
-			// 마우스 커서 설정 (게임 중에는 일반적으로 숨김)
-			bShowMouseCursor = false;
-			FInputModeGameOnly InputMode;
-			SetInputMode(InputMode);
-
-			// 3. 캐릭터 참조 획득 및 UStatsHUD에 위젯 설정
-			if (AFPSCharacter* MyCharacter = Cast<AFPSCharacter>(GetCharacter()))
+			if (AFPSCharacter* MyPlayer = Cast<AFPSCharacter>(GetPawn()))
 			{
-				// UStatsHUD로 캐스팅하여 캐릭터를 설정합니다.
-				// UStatsHUD는 SetOwningCharacter에서 캐릭터의 델리게이트를 직접 바인딩합니다.
-				if (UStatsHUD* StatsHUD = Cast<UStatsHUD>(HUDWidgetInstance))
-				{
-					StatsHUD->SetOwningCharacter(MyCharacter);
-				}
-
-				// **이전의 델리게이트 바인딩 코드는 제거됨**
-				/*
-				// 스탯 변경 델리게이트 바인딩
-				MyCharacter->OnHUDStatChanged.AddDynamic(this, &AFPSPlayerController::OnCharacterStatChanged);
-
-				// 사망 델리게이트 바인딩
-				MyCharacter->OnPlayerDeath.AddDynamic(this, &AFPSPlayerController::OnCharacterDied);
-				*/
+				InventoryWidget->InitInventory(MyPlayer->Inventory);
 			}
+			InventoryWidget->AddToViewport();
+			InventoryWidget->SetVisibility(ESlateVisibility::Hidden);
+		}
+	}
+	if (ShopWidgetClass)
+	{
+		ShopWidget = CreateWidget<UShopWidget>(this, ShopWidgetClass);
+		if (ShopWidget)
+		{
+			ShopWidget->AddToViewport();
+			ShopWidget->SetVisibility(ESlateVisibility::Hidden);
+		}
+	}
+
+	SetUpInputBinding();
+}
+	////title 추가
+	//if (titlewidgetclass)
+	//{
+	//	uuserwidget* titlewidget = createwidget<uuserwidget>(this, titlewidgetclass);
+	//	if (titlewidget)
+	//	{
+	//		titlewidget->addtoviewport();
+
+	//		// 마우스 커서 보이기
+	//		bshowmousecursor = true;
+
+	//		finputmodeuionly inputmode;
+	//		setinputmode(inputmode);
+
+	//		ue_log(logtemp, warning, text("title widget displayed successfully from playercontroller."));
+	//	}
+	//	else
+	//	{
+	//		ue_log(logtemp, error, text("titlewidgetclass exists but failed to create widget."));
+	//	}
+	//}
+	//else
+	//{
+	//	ue_log(logtemp, error, text("titlewidgetclass not set in playercontroller!"));
+	//}
+
+void AFPSPlayerController::SetUpInputBinding()
+{
+	if (UEnhancedInputComponent* EnhancedInput = Cast<UEnhancedInputComponent>(InputComponent))
+	{
+		if (IA_InventoryOnOff)
+		{
+			EnhancedInput->BindAction(
+				IA_InventoryOnOff,
+				ETriggerEvent::Triggered,
+				this,
+				&AFPSPlayerController::InventoryToggle
+			);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Inventory InputAction is nullptr!"));
 		}
 	}
 }
-
-/*
-// 제거된 함수들: UStatsHUD가 직접 바인딩하므로 제거
-void AFPSPlayerController::OnCharacterStatChanged(FName StatName)
+void AFPSPlayerController::InventoryToggle()
 {
-	// 캐릭터에서 데이터 변경 신호가 오면, HUD 위젯의 업데이트 함수를 호출합니다.
-	UpdateHUD(StatName);
+	if (!InventoryWidget)
+	{
+		return;
+	}
+	if (InventoryWidget->IsVisible())
+	{
+		InventoryWidget->SetVisibility(ESlateVisibility::Hidden);
+		bShowMouseCursor = false;
+		SetInputMode(FInputModeGameOnly());
+	}
+	else
+	{
+		InventoryWidget->SetVisibility(ESlateVisibility::Visible);
+		bShowMouseCursor = true;
+		SetInputMode(FInputModeGameAndUI().SetWidgetToFocus(InventoryWidget->TakeWidget()));
+	}
 }
-
-void AFPSPlayerController::OnCharacterDied(AController* KillerController)
-{
-	// 사망 시 처리 (예: 게임 오버 화면 표시)
-}
-
-void AFPSPlayerController::UpdateHUD(FName StatName)
-{
-	// 제거됨
-}
-
-void AFPSPlayerController::UpdateHUDWidgetStats(FName StatName)
-{
-	// 제거됨
-}
-*/

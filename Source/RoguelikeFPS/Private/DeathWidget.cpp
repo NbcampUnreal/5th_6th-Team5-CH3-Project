@@ -36,8 +36,7 @@ void UDeathWidget::OnRestartClicked()
     }
 
     FString CurrentLevelName = UGameplayStatics::GetCurrentLevelName(World, true);
-
-    // 현재 레벨로 재시작
+    // OwningController가 유효하면 그 컨텍스트로, 아니면 World로 열기
     if (OwningController)
     {
         UGameplayStatics::OpenLevel(OwningController, FName(*CurrentLevelName));
@@ -53,23 +52,19 @@ void UDeathWidget::OnExitClicked()
     UWorld* World = GetWorld();
     if (!World) return;
 
-    UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(World);
-    UGameDataInstance* GameDataInstance = Cast<UGameDataInstance>(GameInstance);
-
-    if (GameDataInstance)
+    UGameDataInstance* GameInstance = Cast<UGameDataInstance>(UGameplayStatics::GetGameInstance(World));
+    if (GameInstance)
     {
-        GameDataInstance->ResetGameStatsToLevelOne();
+        GameInstance->ResetGameStatsToLevelOne();
+    }
 
-        // 메인 메뉴 이름 사용
-        FName MenuLevelName = GameDataInstance->MainMenuLevelName;
-
-        if (OwningController)
-        {
-            UGameplayStatics::OpenLevel(OwningController, MenuLevelName);
-        }
-        else
-        {
-            UGameplayStatics::OpenLevel(World, MenuLevelName);
-        }
+    // 메인 메뉴로 (L_MainMenu)
+    if (OwningController)
+    {
+        UGameplayStatics::OpenLevel(OwningController, TEXT("L_MainMenu"));
+    }
+    else
+    {
+        UGameplayStatics::OpenLevel(World, TEXT("L_MainMenu"));
     }
 }
