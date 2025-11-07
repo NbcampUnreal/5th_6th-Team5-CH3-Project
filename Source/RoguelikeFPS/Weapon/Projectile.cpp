@@ -18,7 +18,9 @@ AProjectile::AProjectile()
 	_Collision = CreateDefaultSubobject<USphereComponent>(TEXT("Collision"));
 	_Collision->InitSphereRadius(5.0f);
 	_Collision->SetCollisionProfileName("Projectile");
-	_Collision->SetGenerateOverlapEvents(true);
+	
+	_Collision->SetGenerateOverlapEvents(false);
+	_Collision->SetNotifyRigidBodyCollision(true);
 	_Collision->OnComponentBeginOverlap.AddDynamic(this, &AProjectile::OnBeginOverlap);
 	_Collision->OnComponentHit.AddDynamic(this, &AProjectile::OnHit);
 
@@ -64,6 +66,37 @@ void AProjectile::Tick(float DeltaTime)
 
 void AProjectile::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	//if (OtherComp->IsA(UWeaponComponent::StaticClass())) return;
+	//if (!IsValid(_Instigator)) return;
+	//if (_Instigator == OtherActor) return;
+	//
+	//ACharacter* Victim = Cast<ACharacter>(OtherActor);	
+
+	//if (!Victim)
+	//{
+	//	Destroy();
+	//	return;
+	//}
+
+	//ACharacter* Attacker = Cast<ACharacter>(_Instigator);
+
+	//AActor* ActualDamageCauser = this;
+	//AController* AttackerController = nullptr;
+	//if (IsValid(Attacker))
+	//{
+	//	AttackerController = Attacker->GetController();
+	//}
+
+	//const FVector ShotDir = (OtherActor->GetActorLocation() - GetActorLocation()).GetSafeNormal();
+	//UGameplayStatics::ApplyDamage(Victim, _Damage, AttackerController, ActualDamageCauser, UDamageType::StaticClass());
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("ApplyDamage : %d"), _Damage));
+	//OnDamagedEnemy.Broadcast(Victim);
+	//Destroy();
+}
+
+
+void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
 	if (OtherComp->IsA(UWeaponComponent::StaticClass())) return;
 	if (!IsValid(_Instigator)) return;
 	if (_Instigator == OtherActor) return;
@@ -85,15 +118,11 @@ void AProjectile::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 		AttackerController = Attacker->GetController();
 	}
 
-	UGameplayStatics::ApplyDamage(Victim, _Damage, AttackerController, ActualDamageCauser, UDamageType::StaticClass());
+	const FVector ShotDir = (OtherActor->GetActorLocation() - GetActorLocation()).GetSafeNormal();
+	UGameplayStatics::ApplyPointDamage(OtherActor, _Damage, ShotDir, Hit, AttackerController, this, UDamageType::StaticClass()
+	);
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("ApplyDamage : %d"), _Damage));
 	OnDamagedEnemy.Broadcast(Victim);
-	Destroy();
-}
-
-
-void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
-{
 	Destroy();
 }
 
