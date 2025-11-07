@@ -28,7 +28,7 @@ void URangedAttackComponent::StartAttack(AActor* Target)
 
 void URangedAttackComponent::DoHit()
 {
-    if (bCanceled) return;
+    //if (bCanceled) return;
     if (!HasServerAuthority()) return;
     if (!ProjectileClass) return;
 
@@ -43,12 +43,12 @@ void URangedAttackComponent::DoHit()
 
     if (AProjectile* Proj = GetWorld()->SpawnActor<AProjectile>(ProjectileClass, Loc, Rot, P))
     {
-        UE_LOG(LogTemp, Log, TEXT("SpawnActor if"));
+        //UE_LOG(LogTemp, Log, TEXT("SpawnActor if"));
         Proj->SetMovementSpeed(MuzzleSpeed);
     }
     else
     {
-        UE_LOG(LogTemp, Log, TEXT("SpawnActor else"));
+        //UE_LOG(LogTemp, Log, TEXT("SpawnActor else"));
     }
 }
 

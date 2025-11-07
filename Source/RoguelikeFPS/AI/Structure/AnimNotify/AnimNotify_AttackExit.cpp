@@ -9,25 +9,26 @@ void UAnimNotify_AttackExit::Notify(USkeletalMeshComponent* MeshComp, UAnimSeque
     if (!MeshComp) return;
     if (AActor* Owner = MeshComp->GetOwner())
     {
-        //UE_LOG(LogTemp, Log, TEXT("AnimNotify_AttackExit start"));
-        bool bHandled = false;
+        UE_LOG(LogTemp, Log, TEXT("AnimNotify_AttackExit"));
 
         if (auto* Melee = Owner->FindComponentByClass<UMeleeAttackComponent>())
         {
             Melee->FinishAttack();
             Melee->bAttackEnded = true;
-            bHandled = true;
+            return;
         }
         if (auto* Boss2 = Owner->FindComponentByClass<UStage2BossAttackComponent>())
         {
             Boss2->FinishAttack();
             Boss2->bAttackEnded = true;
-            bHandled = true;
+            return;
         }
-        if (!bHandled)
+        if (auto* Ranged = Owner->FindComponentByClass<URangedAttackComponent>())
         {
-            if (auto* Ranged = Owner->FindComponentByClass<URangedAttackComponent>())
-                Ranged->FinishAttack();
+            Ranged->FinishAttack();
+            return;
         }
+
+        // FinishAttack() 내부에서 OnAttackFinished 브로드캐스트 → 상태머신의 FinalizeAfterAttack()으로 수렴
     }
 }
