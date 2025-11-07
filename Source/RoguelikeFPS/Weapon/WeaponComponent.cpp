@@ -90,10 +90,7 @@ void UWeaponComponent::BeginPlay()
 		if (PickUp)
 		{
 			PickUp->OnPickUp.AddDynamic(this, &UWeaponComponent::AttachWeapon);
-			UE_LOG(LogTemp, Warning, TEXT("AddDynamic"));
-		}
-		else {
-			UE_LOG(LogTemp, Warning, TEXT("Can't find UPickUpComponent"));
+			//UE_LOG(LogTemp, Warning, TEXT("AddDynamic"));
 		}
 	}
 
