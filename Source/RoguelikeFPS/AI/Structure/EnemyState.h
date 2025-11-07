@@ -10,5 +10,6 @@ enum class EEnemyState : uint8
     Patrol UMETA(DisplayName = "Patrol"),
     Chase UMETA(DisplayName = "Chase"),
     Attack UMETA(DisplayName = "Attack"),
+    Stun UMETA(DisplayName = "Stun"),
     Dead UMETA(DisplayName = "Dead")
 };
