@@ -21,7 +21,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	void UpdateUI();
-
+	
 protected:
 
 	UPROPERTY(BlueprintReadOnly)

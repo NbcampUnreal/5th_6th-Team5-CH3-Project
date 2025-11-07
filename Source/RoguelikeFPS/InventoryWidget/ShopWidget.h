@@ -15,11 +15,12 @@ class ROGUELIKEFPS_API UShopWidget : public UUserWidget
 	GENERATED_BODY()
 	
 public:
-	UFUNCTION(BlueprintCallable)
-	void InitShop(const TArray<UItemBase*>& Items);
 		
 	UFUNCTION(BlueprintCallable)
 	void CloseShop();
+	
+	UFUNCTION(BlueprintCallable)
+	void OpenShop(const TArray<UItemBase*>& ShopItems);
 
 protected:
 	UPROPERTY(meta = (BindWidget))

@@ -1,4 +1,5 @@
 #include "FPSCharacter.h"
+#include "Inventory.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputComponent.h"
@@ -38,6 +39,8 @@ AFPSCharacter::AFPSCharacter()		//초기 스텟 설정
 	DashSpeed = MovingSpeed * DashMultifly;
 	DashTime = 0.5f;
 
+	//인벤토리 부착
+	Inventory = CreateDefaultSubobject<UInventory>(TEXT("InventoryComponent"));
 
 	// Crouch 활성화
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;

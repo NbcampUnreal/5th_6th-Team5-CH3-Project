@@ -6,6 +6,7 @@
 
 class USpringArmComponent;
 class UCameraComponent;
+class UInventory;
 struct FInputActionValue;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLevelUpSignature, APlayerController*, PlayerController);
@@ -35,9 +36,8 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnPlayerDeathSignature OnPlayerDeath;
 
-	void AddShield(int32 amount) {
-		shield += amount;
-	}
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
+	UInventory* Inventory;//인벤토리 정보
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")

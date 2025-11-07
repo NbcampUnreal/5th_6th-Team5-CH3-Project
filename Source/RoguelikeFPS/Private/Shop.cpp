@@ -1,7 +1,7 @@
 #include "Shop.h"
 #include "Inventory.h"
-#include "MyCharacter.h"
-#include "MyPlayerController.h"
+#include "RoguelikeFPS/FPSCharacter.h"
+#include "RoguelikeFPS/FPSPlayerController.h"
 #include "ItemBase.h"
 #include "ItemData.h"
 #include "Components/BoxComponent.h"
@@ -39,7 +39,10 @@ void AShop::BeginPlay()
 void AShop::LoadItemsFromDataTable()
 {
     ShopItems.Empty();
-    if (!ItemDataTable) return;
+    if (!ItemDataTable)
+    {
+        return;
+    }
 
     TArray<FName> RowNames = ItemDataTable->GetRowNames();
     for (const FName& Name : RowNames)
@@ -63,28 +66,26 @@ void AShop::PlayerInRange(UPrimitiveComponent* OverlappedComp, AActor* OtherActo
     UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
     bool bFromSweep, const FHitResult& SweepResult)
 {
-    if (AMyCharacter* Player = Cast<AMyCharacter>(OtherActor))
+    if (AFPSCharacter* Player = Cast<AFPSCharacter>(OtherActor))
     {
-        if (AMyPlayerController* PC = Cast<AMyPlayerController>(Player->GetController()))
+        if (AFPSPlayerController* PlayerController = Cast<AFPSPlayerController>(Player->GetController()))
         {
-            if (ShopItems.Num() > 0)
+            if (ShopItems.Num() > 0 && PlayerController->ShopWidget)
             {
-                PC->OpenShop(ShopItems);
+                PlayerController->ShopWidget->OpenShop(ShopItems);
             }
         }
     }
 }void AShop::PlayerOutRange(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
     UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-    if (AMyCharacter* Player = Cast<AMyCharacter>(OtherActor))
+    if (AFPSCharacter* Player = Cast<AFPSCharacter>(OtherActor))
     {
-        if (AMyPlayerController* PlayerController = Cast<AMyPlayerController>(Player->GetController()))
+        if (AFPSPlayerController* PlayerController = Cast<AFPSPlayerController>(Player->GetController()))
         {
             if (PlayerController->ShopWidget)
             {
-                PlayerController->ShopWidget->SetVisibility(ESlateVisibility::Hidden);
-                PlayerController->bShowMouseCursor = false;
-                PlayerController->SetInputMode(FInputModeGameOnly());
+                PlayerController->ShopWidget->CloseShop();
             }
         }
     }

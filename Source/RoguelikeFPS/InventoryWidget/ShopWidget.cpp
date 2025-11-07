@@ -4,7 +4,8 @@
 #include "ItemBase.h"
 #include "Kismet/GameplayStatics.h"
 
-void UShopWidget::InitShop(const TArray<UItemBase*>& Items)
+
+void UShopWidget::OpenShop(const TArray<UItemBase*>& Items)
 {
     if (!ItemBox)
     {
@@ -26,9 +27,16 @@ void UShopWidget::InitShop(const TArray<UItemBase*>& Items)
             ItemBox->AddChild(ItemWidget);
         }
     }
+    SetVisibility(ESlateVisibility::Visible);
+
+    if (APlayerController* PlayerController = GetOwningPlayer())
+    {
+        PlayerController->bShowMouseCursor = true;
+        FInputModeUIOnly InputMode;
+        InputMode.SetWidgetToFocus(TakeWidget());
+        PlayerController->SetInputMode(InputMode);
+    }
 }
-
-
 void UShopWidget::CloseShop()
 {
     SetVisibility(ESlateVisibility::Hidden);
@@ -39,3 +47,4 @@ void UShopWidget::CloseShop()
         PlayerController->SetInputMode(FInputModeGameOnly());
     }
 }
+

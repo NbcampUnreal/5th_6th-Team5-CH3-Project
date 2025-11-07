@@ -30,14 +30,17 @@ void UPartItem::ApplyToWeapon(float& InOutDamage, int32& InOutAmmo, float& InOut
 float UPartItem::ApplyDamage(float BaseDamage) const
 {
     return BaseDamage + (BaseDamage * (Damage / 100.0f));
+    //기본데미지 + (기본데미지 * (파츠 데미지 / 100))
 }
 
 int32 UPartItem::ApplyAmmo(int32 BaseAmmo) const
 {
     return BaseAmmo + Ammo;
+    //기본 총알 + 파츠 총알
 }
 
 float UPartItem::ApplyAttackSpeed(float BaseAttackSpeed) const
 {
     return BaseAttackSpeed * (1 + AttackSpeed / 100.0f);
+    //기본 공속 * (1 + 파츠 공속 / 100)
 }
