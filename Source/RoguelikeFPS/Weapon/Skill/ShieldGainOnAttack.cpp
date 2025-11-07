@@ -33,9 +33,9 @@ void UShieldGainOnAttack::GetShield(ACharacter* Victim)
 		if (GunComp->GetOwnerCharacter())
 		{
 			AFPSCharacter* WeaponOwner = Cast<AFPSCharacter>(GunComp->GetOwnerCharacter());
-			WeaponOwner->AddShield(_ShieldAmountGained);
+			//WeaponOwner->AddShield(_ShieldAmountGained);
 			
-			GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Blue, FString::Printf(TEXT("Shield : %d"), WeaponOwner->GetShieldValue()));
+			//GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Blue, FString::Printf(TEXT("Shield : %d"), WeaponOwner->GetShieldValue()));
 		}
 	}
 }

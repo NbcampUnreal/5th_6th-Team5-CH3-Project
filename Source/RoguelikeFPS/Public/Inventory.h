@@ -68,7 +68,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	UInventoryWidget* InventoryUI;
 
-	//°Ë»ö
+	//ï¿½Ë»ï¿½
 	UFUNCTION(BlueprintCallable)
 	UItemBase* SearchItemName(const FName& Name) const;
 	UFUNCTION(BlueprintCallable)
