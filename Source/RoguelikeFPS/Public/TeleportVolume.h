@@ -22,8 +22,9 @@ public:
     UPROPERTY(EditAnywhere, Category = "Teleport")
     float DelayBeforeTeleport = 5.0f;
 
-    UPROPERTY(EditAnywhere, Category = "Teleport", meta = (ToolTip = "다음으로 이동할 맵의 레벨 이름"))
-    FName NextLevelName = TEXT("NextMap");
+    // 클리어 시 이동할 레벨 이름으로 변경
+    UPROPERTY(EditAnywhere, Category = "Teleport", meta = (ToolTip = "다음으로 이동할 맵의 레벨 이름 (클리어 지점에서는 게임 클리어 맵/메인 메뉴 레벨로 설정)"))
+    FName LevelAfterLastStage = TEXT("L_MainMenu"); // 기본값을 메인 메뉴로 변경
 
     UFUNCTION()
     void OnOverlapBegin(class UPrimitiveComponent* OverlappedComp,

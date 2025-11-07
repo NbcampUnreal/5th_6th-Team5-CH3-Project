@@ -26,7 +26,7 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UButton> ExitButton;
 
-	// 블루프린트에서 MainMenu 위젯 클래스를 지정할 수 있게 추가
+	// 블루프린트에서 MainMenu 위젯 클래스를 지정할 수 있게 추가 (AFPSGameMode에서 사용)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	TSubclassOf<UMainMenuWidget> MainMenuWidgetClass;
 
