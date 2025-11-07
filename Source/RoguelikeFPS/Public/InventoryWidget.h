@@ -7,7 +7,8 @@
 class UInventory;
 class UScrollBox;
 class UTextBlock;
-class UInventoryItemWidget;
+class UImage;
+class UInventorySlotWidget;
 
 UCLASS()
 class ROGUELIKEFPS_API UInventoryWidget : public UUserWidget
@@ -29,10 +30,13 @@ protected:
 
 	UPROPERTY(meta = (BindWidget))
 	UScrollBox* ItemBox;
+	
+	UPROPERTY(meta = (BindWidget))
+	UImage* ItemImage;
 
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* GoldText;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
-	TSubclassOf<UInventoryItemWidget> InventoryItemWidgetClass;
+	TSubclassOf<UInventorySlotWidget> InventorySlotWidgetClass;
 };
