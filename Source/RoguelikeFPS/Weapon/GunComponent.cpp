@@ -110,6 +110,7 @@ float UGunComponent::ReturnDamage()
 void UGunComponent::AddBullet(int32 amount)
 {
 	if (amount > 0) CurrentBulletCount += amount;
+
 }
 
 FRotator UGunComponent::CalculateSapwnRotaion()

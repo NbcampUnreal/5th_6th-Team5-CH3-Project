@@ -18,7 +18,7 @@ void UIncreaseMoveSpeed::Active()
 	UWorld* const World = GetWorld();
 	if (!World) return;
 
-	World->GetTimerManager().SetTimer(DashDurationTimerHandle, this, &UIncreaseMoveSpeed::EndBuff , _BuffDuration, false);
+	World->GetTimerManager().SetTimer(_DashDurationTimerHandle, this, &UIncreaseMoveSpeed::EndBuff , _BuffDuration, false);
 }
 
 void UIncreaseMoveSpeed::SetUp()

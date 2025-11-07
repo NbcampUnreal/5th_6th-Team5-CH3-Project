@@ -31,7 +31,7 @@ private:
 	float _DashMultifly = 1.2f;
 
 	UPROPERTY()
-	FTimerHandle DashDurationTimerHandle;
+	FTimerHandle _DashDurationTimerHandle;
 
 public:
 	virtual void Active() override;
