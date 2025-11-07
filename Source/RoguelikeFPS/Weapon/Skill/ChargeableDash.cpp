@@ -6,9 +6,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"
-
-#include "InputMappingContext.h" // 엔진 헤더 경로에 따라 조정
-#include "EnhancedActionKeyMapping.h"
+#include "FPSCharacter.h"
 
 UChargeableDash::UChargeableDash()
 {
@@ -30,11 +28,6 @@ void UChargeableDash::SetUp()
 	//SetDashMapping();
 }
 
-void UChargeableDash::SetDashMapping()
-{
-
-}
-
 void UChargeableDash::IncreaseDashCharge()
 {
 	if (_ChargedDashCount + 1 <= _MaxDashCount) {
@@ -54,18 +47,20 @@ void UChargeableDash::StartDash() {
 	UWeaponComponent* WeaponComp = Cast<UWeaponComponent>(GetAttachParent());
 	if (WeaponComp)
 	{
-		ACharacter* Owenr = WeaponComp->GetOwnerCharacter();
+		AFPSCharacter* Owenr = Cast<AFPSCharacter>(WeaponComp->GetOwnerCharacter());
 		if (Owenr) {
 			GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Blue, FString::Printf(TEXT("StartDash")));
-			Owenr->GetCharacterMovement()->MaxWalkSpeed *= _DashMultifly;
+			Owenr->GetCharacterMovement()->MaxWalkSpeed = Owenr->GetDashSpeed();
+			
 			_ChargedDashCount--;
 			_IsDash = true;
+			Owenr->SetIsDashing(_IsDash);
 
 			UWorld* const World = GetWorld();
-			if (!World) return;			
+			if (!World) return;
 
 			FTimerHandle DashTimerHandle;
-			World->GetTimerManager().SetTimer(DashTimerHandle, this, &UChargeableDash::StopDash, 1.f, false);
+			World->GetTimerManager().SetTimer(DashTimerHandle, this, &UChargeableDash::StopDash, 0.5f, false);
 
 			if (!_isSkillCoolDown)//is Already charging
 			{
@@ -80,10 +75,11 @@ void UChargeableDash::StopDash() {
 	UWeaponComponent* WeaponComp = Cast<UWeaponComponent>(GetAttachParent());
 	if (WeaponComp)
 	{
-		ACharacter* Owenr = WeaponComp->GetOwnerCharacter();
+		AFPSCharacter* Owenr = Cast<AFPSCharacter>(WeaponComp->GetOwnerCharacter());
 		if (Owenr) {
-			Owenr->GetCharacterMovement()->MaxWalkSpeed /= _DashMultifly;
+			Owenr->GetCharacterMovement()->MaxWalkSpeed = Owenr->GetMovingSpeed();
 			_IsDash = false;
+			Owenr->SetIsDashing(_IsDash);
 			GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Green, FString::Printf(TEXT("StopDash")));
 		}
 	}

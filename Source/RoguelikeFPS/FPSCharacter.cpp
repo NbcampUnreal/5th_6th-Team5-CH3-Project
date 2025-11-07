@@ -28,6 +28,8 @@ void AFPSCharacter::SetMovingSpeed(int32 movingSpeed) { MovingSpeed = movingSpee
 void AFPSCharacter::SetStamina(int32 stamina) { Stamina = stamina; }
 void AFPSCharacter::SetExperience(int32 experience) { Experience = experience; }
 void AFPSCharacter::SetMaxExperience(int32 maxExperience) { MaxExperience = maxExperience; }
+void AFPSCharacter::SetIsDashing(bool isdash) { bIsDashing = isdash; }
+
 
 // CONSTRUCTOR
 AFPSCharacter::AFPSCharacter()		// 초기 설정
@@ -219,7 +221,8 @@ void AFPSCharacter::Look(const FInputActionValue& value)
 }
 void AFPSCharacter::StartJump(const FInputActionValue& value)
 {
-	if (GetCharacterMovement()->IsFalling()) return; if (value.Get<bool>()) {
+	if (GetCharacterMovement()->IsFalling()) return; 
+	if (value.Get<bool>()) {
 		Jump();
 	}
 }

@@ -46,6 +46,7 @@ public:
     int32 GetShield() const { return Shield; }
     int32 GetAttackSpeed() const { return AttackSpeed; }
     int32 GetMovingSpeed() const { return MovingSpeed; }
+    int32 GetDashSpeed() const { return DashSpeed; }
     int32 GetStamina() const { return Stamina; }
     int32 GetExperience() const { return Experience; }
     int32 GetMaxExperience() const { return MaxExperience; }
@@ -55,6 +56,7 @@ public:
     float GetSkill1CooldownRemaining() const { return Skill1CooldownRemaining; }
     float GetSkill2CooldownRemaining() const { return Skill2CooldownRemaining; }
     int32 GetGoldAmount() const { return GoldAmount; }
+    bool GetIsDash() const { return bIsDashing; }
 
     UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
     void SetLevel(int32 level);
@@ -78,6 +80,8 @@ public:
     void SetExperience(int32 experience);
     UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
     void SetMaxExperience(int32 maxExperience);
+    UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
+    void SetIsDashing(bool isdash);
 
 protected:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
