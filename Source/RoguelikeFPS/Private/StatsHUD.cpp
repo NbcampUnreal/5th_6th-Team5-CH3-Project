@@ -61,10 +61,10 @@ void UStatsHUD::OnCharacterStatChanged(FName StatName)
     {
         UpdateWeaponDisplay();
     }
-    else if (StatName.IsEqual(TEXT("Skill1CD")) || StatName.IsEqual(TEXT("Skill2CD")))
-    {
-        UpdateSkillCooldownDisplay();
-    }
+    //else if (StatName.IsEqual(TEXT("Skill1CD")) || StatName.IsEqual(TEXT("Skill2CD")))
+    //{
+        //UpdateSkillCooldownDisplay();
+    //}
     // Death 등 다른 이벤트 처리
 }
 
@@ -94,7 +94,7 @@ void UStatsHUD::UpdateEXPDisplay()
     if (OwningCharacter && ProgressBar_EXP)
     {
         // **Getter 사용으로 수정**
-        float CurrentExp = (float)OwningCharacter->GetCurrentExperience();
+        float CurrentExp = (float)OwningCharacter->GetExperience();
         float MaxExp = (float)OwningCharacter->GetMaxExperience();
 
         float Percent = (MaxExp > 0) ? CurrentExp / MaxExp : 0.0f;
@@ -129,21 +129,21 @@ void UStatsHUD::UpdateGoldDisplay()
     }
 }
 
-void UStatsHUD::UpdateSkillCooldownDisplay()
-{
-    if (OwningCharacter && Skill1CD)
-    {
-        // **Getter 사용으로 수정**
-        float Remaining = OwningCharacter->GetSkill1CooldownRemaining();
-        Skill1CD->SetText(FText::AsNumber(FMath::CeilToInt(Remaining)));
-    }
-    if (OwningCharacter && Skill2CD)
-    {
-        // **Getter 사용으로 수정**
-        float Remaining = OwningCharacter->GetSkill2CooldownRemaining();
-        Skill2CD->SetText(FText::AsNumber(FMath::CeilToInt(Remaining)));
-    }
-}
+//void UStatsHUD::UpdateSkillCooldownDisplay()
+//{
+//    if (OwningCharacter && Skill1CD)
+//    {
+//        // **Getter 사용으로 수정**
+//        float Remaining = OwningCharacter->GetSkill1CooldownRemaining();
+//        Skill1CD->SetText(FText::AsNumber(FMath::CeilToInt(Remaining)));
+//    }
+//    if (OwningCharacter && Skill2CD)
+//    {
+//        // **Getter 사용으로 수정**
+//        float Remaining = OwningCharacter->GetSkill2CooldownRemaining();
+//        Skill2CD->SetText(FText::AsNumber(FMath::CeilToInt(Remaining)));
+//    }
+//}
 
 void UStatsHUD::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {

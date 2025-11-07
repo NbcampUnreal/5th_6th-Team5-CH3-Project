@@ -35,11 +35,11 @@ protected:
     UPROPERTY(meta = (BindWidget))
     UTextBlock* Text_Gold;            // Gold 이름으로 가정
 
-    UPROPERTY(meta = (BindWidget))
-    UTextBlock* Skill1CD;        // Skill1 이름으로 가정
+    //UPROPERTY(meta = (BindWidget))
+    //UTextBlock* Skill1CD;        // Skill1 이름으로 가정
 
-    UPROPERTY(meta = (BindWidget))
-    UTextBlock* Skill2CD;        // Skill2 이름으로 가정
+    //UPROPERTY(meta = (BindWidget))
+    //UTextBlock* Skill2CD;        // Skill2 이름으로 가정
 
     // Image 변수들은 Text/ProgressBar와 달리 Bind 대신 SetBrush 등을 직접 호출하므로 생략 가능 (필요하면 추가)
 
@@ -57,7 +57,7 @@ protected:
     void UpdateEXPDisplay();
     void UpdateWeaponDisplay();
     void UpdateGoldDisplay();
-    void UpdateSkillCooldownDisplay();
+    //void UpdateSkillCooldownDisplay();
 
     // --- 5. 델리게이트 콜백 (Character가 직접 호출) ---
     UFUNCTION()

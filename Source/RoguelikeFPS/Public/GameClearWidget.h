@@ -5,7 +5,7 @@
 #include "GameClearWidget.generated.h"
 
 class UButton;
-class AFPSGameMode; // GameMode 참조를 위해 필요
+class AFPSGameMode;
 
 UCLASS()
 class ROGUELIKEFPS_API UGameClearWidget : public UUserWidget
@@ -20,11 +20,11 @@ public:
 
 protected:
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UButton> ExitButton; // 디자이너 변수명과 일치해야 함
+	TObjectPtr<UButton> ExitButton;
 
 private:
 	UFUNCTION()
-	void OnExitButtonClicked(); // 함수 이름 통일
+	void OnExitButtonClicked();
 
-	TWeakObjectPtr<class AFPSGameMode> OwningGameModePtr; // 변수 이름 통일
+	TWeakObjectPtr<class AFPSGameMode> OwningGameModePtr;
 };

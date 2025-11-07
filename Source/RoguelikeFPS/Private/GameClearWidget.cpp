@@ -2,18 +2,18 @@
 #include "Components/Button.h"
 #include "Kismet/GameplayStatics.h"
 #include "FPSGameMode.h" 
-#include "Blueprint/UserWidget.h" // GetWorld, RemoveFromParent 사용을 위해 추가
+#include "Blueprint/UserWidget.h"
+#include "GameDataInstance.h" // GameDataInstance 포함
 
 bool UGameClearWidget::Initialize()
 {
     if (!Super::Initialize())
         return false;
 
-    // 함수 이름 통일: OnExitButtonClicked
     if (ExitButton)
         ExitButton->OnClicked.AddDynamic(this, &UGameClearWidget::OnExitButtonClicked);
 
-    return true; // *** 반드시 true로 반환 ***
+    return true;
 }
 
 void UGameClearWidget::SetupGameModeLink(AFPSGameMode* OwningGameMode)
@@ -22,17 +22,29 @@ void UGameClearWidget::SetupGameModeLink(AFPSGameMode* OwningGameMode)
 }
 
 
-void UGameClearWidget::OnExitButtonClicked() // 함수 이름 통일
+void UGameClearWidget::OnExitButtonClicked()
 {
-    AFPSGameMode* GM = OwningGameModePtr.Get();
-    // UUserWidget의 멤버 함수인 GetWorld() 사용
-    APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+    UWorld* World = GetWorld();
+    APlayerController* PC = UGameplayStatics::GetPlayerController(World, 0);
+    UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(World);
 
-    if (GM && PC)
+    if (GameInstance)
     {
-        // GameMode의 protected 함수 호출 (AFPSGameMode.h에 friend 선언 필수)
-        //GM->ReturnToMainMenu(PC);
-
-        RemoveFromParent(); // UUserWidget의 멤버 함수
+        if (UGameDataInstance* GameDataInstance = Cast<UGameDataInstance>(GameInstance))
+        {
+            // 클리어 후 다음 플레이를 위해 게임 데이터 초기화 (권장)
+            GameDataInstance->ResetGameStatsToLevelOne();
+        }
     }
+
+    // 메인 메뉴 레벨로 이동
+    FName MenuLevelName = TEXT("L_MainMenu"); // 기본값
+    if (GameInstance && Cast<UGameDataInstance>(GameInstance))
+    {
+        MenuLevelName = Cast<UGameDataInstance>(GameInstance)->MainMenuLevelName;
+    }
+
+    // UI 제거 및 레벨 전환
+    RemoveFromParent();
+    UGameplayStatics::OpenLevel(World, MenuLevelName);
 }

@@ -1,5 +1,4 @@
 #pragma once
-
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "FPSCharacter.generated.h"
@@ -10,171 +9,177 @@ struct FInputActionValue;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLevelUpSignature, APlayerController*, PlayerController);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerDeathSignature, AController*, KillerController);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHUDStatChangedSignature, FName, StatName); // HUD 업데이트 신호
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHUDStatChangedSignature, FName, StatName);
 
 UCLASS()
 class ROGUELIKEFPS_API AFPSCharacter : public ACharacter
 {
-	GENERATED_BODY()
-
+    GENERATED_BODY()
 public:
-	AFPSCharacter();
+    AFPSCharacter();
+    virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+    UFUNCTION(BlueprintCallable)
+    void AddXP(float Amount);
+    UFUNCTION(BlueprintCallable, Category = "Augment")
+    void ApplyAugment(FName AugmentName);
+    UFUNCTION(BlueprintCallable)
+    void UpdateHUDStats(FName StatName);
+    UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
+    void GainGold(int32 Amount);
 
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+    UPROPERTY(BlueprintAssignable, Category = "Events")
+    FOnLevelUpSignature OnLevelUp;
+    UPROPERTY(BlueprintAssignable, Category = "Events")
+    FOnPlayerDeathSignature OnPlayerDeath;
+    UPROPERTY(BlueprintAssignable, Category = "Events")
+    FOnHUDStatChangedSignature OnHUDStatChanged;
 
-	UFUNCTION(BlueprintCallable)
-	void AddXP(float Amount);
+    int32 GetLevel() const { return Level; }
+    int32 GetHealth() const { return Health; }
+    int32 GetMaxHealth() const { return MaxHealth; }
+    int32 GetAttack() const { return Attack; }
+    int32 GetDefence() const { return Defence; }
+    int32 GetShield() const { return Shield; }
+    int32 GetAttackSpeed() const { return AttackSpeed; }
+    int32 GetMovingSpeed() const { return MovingSpeed; }
+    int32 GetStamina() const { return Stamina; }
+    int32 GetExperience() const { return Experience; }
+    int32 GetMaxExperience() const { return MaxExperience; }
+    FName GetCurrentWeaponName() const { return CurrentWeaponName; }
+    int32 GetCurrentAmmo() const { return CurrentAmmo; }
+    int32 GetMaxAmmo() const { return MaxAmmo; }
+    float GetSkill1CooldownRemaining() const { return Skill1CooldownRemaining; }
+    float GetSkill2CooldownRemaining() const { return Skill2CooldownRemaining; }
+    int32 GetGoldAmount() const { return GoldAmount; }
 
-	UFUNCTION(BlueprintCallable)
-	void ApplyAugment(FName AugmentName);
-
-	//HUD 업데이트를 외부에서 호출할 경우 사용
-	void UpdateHUDStats(FName StatName);
-
-	// ===== 델리게이트 =====
-	UPROPERTY(BlueprintAssignable, Category = "Events")
-	FOnLevelUpSignature OnLevelUp;
-
-	UPROPERTY(BlueprintAssignable, Category = "Events")
-	FOnPlayerDeathSignature OnPlayerDeath;
-
-	UPROPERTY(BlueprintAssignable, Category = "Events")
-	FOnHUDStatChangedSignature OnHUDStatChanged;
-
-	// --- HUD Getter 함수들 (StatsHUD에서 접근 가능하도록 PUBLIC) ---
-	UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
-	void GainGold(int32 Amount);
-	UFUNCTION(BlueprintPure, Category = "CharacterStatus")
-	int32 GetHealth() const { return Health; }
-	UFUNCTION(BlueprintPure, Category = "CharacterStatus")
-	int32 GetMaxHealth() const { return MaxHealth; }
-	UFUNCTION(BlueprintPure, Category = "CharacterStatus")
-	int32 GetGoldAmount() const { return GoldAmount; }
-	UFUNCTION(BlueprintPure, Category = "WeaponInfo")
-	int32 GetCurrentAmmo() const { return CurrentAmmo; }
-	UFUNCTION(BlueprintPure, Category = "WeaponInfo")
-	int32 GetMaxAmmo() const { return MaxAmmo; }
-	UFUNCTION(BlueprintPure, Category = "CharacterStatus")
-	float GetCurrentExperience() const { return CurrentExperience; }
-	UFUNCTION(BlueprintPure, Category = "CharacterStatus")
-	int32 GetMaxExperience() const { return MaxExperience; }
-	UFUNCTION(BlueprintPure, Category = "WeaponInfo")
-	FName GetCurrentWeaponName() const { return CurrentWeaponName; }
-	UFUNCTION(BlueprintPure, Category = "Skills")
-	float GetSkill1CooldownRemaining() const { return Skill1CooldownRemaining; }
-	UFUNCTION(BlueprintPure, Category = "Skills")
-	float GetSkill2CooldownRemaining() const { return Skill2CooldownRemaining; }
+    UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
+    void SetLevel(int32 level);
+    UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
+    void SetHealth(int32 health);
+    UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
+    void SetMaxHealth(int32 maxHealth);
+    UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
+    void SetAttack(int32 attack);
+    UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
+    void SetDefence(int32 defence);
+    UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
+    void SetShield(int32 shield);
+    UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
+    void SetAttackSpeed(int32 attackSpeed);
+    UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
+    void SetMovingSpeed(int32 movingSpeed);
+    UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
+    void SetStamina(int32 stamina);
+    UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
+    void SetExperience(int32 experience);
+    UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
+    void SetMaxExperience(int32 maxExperience);
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
-	TObjectPtr<USpringArmComponent> SpringArmComp;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
-	TObjectPtr<UCameraComponent> CameraComp;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
+    TObjectPtr<USpringArmComponent> SpringArmComp;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
+    TObjectPtr<UCameraComponent> CameraComp;
 
-	// Status (기존 변수들)
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
-	int32 Level;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
-	int32 Health;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
-	int32 MaxHealth;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
-	int32 Attack;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
-	int32 Defence;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
-	int32 AttackSpeed;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
-	int32 MovingSpeed;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
-	int32 Stamina;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
-	int32 Experience;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
-	int32 MaxExperience;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
-	bool bIsAlive;
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
+    int32 Level;
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
+    int32 Health;
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
+    int32 MaxHealth;
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
+    int32 Attack;
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
+    int32 Defence;
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
+    int32 AttackSpeed;
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
+    int32 MovingSpeed;
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
+    int32 Stamina;
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
+    int32 Experience;
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
+    int32 MaxExperience;
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
+    bool bIsAlive;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterStatus")
+    int32 GoldAmount = 100;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterStatus")
+    int32 CurrentAmmo = 30;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterStatus")
+    int32 MaxAmmo = 300;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterStatus")
+    float CurrentExperience = 0.0f;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Skills")
+    float Skill1CooldownRemaining = 0.0f;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Skills")
+    float Skill2CooldownRemaining = 0.0f;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "WeaponInfo")
+    FName CurrentWeaponName = TEXT("Pistol");
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
+    int32 Shield = 0;
 
-	// --- HUD 관련 변수 ---
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterStatus")
-	int32 GoldAmount = 100;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterStatus")
-	int32 CurrentAmmo = 30;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterStatus")
-	int32 MaxAmmo = 300;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterStatus")
-	float CurrentExperience = 0.0f;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Skills")
-	float Skill1CooldownRemaining = 0.0f;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Skills")
-	float Skill2CooldownRemaining = 0.0f;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash")
+    float DashMultifly;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Dash")
+    float DashSpeed;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash")
+    float DashTime;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash")
+    bool bIsDashing;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dash")
+    bool bIsDashing2;
+    FTimerHandle DashTimerHandle;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "WeaponInfo")
-	FName CurrentWeaponName = TEXT("Pistol");
+    UFUNCTION()
+    void StartDash(const FInputActionValue& value);
+    UFUNCTION()
+    void StopDash();
 
-	// --- Dash 관련 코드 ---
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash")
-	float DashMultifly;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Dash")
-	float DashSpeed;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash")
-	float DashTime;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash")
-	bool bIsDashing;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dash")
-	bool bIsDashing2;
-	FTimerHandle DashTimerHandle;
-	UFUNCTION()
-	void StartDash(const FInputActionValue& value);
-	UFUNCTION()
-	void StopDash();
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fire")
+    bool bIsFiring;
+    FTimerHandle FireCooltimeHandle;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Fire")
+    float FireCooltime;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Fire")
+    float AutoFireTime;
+    void PerformFire();
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fire")
+    bool bIsReloading;
+    FTimerHandle ReloadTimeHandle;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Fire")
+    float ReloadTime;
+    void StopReload();
 
-	// --- 총/장전 관련 ---
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fire")
-	bool bIsFiring;
-	FTimerHandle FireCooltimeHandle;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Fire")
-	float FireCooltime;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Fire")
-	float AutoFireTime;
-	void PerformFire();
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fire")
-	bool bIsReloading;
-	FTimerHandle ReloadTimeHandle;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Fire")
-	float ReloadTime;
-	void StopReload();
+    UFUNCTION()
+    void Move(const FInputActionValue& value);
+    UFUNCTION()
+    void Look(const FInputActionValue& value);
+    UFUNCTION()
+    void StartJump(const FInputActionValue& value);
+    UFUNCTION()
+    void StopJump(const FInputActionValue& value);
+    UFUNCTION()
+    void StartCrouch(const FInputActionValue& value);
+    UFUNCTION()
+    void StopCrouch(const FInputActionValue& value);
+    UFUNCTION()
+    void Fire(const FInputActionValue& value);
+    UFUNCTION()
+    void StopFire();
+    UFUNCTION()
+    void StartFire_Auto(const FInputActionValue& value);
+    UFUNCTION()
+    void StopFire_Auto(const FInputActionValue& value);
+    UFUNCTION()
+    void Reload(const FInputActionValue& value);
+    void LevelUp();
+    void OnDeath(AController* KillerController);
 
-	// Action Value 함수 선언들
-	UFUNCTION()
-	void Move(const FInputActionValue& value);
-	UFUNCTION()
-	void Look(const FInputActionValue& value);
-	UFUNCTION()
-	void StartJump(const FInputActionValue& value);
-	UFUNCTION()
-	void StopJump(const FInputActionValue& value);
-	UFUNCTION()
-	void StartCrouch(const FInputActionValue& value);
-	UFUNCTION()
-	void StopCrouch(const FInputActionValue& value);
-	UFUNCTION()
-	void Fire(const FInputActionValue& value);
-	UFUNCTION()
-	void StopFire();
-	UFUNCTION()
-	void StartFire_Auto(const FInputActionValue& value);
-	UFUNCTION()
-	void StopFire_Auto(const FInputActionValue& value);
-	UFUNCTION()
-	void Reload(const FInputActionValue& value);
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Augment")
+    TArray<FName> AppliedAugments;
 
-	void LevelUp();
-	void OnDeath(AController* KillerController);
-
-
-	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
-		AController* EventInstigator, AActor* DamageCauser) override;
-
-	virtual void Tick(float DeltaTime) override; // Tick 활성화
+    virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+    virtual void Tick(float DeltaTime) override;
 };

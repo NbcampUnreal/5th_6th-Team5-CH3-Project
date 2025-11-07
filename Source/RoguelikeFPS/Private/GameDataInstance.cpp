@@ -36,5 +36,5 @@ void UGameDataInstance::ResetGameStatsToLevelOne()
     PlayerXP = 0.f;
     SelectedWeaponIndex = 0;
     bIsReadyToStart = false;
-    // CurrentStageIndex는 주로 GameMode에서 리셋됩니다.
+    CurrentStageIndex = 1;  //게임 오버/클리어 후 재시작을 위해 CurrentStageIndex 리셋
 }

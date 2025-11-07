@@ -4,8 +4,32 @@
 #include "EnhancedInputComponent.h"
 #include "FPSPlayerController.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "AugmentWidget.h"
+#include "FPSGameMode.h"
+#include "Engine/DataTable.h"
+#include "Engine/Engine.h"
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetSystemLibrary.h"
 
-AFPSCharacter::AFPSCharacter()		// Initial setup
+// GETTER 구현 (모두 헤더에 인라인으로 선언되어 있으므로 이 파일에 구현이 없습니다.)
+// int32 AFPSCharacter::GetLevel() { return Level; }
+// ... 등
+
+// SETTER IMPLEMENTATIONS (헤더에 인라인으로 선언되어 있으므로 이 파일에 구현이 없습니다.)
+void AFPSCharacter::SetLevel(int32 level) { Level = level; }
+void AFPSCharacter::SetHealth(int32 health) { Health = health; }
+void AFPSCharacter::SetMaxHealth(int32 maxHealth) { MaxHealth = maxHealth; }
+void AFPSCharacter::SetAttack(int32 attack) { Attack = attack; }
+void AFPSCharacter::SetDefence(int32 defence) { Defence = defence; }
+void AFPSCharacter::SetShield(int32 shield) { Shield = shield; }
+void AFPSCharacter::SetAttackSpeed(int32 attackSpeed) { AttackSpeed = attackSpeed; }
+void AFPSCharacter::SetMovingSpeed(int32 movingSpeed) { MovingSpeed = movingSpeed; }
+void AFPSCharacter::SetStamina(int32 stamina) { Stamina = stamina; }
+void AFPSCharacter::SetExperience(int32 experience) { Experience = experience; }
+void AFPSCharacter::SetMaxExperience(int32 maxExperience) { MaxExperience = maxExperience; }
+
+// CONSTRUCTOR
+AFPSCharacter::AFPSCharacter()		// 초기 설정
 	: Level(1),
 	Health(100),
 	MaxHealth(100),
@@ -16,9 +40,11 @@ AFPSCharacter::AFPSCharacter()		// Initial setup
 	Stamina(500),
 	Experience(0),
 	MaxExperience(100),
-	bIsAlive(true)
+	bIsAlive(true),
+	Shield(100) // Shield 초기값 설정
 {
-	PrimaryActorTick.bCanEverTick = false; // Tick 비활성화 (필요하면 BeginPlay 또는 생성자에서 true로 변경 필요)
+	// ★★★ Tick 사용을 위해 true로 변경 (쿨다운 등에 필요) ★★★
+	PrimaryActorTick.bCanEverTick = true;
 
 
 	// Camera Setup
@@ -50,6 +76,7 @@ AFPSCharacter::AFPSCharacter()		// Initial setup
 	ReloadTime = 1.5f;
 }
 
+// INPUT BINDING
 void AFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -164,6 +191,7 @@ void AFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 }
 
 
+// INPUT ACTION IMPLEMENTATIONS
 void AFPSCharacter::Move(const FInputActionValue& value)
 {
 	if (!Controller) return;
@@ -189,10 +217,8 @@ void AFPSCharacter::Look(const FInputActionValue& value)
 	AddControllerPitchInput(LookInput.Y);
 }
 void AFPSCharacter::StartJump(const FInputActionValue& value)
-{
-	if (value.Get<bool>())
-	{
-		Jump();
+{ 
+	if (GetCharacterMovement()->IsFalling()) return; if (value.Get<bool>()) { Jump();
 	}
 }
 void AFPSCharacter::StopJump(const FInputActionValue& value)
@@ -303,20 +329,25 @@ void AFPSCharacter::StopReload()
 }
 
 
-
+// GAMEPLAY LOGIC IMPLEMENTATIONS
 void AFPSCharacter::LevelUp()
 {
-	if (Experience == MaxExperience)
+	if (Experience >= MaxExperience)
 	{
 		Level += 1;
 		Health += 20;
 		Attack += 3;
 		Defence += 3;
 		Experience = 0;
-	}
-	if (APlayerController* PC = Cast<APlayerController>(GetController()))
-	{
-		OnLevelUp.Broadcast(PC);
+		MaxExperience *= 1.2f; // 다음 레벨 요구 경험치 증가
+		UpdateHUDStats(TEXT("Health"));
+		UpdateHUDStats(TEXT("Attack"));
+		UpdateHUDStats(TEXT("Defence"));
+		UpdateHUDStats(TEXT("Experience"));
+		if (APlayerController* PC = Cast<APlayerController>(GetController()))
+		{
+			OnLevelUp.Broadcast(PC);
+		}
 	}
 }
 
@@ -344,29 +375,79 @@ float AFPSCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 void AFPSCharacter::ApplyAugment(FName AugmentName)
 {
 	UE_LOG(LogTemp, Warning, TEXT("ApplyAugment called with: %s"), *AugmentName.ToString());
-	// Augment Logic Here (Example: Stat increase, ability unlock)
+	AFPSGameMode* GameMode = Cast<AFPSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+	if (!GameMode || !GameMode->AugmentDataTable)
+	{
+		UE_LOG(LogTemp, Error, TEXT("증강 데이터 테이블을 찾을 수 없습니다!"));
+		return;
+	}
+	if (AppliedAugments.Contains(AugmentName))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("증강 %s 이미 적용됨!"), *AugmentName.ToString());
+		return;
+	}
+	FAugmentData* AugmentData = GameMode->AugmentDataTable->FindRow<FAugmentData>(AugmentName, TEXT(""));
+	if (AugmentData)
+	{
+		if (AugmentData->HealthBonus != 0)
+		{
+			SetMaxHealth(GetMaxHealth() + AugmentData->HealthBonus);
+			SetHealth(GetHealth() + AugmentData->HealthBonus);
+			UpdateHUDStats(TEXT("Health"));
+		}
+		if (AugmentData->AttackBonus != 0)
+		{
+			SetAttack(GetAttack() + AugmentData->AttackBonus);
+			UpdateHUDStats(TEXT("Attack"));
+		}
+		if (AugmentData->DefenseBonus != 0)
+		{
+			SetDefence(GetDefence() + AugmentData->DefenseBonus);
+			UpdateHUDStats(TEXT("Defence"));
+		}
+		if (AugmentData->ShieldBonus != 0)
+		{
+			SetShield(GetShield() + AugmentData->ShieldBonus);
+			UpdateHUDStats(TEXT("Shield"));
+		}
+		if (AugmentData->AttackSpeedMultiplier != 1.0f)
+		{
+			SetAttackSpeed(GetAttackSpeed() * AugmentData->AttackSpeedMultiplier);
+			UpdateHUDStats(TEXT("AttackSpeed"));
+		}
+		if (AugmentData->MovingSpeedMultiplier != 1.0f)
+		{
+			SetMovingSpeed(GetMovingSpeed() * AugmentData->MovingSpeedMultiplier);
+			GetCharacterMovement()->MaxWalkSpeed = GetMovingSpeed();
+			UpdateHUDStats(TEXT("MovingSpeed"));
+		}
+		AppliedAugments.Add(AugmentName);
+		UE_LOG(LogTemp, Log, TEXT("증강 적용됨: %s"), *AugmentName.ToString());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("증강 %s 데이터 테이블에서 찾을 수 없음!"), *AugmentName.ToString());
+	}
 }
+
 void AFPSCharacter::AddXP(float Amount)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Gained XP: %f"), Amount);
 	CurrentExperience += Amount;
 	UpdateHUDStats(TEXT("Experience"));
 	LevelUp();
-	// Add XP logic here //레벨업 체크
 }
 
-void AFPSCharacter::GainGold(int32 Amount) // 이 함수는 필요하다면 새로 만드세요.
+void AFPSCharacter::GainGold(int32 Amount)
 {
 	GoldAmount += Amount;
-
 	// 골드 변경 시 HUD 업데이트 신호 전송
 	UpdateHUDStats(TEXT("Gold"));
 }
 
 void AFPSCharacter::UpdateHUDStats(FName StatName)
 {
-	// HUD 업데이트 로직이 여기에 추가되어야 합니다.
-	// 예: OnHUDStatChanged.Broadcast(StatName);
+	// HUD 업데이트를 위한 델리게이트 전파 (FOnHUDStatChangedSignature 사용)
 	OnHUDStatChanged.Broadcast(StatName);
 }
 
@@ -383,5 +464,4 @@ void AFPSCharacter::Tick(float DeltaTime)
 			OnHUDStatChanged.Broadcast(TEXT("Skill1CD"));
 		}
 	}
-	// ...
 }
