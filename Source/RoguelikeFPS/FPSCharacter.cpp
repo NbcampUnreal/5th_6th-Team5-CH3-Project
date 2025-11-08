@@ -379,11 +379,36 @@ void AFPSCharacter::OnDeath(AController* KillerController)
 	OnPlayerDeath.Broadcast(KillerController);
 }
 
+// 무적상태 함수
+void AFPSCharacter::OnUndead()
+{
+	Undead = true;
+}
+void AFPSCharacter::OffUndead()
+{
+	Undead = false;
+}
+
+// 무적상태 함수 타이머 (Undead를 True로 변경하고, UndeadTime이 지나면 Undead = false.) 
+void AFPSCharacter::OnUndeadTime()
+{
+	Undead = true;
+
+	GetWorldTimerManager().SetTimer(
+		UndeadTimeHandle,
+		this,
+		&AFPSCharacter::OffUndead,
+		UndeadTime,
+		false
+	);
+}
+
+// 무적상태가 아닐 때 데미지를 적용
 float AFPSCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
 	AController* EventInstigator, AActor* DamageCauser)
 {
 	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser) - Defence;
-	if (ActualDamage > 0)
+	if (Undead == true && ActualDamage > 0)
 	{
 		Health -= ActualDamage;
 
@@ -493,6 +518,46 @@ void AFPSCharacter::UpdateHUDStats(FName StatName)
 						float MaxEXP;
 					} Params{ CurrentExperience, static_cast<float>(MaxExperience) };
 					StatsHUD->ProcessEvent(StatsHUD->FindFunction(FunctionName), &Params);
+				}
+			}
+			if (StatName == TEXT("Health"))
+			{
+				FName FunctionName = TEXT("UpdateHealthText");
+				if (StatsHUD->FindFunction(FunctionName))
+				{
+					StatsHUD->ProcessEvent(StatsHUD->FindFunction(FunctionName), &Health);
+				}
+			}
+			if (StatName == TEXT("CurrentAmmo"))
+			{
+				FName FunctionName = TEXT("UpdateCurrentAmmoText");
+				if (StatsHUD->FindFunction(FunctionName))
+				{
+					StatsHUD->ProcessEvent(StatsHUD->FindFunction(FunctionName), &CurrentAmmo);
+				}
+			}
+			if (StatName == TEXT("MaxAmmo"))
+			{
+				FName FunctionName = TEXT("UpdateMaxAmmoText");
+				if (StatsHUD->FindFunction(FunctionName))
+				{
+					StatsHUD->ProcessEvent(StatsHUD->FindFunction(FunctionName), &MaxAmmo);
+				}
+			}
+			if (StatName == TEXT("Skill1CooldownRemaining"))
+			{
+				FName FunctionName = TEXT("UpdateSkill1CooldownRemainingText");
+				if (StatsHUD->FindFunction(FunctionName))
+				{
+					StatsHUD->ProcessEvent(StatsHUD->FindFunction(FunctionName), &Skill1CooldownRemaining);
+				}
+			}
+			if (StatName == TEXT("Skill2CooldownRemaining"))
+			{
+				FName FunctionName = TEXT("UpdateSkill2CooldownRemainingText");
+				if (StatsHUD->FindFunction(FunctionName))
+				{
+					StatsHUD->ProcessEvent(StatsHUD->FindFunction(FunctionName), &Skill2CooldownRemaining);
 				}
 			}
 			// 기존 스탯 업데이트

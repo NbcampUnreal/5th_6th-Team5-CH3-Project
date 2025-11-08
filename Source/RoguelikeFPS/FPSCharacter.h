@@ -77,6 +77,17 @@ public:
     UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
     void SetMaxExperience(int32 maxExperience);
 
+    // 무적 상태변수
+    bool Undead = false;
+    // 무적 지속 시간
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Undead")
+    float UndeadTime = 3.0f;
+    FTimerHandle UndeadTimeHandle;
+    // 무적 함수
+    void OnUndead();
+    void OffUndead();
+    void OnUndeadTime();
+
 protected:
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input|Debug")
