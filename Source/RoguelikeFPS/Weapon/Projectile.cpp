@@ -152,3 +152,11 @@ void AProjectile::SetDamage(float damage)
 	}
 }
 
+void AProjectile::AddDamage(float damage)
+{
+	if (0 < damage)
+	{
+		_Damage += damage;
+	}
+}
+

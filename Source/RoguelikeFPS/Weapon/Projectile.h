@@ -23,6 +23,8 @@ public:
 
 	FOnDamagedEnemy OnDamagedEnemy;
 
+	float GetDamage() const { return _Damage; };
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	UProjectileMovementComponent* _ProjectileMovement;
@@ -53,6 +55,7 @@ public:
 	void SetInstigator(AActor* instigator);
 
 	void SetDamage(float damage);
+	void AddDamage(float damage);
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
