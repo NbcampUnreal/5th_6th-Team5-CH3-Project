@@ -36,12 +36,26 @@ void UCraftingMenuWidget::InitMenu(UInventory* InInventory, UCraftingSystem* InC
 	{
 		InventoryPanel->InitInventory(Inventory);
 		InventoryPanel->UpdateUI();
+
+		InventoryPanel->OnItemClicked.AddDynamic(this, &UCraftingMenuWidget::OnInventoryItemClicked);
 	}
 
 	if (ModeText)
 	{
 		ModeText->SetText(FText::FromString(TEXT("Mode: Craft")));
 	}
+}
+
+void UCraftingMenuWidget::OnInventoryItemClicked(UItemBase* ClickedItem)
+{
+	if (!ClickedItem || !CraftingPanel)
+	{
+		return;
+	}
+	CraftingPanel->OnItemSelected(ClickedItem->ItemName);
+
+	UE_LOG(LogTemp, Warning, TEXT("[CraftingMenuWidget] Selected item: %s"),
+		*ClickedItem->ItemName.ToString());
 }
 
 void UCraftingMenuWidget::OnCraftModeClicked()

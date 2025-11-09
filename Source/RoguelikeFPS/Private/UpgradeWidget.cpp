@@ -49,6 +49,18 @@ void UUpgradeWidget::OnItemSelected(UItemBase* SelectedItem)
 
     if (SelectedItem->ItemType == EItemType::PartItem)
     {
+        if (SelectedPart == SelectedItem)
+        {
+            UE_LOG(LogTemp, Warning, TEXT("UpgradeItem Clear : %s"), *SelectedPart->ItemName.ToString());
+            SelectedPart = nullptr;
+
+            if (TargetItemImage) TargetItemImage->SetBrushFromTexture(nullptr);
+            if (TargetItemName) TargetItemName->SetText(FText::FromString(TEXT("No Item")));
+            if (TargetItemGrade) TargetItemGrade->SetText(FText::FromString(TEXT("-")));
+            UpdateUI();
+            return;
+        }
+
         SelectedPart = SelectedItem;
 
         if (TargetItemName)
@@ -76,8 +88,20 @@ void UUpgradeWidget::OnItemSelected(UItemBase* SelectedItem)
             return;
         }
 
+        if (UpgradeMaterial == SelectedItem)
+        {
+            UE_LOG(LogTemp, Warning, TEXT("[UpgradeWidget] UpgradeItem Clear : %s"), *UpgradeMaterial->ItemName.ToString());
+            UpgradeMaterial = nullptr;
+
+            if (MaterialImage) MaterialImage->SetBrushFromTexture(nullptr);
+            if (MaterialName) MaterialName->SetText(FText::FromString(TEXT("No material")));
+            if (MaterialCount) MaterialCount->SetText(FText::FromString(TEXT("x 0")));
+            UpdateUI();
+            return;
+        }
+
         UpgradeMaterial = SelectedItem;
-        UE_LOG(LogTemp, Warning, TEXT("[UpgradeWidget] 강화 재료 선택: %s"), *UpgradeMaterial->ItemName.ToString());
+        UE_LOG(LogTemp, Warning, TEXT("[UpgradeWidget] UpgradeItem Selected : %s"), *UpgradeMaterial->ItemName.ToString());
 
         if (MaterialName)
         {

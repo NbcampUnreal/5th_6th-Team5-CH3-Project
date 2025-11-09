@@ -49,6 +49,9 @@ protected:
 	UDataTable* ItemDataTable;
 
 	UFUNCTION()
+	void OnInventoryItemClicked(UItemBase* ClickedItem);
+
+	UFUNCTION()
 	void OnCraftModeClicked();
 
 	UFUNCTION()

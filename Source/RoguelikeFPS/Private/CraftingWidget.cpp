@@ -109,3 +109,10 @@ void UCraftingWidget::OnCraftOrDecomposeClicked()
 
     UpdateUI();
 }
+
+void UCraftingWidget::OnItemSelected(FName ItemRowName)
+{
+    SelectedItemName = ItemRowName;
+    UE_LOG(LogTemp, Warning, TEXT("[CraftingWidget] Selected item: %s"), *SelectedItemName.ToString());
+    UpdateUI();
+}

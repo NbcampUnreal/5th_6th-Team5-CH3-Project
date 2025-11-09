@@ -77,9 +77,7 @@ bool UCraftingSystem::AddItem(UInventory* PlayerInventory, UDataTable* ItemDataT
     return false;
 }
 
-///////////////////////////////////////////////////////////
 // 제작
-///////////////////////////////////////////////////////////
 
 bool UCraftingSystem::CraftItem(UInventory* PlayerInventory, UDataTable* ItemDataTable, const FName& TargetItemName)
 {
@@ -129,9 +127,7 @@ bool UCraftingSystem::CraftItem(UInventory* PlayerInventory, UDataTable* ItemDat
     return true;
 }
 
-///////////////////////////////////////////////////////////
 // 분해
-///////////////////////////////////////////////////////////
 
 bool UCraftingSystem::DecomposeItem(UInventory* PlayerInventory, UDataTable* ItemDataTable, const FName& TargetItemName)
 {

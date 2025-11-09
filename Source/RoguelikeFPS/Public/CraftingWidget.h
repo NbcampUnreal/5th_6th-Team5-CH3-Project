@@ -37,6 +37,9 @@ public:
     void UpdateUI();
 
     UFUNCTION(BlueprintCallable)
+    void OnItemSelected(FName ItemRowName);
+
+    UFUNCTION(BlueprintCallable)
     void SetCraftingMode(ECraftingMode NewMode);
 
     UPROPERTY(BlueprintAssignable, Category = "Event")

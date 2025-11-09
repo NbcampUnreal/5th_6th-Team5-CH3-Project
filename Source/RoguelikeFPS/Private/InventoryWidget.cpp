@@ -11,9 +11,12 @@ void UInventoryWidget::InitInventory(UInventory* InInventory)
 	
 	if (Inventory)
 	{
-		Inventory->OnGoldChanged.AddDynamic(this, &UInventoryWidget::UpdateGoldUI);
+        Inventory->OnGoldChanged.RemoveDynamic(this, &UInventoryWidget::UpdateGoldUI);
+        Inventory->OnGoldChanged.AddDynamic(this, &UInventoryWidget::UpdateGoldUI);
+
+        Inventory->OnInventoryUpdated.RemoveDynamic(this, &UInventoryWidget::UpdateUI);
         Inventory->OnInventoryUpdated.AddDynamic(this, &UInventoryWidget::UpdateUI);
-	}
+    }
 
 	UpdateUI();
 
@@ -22,22 +25,27 @@ void UInventoryWidget::UpdateUI()
 {
     if (!Inventory || !ItemGrid || !InventorySlotWidgetClass)
     {
-        UE_LOG(LogTemp, Warning, TEXT("InventoryWidget: Missing references"));
         return;
     }
 
-    UE_LOG(LogTemp, Warning, TEXT("InventoryWidget::UpdateUI() using %s (Items: %d)"),
-        *GetNameSafe(Inventory), Inventory->InventoryItems.Num());
+    ItemGrid->SetSlotPadding(FMargin(4.f, 4.f));
 
     ItemGrid->ClearChildren();
+
+    const int32 ColumnsPerRow = Columns > 0 ? Columns : 10;
+
+    const float PaddingX = 5.0f;
+    const float PaddingY = 5.0f;
 
     int32 Row = 0;
     int32 Col = 0;
 
     for (UItemBase* Item : Inventory->InventoryItems)
     {
-        if (!Item) continue;
-
+        if (!Item)
+        {
+            continue;
+        }
         UInventorySlotWidget* ItemWidget = CreateWidget<UInventorySlotWidget>(this, InventorySlotWidgetClass);
         if (!ItemWidget) continue;
 
@@ -51,7 +59,7 @@ void UInventoryWidget::UpdateUI()
         }
 
         Col++;
-        if (Col >= Columns)
+        if (Col >= ColumnsPerRow)
         {
             Col = 0;
             Row++;
@@ -60,20 +68,23 @@ void UInventoryWidget::UpdateUI()
 
     const int32 MaxSlots = 50;
     const int32 CurrentCount = Inventory->InventoryItems.Num();
+
     for (int32 i = CurrentCount; i < MaxSlots; ++i)
     {
         UInventorySlotWidget* EmptyWidget = CreateWidget<UInventorySlotWidget>(this, InventorySlotWidgetClass);
         if (!EmptyWidget) continue;
 
         EmptyWidget->SetEmptySlot();
+
         if (UUniformGridSlot* GridSlot = ItemGrid->AddChildToUniformGrid(EmptyWidget, Row, Col))
         {
             GridSlot->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Center);
             GridSlot->SetVerticalAlignment(EVerticalAlignment::VAlign_Center);
+            //GridSlot->SetPadding(FMargin(PaddingX, PaddingY));
         }
 
         Col++;
-        if (Col >= Columns)
+        if (Col >= ColumnsPerRow)
         {
             Col = 0;
             Row++;

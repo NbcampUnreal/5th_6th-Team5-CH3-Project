@@ -36,10 +36,10 @@ void UUpgradeMenuWidget::InitMenu(UInventory* InInventory, UUpgradeSystem* InUpg
         UpgradePanel->InitWidget(UpgradeSystem, Inventory);
     }
 
-    if (UpgradePanel && InventoryPanel)
-    {
-        UpgradePanel->BindInventory(InventoryPanel);
-    }
+    //if (UpgradePanel && InventoryPanel)
+    //{
+    //    UpgradePanel->BindInventory(InventoryPanel);
+    //}
 
     UE_LOG(LogTemp, Warning, TEXT("[UpgradeMenuWidget] InitMenu -> Inventory: %s | InventoryPanel: %s | UpgradePanel: %s"),
         *GetNameSafe(Inventory), *GetNameSafe(InventoryPanel), *GetNameSafe(UpgradePanel));
