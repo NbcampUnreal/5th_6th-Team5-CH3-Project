@@ -18,7 +18,7 @@ void UStatsHUD::SetOwningCharacter(AFPSCharacter* NewCharacter)
         UpdateEXPDisplay();
         UpdateWeaponDisplay();
         UpdateGoldDisplay();
-        UpdateSkillCooldownDisplay();
+        //UpdateSkillCooldownDisplay();
     }
 }
 

@@ -8,7 +8,7 @@
 void AMainMenuController::BeginPlay()
 {
     Super::BeginPlay();
-
+    // 타이틀 화면 표시
     if (TitleWidgetClass)
     {
         TitleWidgetInstance = CreateWidget<UTitleWidget>(this, TitleWidgetClass);
@@ -16,22 +16,29 @@ void AMainMenuController::BeginPlay()
         {
             TitleWidgetInstance->AddToViewport();
             TitleWidgetInstance->OnStartButtonClicked.AddDynamic(this, &AMainMenuController::ShowWeaponSelectMenu);
-
-            FInputModeUIOnly InputModeData;
-            InputModeData.SetWidgetToFocus(TitleWidgetInstance->TakeWidget());
-            SetInputMode(InputModeData);
-            bShowMouseCursor = true;
+            SetUIMode(TitleWidgetInstance.Get());
         }
     }
 }
+
+void AMainMenuController::SetUIMode(UUserWidget* Widget)
+{
+    // UI 입력 모드 설정
+    if (!Widget) return;
+    FInputModeUIOnly InputMode;
+    InputMode.SetWidgetToFocus(Widget->TakeWidget());
+    SetInputMode(InputMode);
+    bShowMouseCursor = true;
+}
+
 void AMainMenuController::ShowWeaponSelectMenu()
 {
+    // 메인 메뉴로 전환
     if (TitleWidgetInstance)
     {
         TitleWidgetInstance->RemoveFromParent();
         TitleWidgetInstance = nullptr;
     }
-
     if (MainMenuWidgetClass)
     {
         MainMenuWidgetInstance = CreateWidget<UMainMenuWidget>(this, MainMenuWidgetClass);
@@ -39,23 +46,19 @@ void AMainMenuController::ShowWeaponSelectMenu()
         {
             MainMenuWidgetInstance->AddToViewport();
             MainMenuWidgetInstance->OnBackButtonClicked.AddDynamic(this, &AMainMenuController::ShowTitleScreen);
-
-            FInputModeUIOnly InputModeData;
-            InputModeData.SetWidgetToFocus(MainMenuWidgetInstance->TakeWidget());
-            SetInputMode(InputModeData);
-            bShowMouseCursor = true;
+            SetUIMode(MainMenuWidgetInstance.Get());
         }
     }
 }
 
 void AMainMenuController::ShowTitleScreen()
 {
+    // 타이틀 화면으로 복귀
     if (MainMenuWidgetInstance)
     {
         MainMenuWidgetInstance->RemoveFromParent();
         MainMenuWidgetInstance = nullptr;
     }
-
     if (TitleWidgetClass)
     {
         TitleWidgetInstance = CreateWidget<UTitleWidget>(this, TitleWidgetClass);
@@ -63,11 +66,7 @@ void AMainMenuController::ShowTitleScreen()
         {
             TitleWidgetInstance->AddToViewport();
             TitleWidgetInstance->OnStartButtonClicked.AddDynamic(this, &AMainMenuController::ShowWeaponSelectMenu);
-
-            FInputModeUIOnly InputModeData;
-            InputModeData.SetWidgetToFocus(TitleWidgetInstance->TakeWidget());
-            SetInputMode(InputModeData);
-            bShowMouseCursor = true;
+            SetUIMode(TitleWidgetInstance.Get());
         }
     }
 }

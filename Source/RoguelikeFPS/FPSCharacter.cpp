@@ -25,8 +25,8 @@ void AFPSCharacter::SetShield(int32 shield) { Shield = shield; }
 void AFPSCharacter::SetAttackSpeed(int32 attackSpeed) { AttackSpeed = attackSpeed; }
 void AFPSCharacter::SetMovingSpeed(int32 movingSpeed) { MovingSpeed = movingSpeed; }
 void AFPSCharacter::SetStamina(int32 stamina) { Stamina = stamina; }
-void AFPSCharacter::SetExperience(int32 experience) { Experience = experience; }
-void AFPSCharacter::SetMaxExperience(int32 maxExperience) { MaxExperience = maxExperience; }
+void AFPSCharacter::SetExperience(float experience) { Experience = experience; }
+void AFPSCharacter::SetMaxExperience(float maxExperience) { MaxExperience = maxExperience; }
 
 // CONSTRUCTOR
 AFPSCharacter::AFPSCharacter()		// 초기 설정
@@ -38,8 +38,8 @@ AFPSCharacter::AFPSCharacter()		// 초기 설정
 	AttackSpeed(5),
 	MovingSpeed(600),
 	Stamina(500),
-	Experience(0),
-	MaxExperience(100),
+	Experience(0.0f),
+	MaxExperience(100.0f),
 	bIsAlive(true),
 	Shield(100) // Shield 초기값 설정
 {
@@ -338,7 +338,7 @@ void AFPSCharacter::LevelUp()
 		Health += 20;
 		Attack += 3;
 		Defence += 3;
-		Experience = 0;
+		Experience = 0.0f;
 		MaxExperience *= 1.2f; // 다음 레벨 요구 경험치 증가
 		UpdateHUDStats(TEXT("Health"));
 		UpdateHUDStats(TEXT("Attack"));
@@ -433,7 +433,7 @@ void AFPSCharacter::ApplyAugment(FName AugmentName)
 void AFPSCharacter::AddXP(float Amount)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Gained XP: %f"), Amount);
-	CurrentExperience += Amount;
+	Experience += Amount;
 	UpdateHUDStats(TEXT("Experience"));
 	LevelUp();
 }

@@ -6,44 +6,28 @@
 
 bool UDeathWidget::Initialize()
 {
-    if (!Super::Initialize())
-    {
-        return false;
-    }
-
-    if (RestartButton)
-    {
-        RestartButton->OnClicked.AddDynamic(this, &UDeathWidget::OnRestartClicked);
-    }
-
-    if (ExitButton)
-    {
-        ExitButton->OnClicked.AddDynamic(this, &UDeathWidget::OnExitClicked);
-    }
-
+    if (!Super::Initialize()) return false;
+    // 버튼 이벤트 바인딩
+    if (RestartButton) RestartButton->OnClicked.AddDynamic(this, &UDeathWidget::OnRestartClicked);
+    if (ExitButton) ExitButton->OnClicked.AddDynamic(this, &UDeathWidget::OnExitClicked);
     return true;
+}
+
+void UDeathWidget::Setup(APlayerController* InController, bool bInIsCleared)
+{
+    OwningController = InController;
+    bIsGameCleared = bInIsCleared;
 }
 
 void UDeathWidget::OnRestartClicked()
 {
     UWorld* World = GetWorld();
     if (!World) return;
-
-    UGameDataInstance* GameInstance = Cast<UGameDataInstance>(UGameplayStatics::GetGameInstance(World));
-    if (GameInstance)
+    // 게임 데이터 초기화 및 현재 레벨 재시작
+    if (UGameDataInstance* GameData = UGameDataInstance::GetGameDataInstance(World))
     {
-        GameInstance->ResetGameStatsToLevelOne();
-    }
-
-    FString CurrentLevelName = UGameplayStatics::GetCurrentLevelName(World, true);
-
-    // 현재 레벨로 재시작
-    if (OwningController)
-    {
-        UGameplayStatics::OpenLevel(OwningController, FName(*CurrentLevelName));
-    }
-    else
-    {
+        GameData->ResetGameStatsToLevelOne();
+        FString CurrentLevelName = UGameplayStatics::GetCurrentLevelName(World, true);
         UGameplayStatics::OpenLevel(World, FName(*CurrentLevelName));
     }
 }
@@ -52,24 +36,10 @@ void UDeathWidget::OnExitClicked()
 {
     UWorld* World = GetWorld();
     if (!World) return;
-
-    UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(World);
-    UGameDataInstance* GameDataInstance = Cast<UGameDataInstance>(GameInstance);
-
-    if (GameDataInstance)
+    // 게임 데이터 초기화 및 메인 메뉴로 이동
+    if (UGameDataInstance* GameData = UGameDataInstance::GetGameDataInstance(World))
     {
-        GameDataInstance->ResetGameStatsToLevelOne();
-
-        // 메인 메뉴 이름 사용
-        FName MenuLevelName = GameDataInstance->MainMenuLevelName;
-
-        if (OwningController)
-        {
-            UGameplayStatics::OpenLevel(OwningController, MenuLevelName);
-        }
-        else
-        {
-            UGameplayStatics::OpenLevel(World, MenuLevelName);
-        }
+        GameData->ResetGameStatsToLevelOne();
+        UGameplayStatics::OpenLevel(World, GameData->MainMenuLevelName);
     }
 }

@@ -43,8 +43,8 @@ public:
     int32 GetAttackSpeed() const { return AttackSpeed; }
     int32 GetMovingSpeed() const { return MovingSpeed; }
     int32 GetStamina() const { return Stamina; }
-    int32 GetExperience() const { return Experience; }
-    int32 GetMaxExperience() const { return MaxExperience; }
+    float GetExperience() const { return Experience; }
+    float GetMaxExperience() const { return MaxExperience; }
     FName GetCurrentWeaponName() const { return CurrentWeaponName; }
     int32 GetCurrentAmmo() const { return CurrentAmmo; }
     int32 GetMaxAmmo() const { return MaxAmmo; }
@@ -71,9 +71,9 @@ public:
     UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
     void SetStamina(int32 stamina);
     UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
-    void SetExperience(int32 experience);
+    void SetExperience(float experience);
     UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
-    void SetMaxExperience(int32 maxExperience);
+    void SetMaxExperience(float maxExperience);
 
 protected:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
@@ -98,9 +98,9 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
     int32 Stamina;
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
-    int32 Experience;
+    float Experience;
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
-    int32 MaxExperience;
+    float MaxExperience;
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
     bool bIsAlive;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterStatus")
@@ -110,8 +110,6 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterStatus")
     int32 MaxAmmo = 300;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterStatus")
-    float CurrentExperience = 0.0f;
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Skills")
     float Skill1CooldownRemaining = 0.0f;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Skills")
     float Skill2CooldownRemaining = 0.0f;

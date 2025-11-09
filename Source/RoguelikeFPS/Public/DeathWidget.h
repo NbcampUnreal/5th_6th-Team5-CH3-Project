@@ -2,37 +2,38 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-
-class UButton;
-class APlayerController;
-
+#include "Components/Button.h"
 #include "DeathWidget.generated.h"
 
-//Death라고 했지만 사실 Clear도 포함
+class APlayerController;
+
 UCLASS()
 class ROGUELIKEFPS_API UDeathWidget : public UUserWidget
 {
-	GENERATED_BODY()
-
+    GENERATED_BODY()
 public:
-    // UI 버튼을 UMG 디자이너에서 변수 이름으로 연결하기 위한 BindWidget
-    UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UButton> RestartButton;
-
-    UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UButton> ExitButton;
-
-    // 이 위젯을 소유하는 컨트롤러 포인터 (클릭 이벤트 처리용)
-    UPROPERTY(BlueprintReadOnly)
-    TObjectPtr<APlayerController> OwningController;
+    // 초기 설정 (사망/클리어 여부 지정)
+    UFUNCTION(BlueprintCallable)
+    void Setup(APlayerController* InController, bool bInIsCleared);
 
 protected:
     virtual bool Initialize() override;
 
-private:
-    UFUNCTION()
-    void OnRestartClicked();
+    // UI 버튼 바인딩
+    UPROPERTY(meta = (BindWidgetOptional))
+    TObjectPtr<UButton> RestartButton; // 재시작 버튼
+    UPROPERTY(meta = (BindWidgetOptional))
+    TObjectPtr<UButton> ExitButton; // 메인 메뉴로 버튼
 
+    // 클리어 여부 플래그
+    UPROPERTY(BlueprintReadWrite)
+    bool bIsGameCleared = false;
+
+private:
+    // 소유 컨트롤러
+    TWeakObjectPtr<APlayerController> OwningController;
     UFUNCTION()
-    void OnExitClicked();
+    void OnRestartClicked(); // 재시작 처리
+    UFUNCTION()
+    void OnExitClicked(); // 메인 메뉴로 이동
 };

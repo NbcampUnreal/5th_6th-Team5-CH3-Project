@@ -33,7 +33,7 @@ void AFPSGameMode::BeginPlay()
 {
     Super::BeginPlay();
     // 타이틀 UI 표시
-    if (!TitleWidgetClass)
+    if (TitleWidgetClass)
     {
         TitleWidgetInstance = CreateWidget<UTitleWidget>(GetWorld(), TitleWidgetClass);
         if (TitleWidgetInstance)
