@@ -14,6 +14,7 @@ bool UAugmentWidget::Initialize()
     return true;
 }
 
+
 void UAugmentWidget::Setup(AFPSCharacter* InCharacter, const TArray<FAugmentData>& InAugments)
 {
     OwningCharacter = InCharacter;
@@ -52,7 +53,7 @@ void UAugmentWidget::ApplyAugment(int32 AugmentIndex)
     {
         GameMode->CloseCurrentUIAndResumeGame(true);
     }
-
+     
     if (GEngine)
     {
         GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("Applied Augment: %s"), *SelectedAugment.DisplayName.ToString()));

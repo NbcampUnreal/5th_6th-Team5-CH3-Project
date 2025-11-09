@@ -12,6 +12,7 @@
 #include "EnhancedInputComponent.h"
 #include "Blueprint/UserWidget.h"
 //#include "TitleWidget.h"
+#include "StatsHUD.h"
 
 AFPSPlayerController::AFPSPlayerController()
 	: InputMappingContext(nullptr),
@@ -43,6 +44,7 @@ void AFPSPlayerController::BeginPlay()
 			{
 				Subsystem->AddMappingContext(InputMappingContext, 0);
 			}
+			
 	}
 
 	if (InventoryWidgetClass)
@@ -61,6 +63,30 @@ void AFPSPlayerController::BeginPlay()
 			InventoryWidget->SetVisibility(ESlateVisibility::Hidden);
 		}
 	}
+	
+	// // 2. HUD 위젯 생성 및 델리게이트 바인딩
+	// if (StatsHUDClass)
+	// {
+		// UUserWidget* StatsHUD = CreateWidget<UUserWidget>(this, StatsHUDClass);
+		
+		// if (StatsHUD)
+		// {
+			// StatsHUD->AddToViewport();
+			// HUDWidgetInstance = StatsHUD;
+			// // 마우스 커서 설정 (게임 중에는 일반적으로 숨김)
+			// bShowMouseCursor = false;
+			// FInputModeGameOnly InputMode;
+			// SetInputMode(InputMode);
+
+			// // 3. 캐릭터 참조 획득 및 UStatsHUD에 위젯 설정
+			// if (AFPSCharacter* MyCharacter = Cast<AFPSCharacter>(GetCharacter()))
+			// {
+				// // UStatsHUD로 캐스팅하여 캐릭터를 설정합니다.
+				// // UStatsHUD는 SetOwningCharacter에서 캐릭터의 델리게이트를 직접 바인딩합니다.
+				// if (UStatsHUD* StatsHUDInstance = Cast<UStatsHUD>(HUDWidgetInstance))
+				// {
+					// StatsHUDInstance->SetOwningCharacter(MyCharacter);
+				// }
 
 	if (ShopWidgetClass)
 	{

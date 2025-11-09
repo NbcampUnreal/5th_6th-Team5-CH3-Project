@@ -78,6 +78,12 @@ public:
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")	//Title Å×½ºÆ®
 	//TSubclassOf<UTitleWidget> TitleWidgetClass;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	TSubclassOf<UUserWidget> StatsHUDClass;
+
+	UPROPERTY()
+	TObjectPtr<UUserWidget> HUDWidgetInstance;
+
 protected:
 	virtual void BeginPlay() override;
 

@@ -10,6 +10,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "AugmentWidget.h"
 #include "FPSGameMode.h"
+#include "StatsHUD.h"
 #include "Engine/Engine.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -48,7 +49,6 @@ AFPSCharacter::AFPSCharacter()		// 초기 설정
 	bIsAlive(true),
 	Shield(100) // Shield 초기값 설정
 {
-	// ★★★ Tick 사용을 위해 true로 변경 (쿨다운 등에 필요) ★★★
 	PrimaryActorTick.bCanEverTick = true;
 
 
@@ -82,6 +82,13 @@ AFPSCharacter::AFPSCharacter()		// 초기 설정
 
 	// Reload Time
 	ReloadTime = 1.5f;
+
+	//(임시)
+	static ConstructorHelpers::FObjectFinder<UInputAction> LevelUpTestFinder(TEXT("/Game/Input/Actions/IA_LevelUPTest"));
+	if (LevelUpTestFinder.Succeeded())
+	{
+		LevelUpTestAction = LevelUpTestFinder.Object;
+	}
 }
 void AFPSCharacter::BeginPlay()
 {
@@ -207,7 +214,6 @@ void AFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 		}
 	}
 }
-
 
 // INPUT ACTION IMPLEMENTATIONS
 void AFPSCharacter::Move(const FInputActionValue& value)
@@ -352,19 +358,34 @@ void AFPSCharacter::StopReload()
 
 // GAMEPLAY LOGIC IMPLEMENTATIONS
 void AFPSCharacter::LevelUp()
-{
+{	
+	if (!bIsAlive) //사망 상태일 때
+	{
+		UE_LOG(LogTemp, Warning, TEXT("사망 상태: 레벨업 불가"));
+		return;
+	}
 	if (Experience >= MaxExperience)
 	{
 		Level += 1;
 		Health += 20;
 		Attack += 3;
 		Defence += 3;
+		CurrentExperience = 0.0f;
 		Experience = 0;
 		MaxExperience *= 1.2f; // 다음 레벨 요구 경험치 증가
 		UpdateHUDStats(TEXT("Health"));
 		UpdateHUDStats(TEXT("Attack"));
 		UpdateHUDStats(TEXT("Defence"));
 		UpdateHUDStats(TEXT("Experience"));
+		UpdateHUDStats(TEXT("Level"));
+
+		if (APlayerController* PC = Cast<APlayerController>(GetController()))
+		{
+			if (AFPSGameMode* GameMode = Cast<AFPSGameMode>(UGameplayStatics::GetGameMode(GetWorld())))
+			{
+				GameMode->HandlePlayerLevelUp(PC);
+			}
+		}
 		if (APlayerController* PC = Cast<APlayerController>(GetController()))
 		{
 			OnLevelUp.Broadcast(PC);
@@ -378,11 +399,36 @@ void AFPSCharacter::OnDeath(AController* KillerController)
 	OnPlayerDeath.Broadcast(KillerController);
 }
 
+// 무적상태 함수
+void AFPSCharacter::OnUndead()
+{
+	Undead = true;
+}
+void AFPSCharacter::OffUndead()
+{
+	Undead = false;
+}
+
+// 무적상태 함수 타이머 (Undead를 True로 변경하고, UndeadTime이 지나면 Undead = false.) 
+void AFPSCharacter::OnUndeadTime()
+{
+	Undead = true;
+
+	GetWorldTimerManager().SetTimer(
+		UndeadTimeHandle,
+		this,
+		&AFPSCharacter::OffUndead,
+		UndeadTime,
+		false
+	);
+}
+
+// 무적상태가 아닐 때 데미지를 적용
 float AFPSCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
 	AController* EventInstigator, AActor* DamageCauser)
 {
 	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser) - Defence;
-	if (ActualDamage > 0)
+	if (Undead == true && ActualDamage > 0)
 	{
 		Health -= ActualDamage;
 
@@ -455,6 +501,7 @@ void AFPSCharacter::AddXP(float Amount)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Gained XP: %f"), Amount);
 	CurrentExperience += Amount;
+	Experience = static_cast<int32>(CurrentExperience);
 	UpdateHUDStats(TEXT("Experience"));
 	LevelUp();
 }
@@ -468,8 +515,75 @@ void AFPSCharacter::GainGold(int32 Amount)
 
 void AFPSCharacter::UpdateHUDStats(FName StatName)
 {
-	// HUD 업데이트를 위한 델리게이트 전파 (FOnHUDStatChangedSignature 사용)
-	OnHUDStatChanged.Broadcast(StatName);
+	if (AFPSPlayerController* PC = Cast<AFPSPlayerController>(GetController()))
+	{	
+		if (UStatsHUD* StatsHUD = Cast<UStatsHUD>(PC->HUDWidgetInstance))
+		{
+			if (StatName == TEXT("Level"))
+			{
+				FName FunctionName = TEXT("UpdateLevelText");
+				if (StatsHUD->FindFunction(FunctionName))
+				{
+					StatsHUD->ProcessEvent(StatsHUD->FindFunction(FunctionName), &Level);
+				}
+			}
+			else if (StatName == TEXT("Experience"))
+			{
+				FName FunctionName = TEXT("UpdateEXPProgress");
+				if (StatsHUD->FindFunction(FunctionName))
+				{
+					struct FEXPParams
+					{
+						float CurrentEXP;
+						float MaxEXP;
+					} Params{ CurrentExperience, static_cast<float>(MaxExperience) };
+					StatsHUD->ProcessEvent(StatsHUD->FindFunction(FunctionName), &Params);
+				}
+			}
+			if (StatName == TEXT("Health"))
+			{
+				FName FunctionName = TEXT("UpdateHealthText");
+				if (StatsHUD->FindFunction(FunctionName))
+				{
+					StatsHUD->ProcessEvent(StatsHUD->FindFunction(FunctionName), &Health);
+				}
+			}
+			if (StatName == TEXT("CurrentAmmo"))
+			{
+				FName FunctionName = TEXT("UpdateCurrentAmmoText");
+				if (StatsHUD->FindFunction(FunctionName))
+				{
+					StatsHUD->ProcessEvent(StatsHUD->FindFunction(FunctionName), &CurrentAmmo);
+				}
+			}
+			if (StatName == TEXT("MaxAmmo"))
+			{
+				FName FunctionName = TEXT("UpdateMaxAmmoText");
+				if (StatsHUD->FindFunction(FunctionName))
+				{
+					StatsHUD->ProcessEvent(StatsHUD->FindFunction(FunctionName), &MaxAmmo);
+				}
+			}
+			if (StatName == TEXT("Skill1CooldownRemaining"))
+			{
+				FName FunctionName = TEXT("UpdateSkill1CooldownRemainingText");
+				if (StatsHUD->FindFunction(FunctionName))
+				{
+					StatsHUD->ProcessEvent(StatsHUD->FindFunction(FunctionName), &Skill1CooldownRemaining);
+				}
+			}
+			if (StatName == TEXT("Skill2CooldownRemaining"))
+			{
+				FName FunctionName = TEXT("UpdateSkill2CooldownRemainingText");
+				if (StatsHUD->FindFunction(FunctionName))
+				{
+					StatsHUD->ProcessEvent(StatsHUD->FindFunction(FunctionName), &Skill2CooldownRemaining);
+				}
+			}
+			// 기존 스탯 업데이트
+			OnHUDStatChanged.Broadcast(StatName);
+		}
+	}
 }
 
 void AFPSCharacter::Tick(float DeltaTime)

@@ -1,6 +1,8 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "InputActionValue.h"
+#include "EnhancedInputComponent.h"
 #include "FPSCharacter.generated.h"
 
 class USpringArmComponent;
@@ -89,7 +91,22 @@ public:
     UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
     void SetIsDashing(bool isdash);
 
+    // 무적 상태변수
+    bool Undead = false;
+    // 무적 지속 시간
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Undead")
+    float UndeadTime = 3.0f;
+    FTimerHandle UndeadTimeHandle;
+    // 무적 함수
+    void OnUndead();
+    void OffUndead();
+    void OnUndeadTime();
+
 protected:
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input|Debug")
+    class UInputAction* LevelUpTestAction;
+
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
     TObjectPtr<USpringArmComponent> SpringArmComp;
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")

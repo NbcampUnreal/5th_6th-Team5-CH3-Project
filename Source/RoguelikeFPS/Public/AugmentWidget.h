@@ -11,7 +11,7 @@ UENUM(BlueprintType)
 enum class EAugmentRarity : uint8
 {
     Normal UMETA(DisplayName = "Normal"),
-    Rare UMETA(DisplayName = "Rare"), // Fixed typo: "Rear" ¡æ "Rare"
+    Rare UMETA(DisplayName = "Rare"),
     Epic UMETA(DisplayName = "Epic"),
     Legendary UMETA(DisplayName = "Legendary")
 };
@@ -62,6 +62,7 @@ public:
     virtual bool Initialize() override;
     UFUNCTION(BlueprintCallable, Category = "Augment")
     void Setup(AFPSCharacter* InCharacter, const TArray<FAugmentData>& InAugments);
+
 protected:
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UButton> AugmentButton1;
@@ -81,6 +82,7 @@ protected:
     TObjectPtr<UTextBlock> AugmentDesc2;
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UTextBlock> AugmentDesc3;
+
 private:
     UFUNCTION()
     void OnAugment1Clicked();
