@@ -23,6 +23,8 @@ public:
 protected:
 
 private:
+	UPROPERTY()
+	ACharacter* _Instigator;
 
 public:
 	virtual void SetUp() override;

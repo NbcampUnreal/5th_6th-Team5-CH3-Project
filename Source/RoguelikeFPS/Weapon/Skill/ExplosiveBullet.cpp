@@ -12,6 +12,7 @@ void UExplosiveBullet::SetUp()
 	UGunComponent* GunComp = Cast<UGunComponent>(GetAttachParent());
 	if (GunComp)
 	{
+		_Instigator = GunComp->GetOwnerCharacter();
 		GunComp->ProjectileSpawn.AddUObject(this, &UExplosiveBullet::Projectile_AddDynamic);
 	}
 }
@@ -34,7 +35,7 @@ void UExplosiveBullet::Spawn_Explosion(AActor* DestroyedActor)
 			const FRotator SpawnRotation = DestroyedActor->GetActorRotation();
 			const FVector SpawnLocation = DestroyedActor->GetActorLocation();
 
-			AExplosiveActor* ExplosiveActor = World->SpawnActorDeferred<AExplosiveActor>(_Explosion, FTransform(SpawnRotation, SpawnLocation));
+			AExplosiveActor* ExplosiveActor = World->SpawnActorDeferred<AExplosiveActor>(_Explosion, FTransform(SpawnRotation, SpawnLocation), _Instigator, _Instigator, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
 			if (!IsValid(ExplosiveActor)) return;
 			SetDamge();
 			ExplosiveActor->_Damage = this->_Damage;
