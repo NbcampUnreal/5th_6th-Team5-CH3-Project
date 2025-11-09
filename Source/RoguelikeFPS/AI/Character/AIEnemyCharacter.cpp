@@ -204,8 +204,8 @@ void AAIEnemyCharacter::OnDeath()
         {
             AICon->SendDeadToBT();
         }
-        AActor* Proj = GetWorld()->SpawnActor<AActor>(DropItemClass, GetActorLocation(), GetActorRotation());
-
+        //AActor* Proj = GetWorld()->SpawnActor<AActor>(DropItemClass, GetActorLocation(), GetActorRotation());
+        DropItem();
         StateMachine->ChangeState(EEnemyState::Dead);
     }
 }
@@ -246,8 +246,31 @@ void AAIEnemyCharacter::ApplyStun(float Duration)
     UE_LOG(LogTemp, Warning, TEXT("[STUN START] Enemy stunned for %.1f sec"), Duration);
 }
 
+void AAIEnemyCharacter::DropItem()
+{
+    if (DropTable)
+    {
+        TArray<FDropTable*> AllRows;
+        static const FString ContextString(TEXT("ItemSpawnContext"));
+        DropTable->GetAllRows<FDropTable>(ContextString, AllRows);
+        if (AllRows.IsEmpty()) return;
 
+        for (const FDropTable* Row : AllRows)
+        {
+            const float RandValue = FMath::FRandRange(0.0f, 100.f);
+            if (RandValue <= Row->SpawnChance)
+            {
+                const float randX = FMath::FRandRange(-50.0f, 50.f);
+                const float randY = FMath::FRandRange(-50.0f, 50.f);
+                FVector randLocation = FVector();
 
+                AActor* Proj = GetWorld()->SpawnActor<AActor>(Row->ItemClass, FVector(randX, randY, GetActorLocation().Z), GetActorRotation());
+            }
+        }
+   
+        //if(RandValue <= AllRows->SpawnChance)
+    }
+}
 
 float AAIEnemyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) 
 {

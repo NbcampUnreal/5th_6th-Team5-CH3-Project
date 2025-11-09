@@ -6,6 +6,8 @@
 #include "AI/Structure/EnemyConfig.h"
 #include "AI/Structure/Component/EnemyStateMachineComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "../DropTable.h"
+
 #include "AIEnemyCharacter.generated.h"
 
 
@@ -28,6 +30,13 @@ public:
     // 몹 BP에서 각자 다른 Asset 할당
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI")
     UEnemyConfig* Config = nullptr;   
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+    UDataTable* DropTable;
+
+    //삭제 예정
+    UPROPERTY(EditAnywhere, BlueprintReadOnly)
+    TSubclassOf<AActor> DropItemClass;
 
     UFUNCTION(BlueprintCallable, Category = "AI|Config")
     void ApplyConfigToComponents(float Damage);
@@ -82,8 +91,7 @@ public:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stats")
     float DEF;
 
-    UPROPERTY(EditAnywhere, BlueprintReadOnly)
-    TSubclassOf<AActor> DropItemClass;
+
 
 
     UPROPERTY(EditAnywhere, Category = "Combat")
@@ -109,6 +117,9 @@ public:
 
     UFUNCTION(BlueprintCallable)
     void ApplyStun(float Duration);
+
+    UFUNCTION(BlueprintCallable)
+    void DropItem();
 
 
 

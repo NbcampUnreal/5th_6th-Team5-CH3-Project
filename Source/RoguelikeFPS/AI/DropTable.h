@@ -21,8 +21,11 @@ public:
     // 이 아이템의 스폰 확률
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     float SpawnChance;
+    // 추가할 수치
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    float AddAmount;
     // 이 아이템의 스폰 개수
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    int32 Amount;
+    int32 ItemAmount;
 
 };
