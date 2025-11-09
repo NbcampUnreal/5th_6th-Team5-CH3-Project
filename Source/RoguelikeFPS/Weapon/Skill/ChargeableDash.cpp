@@ -50,7 +50,7 @@ void UChargeableDash::StartDash() {
 		AFPSCharacter* Owenr = Cast<AFPSCharacter>(WeaponComp->GetOwnerCharacter());
 		if (Owenr) {
 			GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Blue, FString::Printf(TEXT("StartDash")));
-			Owenr->GetCharacterMovement()->MaxWalkSpeed = Owenr->GetDashSpeed();
+			Owenr->GetCharacterMovement()->MaxWalkSpeed = Owenr->GetDashSpeed() * _DashMultifly;
 			
 			_ChargedDashCount--;
 			_IsDash = true;

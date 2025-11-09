@@ -26,7 +26,7 @@ private:
 	int32 _MaxDashCount = 2;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Skill, meta = (AllowPrivateAccess = "true"))
-	float _DashMultifly = 2.0f;
+	float _DashMultifly = 1.0f;
 
 	bool _IsDash = false;
 public:
