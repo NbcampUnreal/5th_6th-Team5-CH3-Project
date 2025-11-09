@@ -149,12 +149,30 @@ void UWeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 }
 
+void UWeaponComponent::OnChildAttached(USceneComponent* ChildComponent)
+{
+	UWeaponSkillComponent* Skill = Cast<UWeaponSkillComponent>(ChildComponent);
+	if (Skill && _Character) Skill->SetUp();
+}
+
 void UWeaponComponent::SetUpWeaponSkills()
 {
-	const TArray<USceneComponent*>& Children = this->GetAttachChildren();
+	TArray<UWeaponSkillComponent*> SkillComps;
+
+	// 현재 직속 자식들 중 UWeaponSkillComponent만 골라서 복사
+	const TArray<USceneComponent*>& Children = GetAttachChildren();
 	for (USceneComponent* Child : Children)
 	{
 		if (UWeaponSkillComponent* Skill = Cast<UWeaponSkillComponent>(Child))
+		{
+			SkillComps.Add(Skill);
+		}
+	}
+
+	// 복사한 배열을 안전하게 순회하며 SetUp 호출
+	for (UWeaponSkillComponent* Skill : SkillComps)
+	{
+		if (IsValid(Skill))
 		{
 			Skill->SetUp();
 		}

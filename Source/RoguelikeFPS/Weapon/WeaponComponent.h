@@ -72,9 +72,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void AttachWeapon(ACharacter* TargetCharacter); // 델리게이트용 (void)
 
-	//UFUNCTION(BlueprintCallable, Category = "Weapon")
-	//virtual void ActiveSkill();
-
 	UEnhancedInputComponent* GetCharacterEnhancedInputComponent();
 
 protected:
@@ -82,6 +79,8 @@ protected:
 
 	UFUNCTION()
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+	virtual void OnChildAttached(USceneComponent* ChildComponent) override;
 
 	void SetUpWeaponSkills();
 private:
