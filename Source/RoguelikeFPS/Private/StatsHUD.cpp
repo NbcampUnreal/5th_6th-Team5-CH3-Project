@@ -6,6 +6,7 @@
 
 void UStatsHUD::SetOwningCharacter(AFPSCharacter* NewCharacter)
 {
+    APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
     OwningCharacter = NewCharacter;
     if (OwningCharacter)
     {
@@ -16,6 +17,7 @@ void UStatsHUD::SetOwningCharacter(AFPSCharacter* NewCharacter)
         // 초기 데이터로 한 번 모두 업데이트 (선택 사항)
         UpdateHealthDisplay();
         UpdateEXPDisplay();
+        UpdateLevel();
         UpdateWeaponDisplay();
         UpdateGoldDisplay();
         //UpdateSkillCooldownDisplay();
@@ -28,7 +30,6 @@ void UStatsHUD::NativeConstruct()
 
     // PlayerController::BeginPlay에서 SetOwningCharacter를 호출하므로,
     // 이 함수에서의 캐릭터 획득 시도는 제거/주석 처리하는 것이 좋습니다.
-    /*
     if (!OwningCharacter)
     {
         if (APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0))
@@ -39,7 +40,6 @@ void UStatsHUD::NativeConstruct()
             }
         }
     }
-    */
 }
 
 void UStatsHUD::OnCharacterStatChanged(FName StatName)
@@ -99,6 +99,19 @@ void UStatsHUD::UpdateEXPDisplay()
 
         float Percent = (MaxExp > 0) ? CurrentExp / MaxExp : 0.0f;
         ProgressBar_EXP->SetPercent(Percent);
+    }
+}
+void UStatsHUD::UpdateLevel()
+{
+    if (OwningCharacter && Text_Level)
+    {
+        // **Getter 사용으로 수정**
+        Text_WeaponName->SetText(FText::FromName(OwningCharacter->GetCurrentWeaponName()));
+
+        Text_Level->SetText(FText::Format(
+            NSLOCTEXT("HUD", "LevelFormat", "{0} Level"),
+            FText::AsNumber(OwningCharacter->GetLevel())
+        ));
     }
 }
 

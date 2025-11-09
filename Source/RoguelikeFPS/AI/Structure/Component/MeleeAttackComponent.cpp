@@ -24,7 +24,7 @@ void UMeleeAttackComponent::StartAttack(AActor* Target)
 
 void UMeleeAttackComponent::DoHit()
 {
-    if (bCanceled) return;
+    //if (bCanceled) return;
     if (!HasServerAuthority()) return;
     //if (!bAttackInProgress) return;
     //UE_LOG(LogTemp, Log, TEXT("DoHit start"));

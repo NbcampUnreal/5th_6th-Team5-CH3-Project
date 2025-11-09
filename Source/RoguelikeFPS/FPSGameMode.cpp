@@ -165,6 +165,19 @@ void AFPSGameMode::CloseCurrentUIAndResumeGame(bool bResumeGameInput)
 
 void AFPSGameMode::HandlePlayerLevelUp(APlayerController* PlayerController)
 {
+    if (!PlayerController)
+    {
+        UE_LOG(LogTemp, Error, TEXT("HandlePlayerLevelUp: PlayerController is NULL"));
+    }
+    if (!AugmentWidgetClass)
+    {
+        UE_LOG(LogTemp, Error, TEXT("HandlePlayerLevelUp: AugmentWidgetClass is NULL"));
+    }
+    if (!AugmentDataTable)
+    {
+        UE_LOG(LogTemp, Error, TEXT("HandlePlayerLevelUp: AugmentDataTable is NULL"));
+    }
+
     if (!PlayerController || !AugmentWidgetClass || !AugmentDataTable) return;
 
     PlayerController->SetPause(true);
@@ -201,6 +214,7 @@ void AFPSGameMode::HandlePlayerLevelUp(APlayerController* PlayerController)
     }
 
     UAugmentWidget* AugmentWidget = CreateWidget<UAugmentWidget>(PlayerController, AugmentWidgetClass);
+    GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, TEXT("LEVELUP"));
     if (AugmentWidget)
     {
         AFPSCharacter* Character = Cast<AFPSCharacter>(PlayerController->GetPawn());
@@ -222,12 +236,27 @@ void AFPSGameMode::HandlePlayerDeath(AController* KillerController)
     {
         MenuLevelName = GameDataInstance->MainMenuLevelName;
         GameDataInstance->ResetGameStatsToLevelOne();
+        UE_LOG(LogTemp, Log, TEXT("GameDataInstance 리셋: MainMenuLevelName = %s"), *MenuLevelName.ToString());
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("GameDataInstance 캐스트 실패! Fallback 레벨: %s"), *MenuLevelName.ToString());
     }
     if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
     {
         PC->SetPause(true);
         PC->bShowMouseCursor = true;
         PC->SetInputMode(FInputModeUIOnly());
+    }
+    FString OutReason;
+    if (FPackageName::DoesPackageExist(MenuLevelName.ToString(), nullptr, &OutReason))
+    {
+        UGameplayStatics::OpenLevel(GetWorld(), MenuLevelName);
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("레벨 '%s' 존재하지 않음! Fallback 사용."), *MenuLevelName.ToString());
+        UGameplayStatics::OpenLevel(GetWorld(), FName(TEXT("L_MainMenu")));  // 최종 Fallback
     }
     UGameplayStatics::OpenLevel(GetWorld(), MenuLevelName);
 }

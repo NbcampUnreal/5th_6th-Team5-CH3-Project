@@ -6,7 +6,6 @@
 
 class UBoxComponent;
 class UStaticMeshComponent;
-class AMyCharacter;
 class UItemBase;
 class DataTable;
 
@@ -32,7 +31,7 @@ protected:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shop")
 	UDataTable* ItemDataTable;
-
+	
 	UFUNCTION()
 	void LoadItemsFromDataTable();
 

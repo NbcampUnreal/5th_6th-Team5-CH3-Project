@@ -44,6 +44,7 @@ public:
     void CloseCurrentUIAndResumeGame(bool bResumeGameInput = true);
 
 protected:
+
     UPROPERTY()
     UTitleWidget* TitleWidgetInstance;
     UPROPERTY()

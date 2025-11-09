@@ -10,6 +10,7 @@ class UBlackboardComponent;
 class UMeleeAttackComponent;
 class URangedAttackComponent;
 class UStage2BossAttackComponent;
+class UEnemyAnimInstance;
 
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
@@ -42,6 +43,13 @@ public:
     UFUNCTION(BlueprintCallable, Category = "AI")
     AActor* GetTargetFromBlackboard() const;
 
+    FTimerHandle PostAttackTimer;
+    UPROPERTY(EditAnywhere, Category = "Combat")
+    float PostAttackDelay = 0.3f;   // 공격 후 짧은 대기(블렌딩/리커버리용)
+
+    FTimerHandle AttackRecheckTimer;
+    void RecheckAttackReady();  // 쿨타임 대기 중 재평가
+
 private:
     TWeakObjectPtr<UMeleeAttackComponent>  MeleeComp;
     TWeakObjectPtr<URangedAttackComponent> RangedComp;
@@ -50,9 +58,12 @@ private:
     UFUNCTION()
     void HandleAttackFinished();
 
+    void SetCombatLocked(bool bLocked);
+
     float Dist2DToTarget(AActor* Target) const;
 
-    TWeakObjectPtr<class UEnemyAnimInstance> CachedAnim;
+    UPROPERTY(Transient)
+    UEnemyAnimInstance* CachedAnim = nullptr;
 
 protected:
     virtual void BeginPlay() override;
@@ -62,4 +73,14 @@ protected:
     virtual void OnExitState(EEnemyState State);
     virtual void TickState(EEnemyState State, float DeltaTime);
     virtual void OnEnter_Attack();
+
+    UFUNCTION()
+    void OnMeleeFinished();
+    UFUNCTION()
+    void OnRangedFinished();
+    UFUNCTION()
+    void OnBoss2Finished();
+
+    void FinalizeAfterAttack();
+    void OnPostAttackDelayElapsed();
 };

@@ -53,7 +53,7 @@ void ADropItem::DropTestItem()
 {
 	UItemBase* TestItem = NewObject<UItemBase>(inven);
 	TestItem->ItemName = "ItemName";
-	TestItem->Amount = Amount1;
+	TestItem->Amount = ADDAmount;
 	inven->AddItem(TestItem, TestItem->Amount, FName("NONE"));
 }
 

@@ -27,6 +27,9 @@ protected:
     UProgressBar* ProgressBar_EXP;    // ProgressBar_EXP 이름으로 가정
 
     UPROPERTY(meta = (BindWidget))
+    UTextBlock* Text_Level;           // Text_Level 이름으로 가정
+
+    UPROPERTY(meta = (BindWidget))
     UTextBlock* Text_MinMaxBullet;    // MinMaxBulit 이름으로 가정
 
     UPROPERTY(meta = (BindWidget))
@@ -36,7 +39,7 @@ protected:
     UTextBlock* Text_Gold;            // Gold 이름으로 가정
 
     //UPROPERTY(meta = (BindWidget))
-    //UTextBlock* Skill1CD;        // Skill1 이름으로 가정
+    //UImage* Skill1CD;        // Skill1 이름으로 가정
 
     //UPROPERTY(meta = (BindWidget))
     //UTextBlock* Skill2CD;        // Skill2 이름으로 가정
@@ -55,6 +58,7 @@ protected:
     // --- 4. C++에서 직접 UI 업데이트 (필요한 데이터가 변경될 때마다 호출) ---
     void UpdateHealthDisplay();
     void UpdateEXPDisplay();
+    void UpdateLevel();
     void UpdateWeaponDisplay();
     void UpdateGoldDisplay();
     //void UpdateSkillCooldownDisplay();

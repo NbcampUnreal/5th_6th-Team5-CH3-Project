@@ -42,13 +42,7 @@ public:
 	EDropItemType GoodsType = EDropItemType::Goods1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "InventoryGold")
-	int32 Goods1amount;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "InventoryGold")
-	int32 Goods2amount;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "InventoryGold")
-	int32 Amount1;
+	int32 ADDAmount;
 
 
 	UFUNCTION(BlueprintCallable)

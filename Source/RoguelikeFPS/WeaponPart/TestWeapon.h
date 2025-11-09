@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Engine/DataTable.h"
-#include "PartData.h"
+#include "ItemBase.h"
 #include "TestWeapon.generated.h"
 
 class UPartItem;
@@ -27,11 +27,11 @@ public:
 
 	//파츠
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Parts")
-	UPartItem* MuzzlePart;
+	UItemBase* MuzzlePart;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Parts")
-	UPartItem* MagazinPart;
+	UItemBase* MagazinPart;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Parts")
-	UPartItem* StockPart;
+	UItemBase* StockPart;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Parts")
 	FName MuzzleRow;//테스트용
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Parts")
