@@ -56,14 +56,7 @@ void UWeaponComponent::AttachWeapon(ACharacter* TargetCharacter)
 	if (_TSubAnimInstance)
 	{
 		_Character->GetMesh()->SetAnimInstanceClass(_TSubAnimInstance);
-		_AnimInstance = _Character->GetMesh()->GetAnimInstance();
-		GEngine->AddOnScreenDebugMessage(1, 3.f, FColor::Blue, FString::Printf(TEXT("SetAnimInstanceClass")));
 	}
-
-	/*if (_AnimInstance)
-	{
-		_Character->GetMesh()->SetAnimInstanceClass(_TSubAnimInstance);
-	}*/
 }
 
 void UWeaponComponent::ActiveSkill()
@@ -135,7 +128,7 @@ void UWeaponComponent::BeginPlay()
 
 	if (_TSubAnimInstance)
 	{
-		_AnimInstance = _TSubAnimInstance.GetDefaultObject();
+		//_AnimInstance = _TSubAnimInstance.GetDefaultObject();
 	}
 }
 

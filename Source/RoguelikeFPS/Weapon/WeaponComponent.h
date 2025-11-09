@@ -43,9 +43,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Gameplay, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UAnimInstance> _TSubAnimInstance;
 
-	UPROPERTY()
-	UAnimInstance* _AnimInstance;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputMappingContext* _AttackMappingContext;
 

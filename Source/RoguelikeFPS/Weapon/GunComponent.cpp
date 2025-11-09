@@ -61,11 +61,6 @@ void UGunComponent::Fire()
 	CurrentBulletCount--;
 	CanAttack = false;
 
-	//FTimerDelegate Delegate = FTimerDelegate::CreateLambda([this]()
-	//	{
-	//		CanAttack = true;
-	//	});
-
 	UWorld* const World = GetWorld();
 	World->GetTimerManager().SetTimer(_GunTimerHandle, [this]()
 		{
@@ -81,8 +76,8 @@ void UGunComponent::Fire()
 	if (_AttackAnimation != nullptr)
 	{
 		// Get the animation object for the arms mesh
-		//UAnimInstance* AnimInstance = _Character->GetMesh()->GetAnimInstance();
-		_AnimInstance->Montage_Play(_AttackAnimation, 1.f);
+		UAnimInstance* AnimInstance = _Character->GetMesh()->GetAnimInstance();
+		AnimInstance->Montage_Play(_AttackAnimation, 1.f);
 	}
 }
 
