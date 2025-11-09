@@ -32,11 +32,8 @@ void UMissile::SetUp()
 {
     Super::SetUp();
 
-    if (GetAttachParent())
-    {
-        UGunComponent* Guncomp = Cast<UGunComponent>(GetAttachParent());
-        if (Guncomp) _Instigator = Guncomp->GetOwnerCharacter();
-    }
+    UGunComponent* Guncomp = Cast<UGunComponent>(GetAttachParent());
+    if (Guncomp) _Instigator = Guncomp->GetOwnerCharacter();
 }
 
 void UMissile::OnCollsionBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
