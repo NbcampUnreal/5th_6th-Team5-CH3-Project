@@ -18,6 +18,7 @@ UItemBase* UInventory::AddItem(UItemBase* Item, int32 AddAmount, const FName& It
 	{
 		return nullptr;
 	}
+
 	UItemBase* ItemAdd = nullptr;
 	int32 EndAmount = FMath::Max(AddAmount, 1);
 
@@ -29,38 +30,31 @@ UItemBase* UInventory::AddItem(UItemBase* Item, int32 AddAmount, const FName& It
 	}
 	else if (ItemDataTable)
 	{
-		FItemData* Row = ItemDataTable->FindRow<FItemData>(ItemName, TEXT("AddItem"));
-		if (Row)
+		if (FItemData* Row = ItemDataTable->FindRow<FItemData>(ItemName, TEXT("AddItem")))
 		{
 			ItemAdd = NewObject<UItemBase>(this);
-			ItemAdd->ItemNumber = Row->ItemNumber;
-			ItemAdd->ItemName = Row->ItemName;
-			ItemAdd->Description = Row->Description;
-			ItemAdd->EffectDescription = Row->EffectDescription;
+			ItemAdd->InitItemData(*Row);
 			ItemAdd->Amount = EndAmount;
-			ItemAdd->BuyPrice = Row->BuyPrice;
-			ItemAdd->SellPrice = Row->SellPrice;
-			ItemAdd->ItemType = Row->ItemType;
-			ItemAdd->Thumbnail = Row->Thumbnail;
 		}
 	}
 
 	if (!ItemAdd)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Add Item Failed!"));
 		return nullptr;
 	}
 
 	for (UItemBase* InItem : InventoryItems)
 	{
-		if (InItem && InItem->ItemName == ItemAdd->ItemName)
+		if (InItem && InItem->ItemNumber == ItemAdd->ItemNumber)
 		{
 			InItem->Amount += ItemAdd->Amount;
+			OnInventoryUpdated.Broadcast();
 			return InItem;
 		}
 	}
 
 	InventoryItems.Add(ItemAdd);
+	OnInventoryUpdated.Broadcast();
 
 	if (InventoryUI)
 	{
@@ -69,7 +63,6 @@ UItemBase* UInventory::AddItem(UItemBase* Item, int32 AddAmount, const FName& It
 
 	return ItemAdd;
 }
-
 bool UInventory::RemoveItem(UItemBase* Item, int32 Amount)
 {
 	if (!Item || Amount <= 0)
@@ -89,6 +82,7 @@ bool UInventory::RemoveItem(UItemBase* Item, int32 Amount)
 			if (RemoveItem->Amount <= 0)
 			{
 				InventoryItems.RemoveAt(i);
+				OnInventoryUpdated.Broadcast();
 			}
 			return true;
 		}
@@ -109,27 +103,29 @@ bool UInventory::BuyItem(UItemBase* Item)
 		if (InvenItem && InvenItem->ItemName == Item->ItemName)
 		{
 			InvenItem->Amount += 1;
-			UE_LOG(LogTemp, Log, TEXT("Item Buy : %s, BuyPrice : %d, Current Gold : %d, Amount : %d"),
-				*Item->ItemName.ToString(), Item->BuyPrice, Gold, InvenItem->Amount);
+			OnGoldChanged.Broadcast(Gold);
+			OnInventoryUpdated.Broadcast();
 			return true;
 		}
 	}
 
-	UItemBase* NewItem = NewObject<UItemBase>(this);
-	NewItem->ItemNumber = Item->ItemNumber;
-	NewItem->ItemName = Item->ItemName;
-	NewItem->Description = Item->Description;
-	NewItem->EffectDescription = Item->EffectDescription;
-	NewItem->Amount = 1;
-	NewItem->BuyPrice = Item->BuyPrice;
-	NewItem->SellPrice = Item->SellPrice;
-	NewItem->ItemType = Item->ItemType;
-	NewItem->Thumbnail = Item->Thumbnail;
-	InventoryItems.Add(NewItem);
+	if (ItemDataTable)
+	{
+		if (FItemData* Row = ItemDataTable->FindRow<FItemData>(Item->ItemName, TEXT("BuyItem")))
+		{
+			UItemBase* NewItem = NewObject<UItemBase>(this);
+			NewItem->InitItemData(*Row);
+			NewItem->Amount = 1;
+			InventoryItems.Add(NewItem);
 
-	UE_LOG(LogTemp, Log, TEXT("Item Buy : %s, BuyPrice : %d, Current Gold : %d, Amount : %d"), *NewItem->ItemName.ToString(), NewItem->BuyPrice, Gold, NewItem->Amount);
-	
-	return true;
+			OnGoldChanged.Broadcast(Gold);
+			OnInventoryUpdated.Broadcast();
+
+			return true;
+		}
+	}
+
+	return false;
 }
 
 bool UInventory::SellItem(UItemBase* Item, int32 Amount)
@@ -145,9 +141,9 @@ bool UInventory::SellItem(UItemBase* Item, int32 Amount)
 	}
 	Gold += InvenItem->SellPrice * Amount;
 	RemoveItem(Item, Amount);
+	OnGoldChanged.Broadcast(Gold);
+	OnInventoryUpdated.Broadcast();
 
-	UE_LOG(LogTemp, Log, TEXT("Sold Item : %s, SellPrice : %d, Current Gold : %d, Amount : %d"),
-		*Item->ItemName.ToString(), InvenItem->SellPrice * Amount, Gold, InvenItem ? InvenItem->Amount : 0);
 	return true;
 }
 
@@ -182,4 +178,15 @@ UItemBase* UInventory::SearchItemNumber(int32 ItemNumber) const
 		}
 	}
 	return nullptr;
+}
+
+int32 UInventory::GetGold() const
+{
+	return Gold;
+}
+
+void UInventory::SetGold(int32 NewGold)
+{
+	Gold = FMath::Max(0, NewGold);
+	OnGoldChanged.Broadcast(Gold);
 }

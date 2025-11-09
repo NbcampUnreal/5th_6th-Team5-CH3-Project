@@ -8,6 +8,9 @@ class UInputMappingContext;
 class UInputAction;
 class UInventory;
 class UInventoryWidget;
+class UUpgradeMenuWidget;
+class UCraftingWidget;
+class UCraftingMenuWidget;
 class UShopWidget;
 //class UTitleWidget;	//타이틀 테스트
 
@@ -39,6 +42,11 @@ public:
 	TObjectPtr<UInputAction> Weapon_ReloadAction;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	TObjectPtr<UInputAction> IA_InventoryOnOff;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	TObjectPtr<UInputAction> IA_UpgradeOnOff;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	TObjectPtr<UInputAction> IA_CraftingOnOff;
+
 
 	//인벤토리/상점 위젯
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
@@ -49,9 +57,21 @@ public:
 	UInventoryWidget* InventoryWidget;
 	UPROPERTY()
 	UShopWidget* ShopWidget;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	TSubclassOf<UUpgradeMenuWidget> UpgradeMenuWidgetClass;
+	UPROPERTY()
+	UUpgradeMenuWidget* UpgradeMenuWidget;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	TSubclassOf<UCraftingMenuWidget> CraftingMenuWidgetClass;
+	UPROPERTY()
+	UCraftingMenuWidget* CraftingMenuWidget;
 
 	UFUNCTION(BlueprintCallable)
 	void InventoryToggle();	//열기/닫기
+	UFUNCTION(BlueprintCallable)
+	void UpgradeToggle();
+	UFUNCTION(BlueprintCallable)
+	void CraftingToggle();
 
 	void SetUpInputBinding();
 

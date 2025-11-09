@@ -1,4 +1,8 @@
 #include "FPSCharacter.h"
+#include "Inventory.h"
+#include "UpgradeSystem.h"
+#include "CraftingSystem.h"
+#include "Engine/DataTable.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputComponent.h"
@@ -66,6 +70,9 @@ AFPSCharacter::AFPSCharacter()		// 초기 설정
 	DashSpeed = MovingSpeed * DashMultifly;
 	DashTime = 0.5f;
 
+	//인벤토리 부착
+	Inventory = CreateDefaultSubobject<UInventory>(TEXT("InventoryComponent"));
+	UpgradeSystem = CreateDefaultSubobject<UUpgradeSystem>(TEXT("UpgradeSystem"));
 
 	// Crouch Activation
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
@@ -80,6 +87,16 @@ AFPSCharacter::AFPSCharacter()		// 초기 설정
 
 	Inventory = CreateDefaultSubobject<UInventory>(TEXT("InventoryComponent"));
 }
+void AFPSCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	//if (Inventory && UpgradeSystem)
+	//{
+	//	UpgradeSystem->TestPartUpgrade(Inventory);
+	//}
+}
+
 
 // INPUT BINDING
 void AFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -302,6 +319,7 @@ void AFPSCharacter::StartFire_Auto(const FInputActionValue& value)
 	);
 
 }
+
 void AFPSCharacter::PerformFire()
 {
 	bIsFiring = true;

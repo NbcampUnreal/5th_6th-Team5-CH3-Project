@@ -3,7 +3,6 @@
 #include "RoguelikeFPS/FPSCharacter.h"
 #include "RoguelikeFPS/FPSPlayerController.h"
 #include "ItemBase.h"
-#include "ItemData.h"
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/DataTable.h"
@@ -39,27 +38,26 @@ void AShop::BeginPlay()
 void AShop::LoadItemsFromDataTable()
 {
     ShopItems.Empty();
+
     if (!ItemDataTable)
     {
         return;
     }
-
     TArray<FName> RowNames = ItemDataTable->GetRowNames();
-    for (const FName& Name : RowNames)
+    for (const FName& RowName : RowNames)
     {
-        FItemData* Row = ItemDataTable->FindRow<FItemData>(Name, TEXT("ShopItems"));
-        if (Row)
+        if (const FItemData* ItemRow = ItemDataTable->FindRow<FItemData>(RowName, TEXT("ShopItems")))
         {
             UItemBase* NewItem = NewObject<UItemBase>(this);
-            NewItem->ItemNumber = Row->ItemNumber;
-            NewItem->ItemName = Row->ItemName;
-            NewItem->Amount = Row->Amount;
-            NewItem->BuyPrice = Row->BuyPrice;
-            NewItem->SellPrice = Row->SellPrice;
-            NewItem->Thumbnail = Row->Thumbnail;
+            NewItem->InitItemData(*ItemRow);
+
+            NewItem->Amount = FMath::Max(1, ItemRow->Amount);
+
             ShopItems.Add(NewItem);
         }
     }
+
+    UE_LOG(LogTemp, Log, TEXT("[Shop] Loaded %d items from data table"), ShopItems.Num());
 }
 
 void AShop::PlayerInRange(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
