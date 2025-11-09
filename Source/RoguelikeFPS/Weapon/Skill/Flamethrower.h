@@ -25,35 +25,35 @@ protected:
 
 
 private:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Flamethrower, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Skill, meta = (AllowPrivateAccess = "true"))
 	UProceduralMeshComponent* _Collision;
 
 	UPROPERTY()
 	float _Width;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Flamethrower, meta = (ClampMin = "1.0"), meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Skill, meta = (ClampMin = "1.0"), meta = (AllowPrivateAccess = "true"))
 	float _Height = 100;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Flamethrower, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Skill, meta = (AllowPrivateAccess = "true"))
 	float _Length = 500.f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Flamethrower, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Skill, meta = (AllowPrivateAccess = "true"))
 	float _Angle = 60.f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Flamethrower, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Skill, meta = (AllowPrivateAccess = "true"))
 	int32 _TickPerSecond = 5;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Flamethrower, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Skill, meta = (AllowPrivateAccess = "true"))
 	float _FlamethrowerDuration = 5.f;
 
-	UPROPERTY(EditDefaultsOnly, Category = "FX", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, Category = Skill, meta = (AllowPrivateAccess = "true"))
 	UNiagaraSystem* _VFXFlamethrower;
 
 	UPROPERTY()
 	UNiagaraComponent* _VFXComponent;
 
 	UPROPERTY()
-	AActor* _Instigator;
+	APawn* _Instigator;
 
 	UPROPERTY()
 	TSet<TWeakObjectPtr<ACharacter>> OverlappedCharacters;
