@@ -364,6 +364,34 @@ void AFPSCharacter::OnDeath(AController* KillerController)
 	OnPlayerDeath.Broadcast(KillerController);
 }
 
+<<<<<<< Updated upstream
+=======
+// 무적상태 함수
+void AFPSCharacter::OnUndead()
+{
+	Undead = true;
+}
+void AFPSCharacter::OffUndead()
+{
+	Undead = false;
+}
+
+// 무적상태 함수 타이머 (Undead를 True로 변경하고, UndeadTime이 지나면 Undead = false.) 
+void AFPSCharacter::OnUndeadTime(float time)
+{
+	Undead = true;
+
+	GetWorldTimerManager().SetTimer(
+		UndeadTimeHandle,
+		this,
+		&AFPSCharacter::OffUndead,
+		time,
+		false
+	);
+}
+
+// 무적상태가 아닐 때 데미지를 적용
+>>>>>>> Stashed changes
 float AFPSCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
 	AController* EventInstigator, AActor* DamageCauser)
 {

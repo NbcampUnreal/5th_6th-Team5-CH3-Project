@@ -83,6 +83,18 @@ public:
     UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
     void SetIsDashing(bool isdash);
 
+<<<<<<< Updated upstream
+=======
+    // 무적 상태변수
+    bool Undead = false;
+    // 무적 지속 시간
+    FTimerHandle UndeadTimeHandle;
+    // 무적 함수
+    void OnUndead();
+    void OffUndead();
+    void OnUndeadTime(float time);
+
+>>>>>>> Stashed changes
 protected:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
     TObjectPtr<USpringArmComponent> SpringArmComp;
@@ -183,6 +195,7 @@ protected:
     UFUNCTION()
     void Reload(const FInputActionValue& value);
     void LevelUp();
+    UFUNCTION(BlueprintCallable)
     void OnDeath(AController* KillerController);
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Augment")

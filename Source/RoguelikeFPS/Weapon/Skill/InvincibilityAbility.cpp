@@ -13,5 +13,15 @@ void UInvincibilityAbility::Active()
 	_isSkillCoolDown = true;
 
 	UGunComponent* GunComp = Cast<UGunComponent>(GetAttachParent());
-	//GunComp->GetOwnerCharacter()->Setun
+	if (GunComp)
+	{
+		if (GunComp->GetOwnerCharacter())
+		{
+			AFPSCharacter* Owner = Cast<AFPSCharacter>(GunComp->GetOwnerCharacter());
+			if (Owner)
+			{
+				Owner->OnUndeadTime(_BuffDuration);
+			}
+		}
+	}
 }
