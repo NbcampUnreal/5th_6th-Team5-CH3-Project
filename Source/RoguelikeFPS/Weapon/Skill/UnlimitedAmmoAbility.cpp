@@ -32,11 +32,9 @@ void UUnlimitedAmmoAbility::Active()
 	if (_isSkillCoolDown) return;
 	_isSkillCoolDown = true;
 	IsBuffActive = true;
-	GEngine->AddOnScreenDebugMessage(-1, 3, FColor::Red, FString::Printf(TEXT("Active")));
 
 	UWorld* const World = GetWorld();
 	if (!World) return;
-
 	World->GetTimerManager().SetTimer(_BuffDurationTimerHandle, this, &UUnlimitedAmmoAbility::EndBuff, _BuffDuration, false);
 }
 

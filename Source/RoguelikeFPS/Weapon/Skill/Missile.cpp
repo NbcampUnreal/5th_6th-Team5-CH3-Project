@@ -100,6 +100,7 @@ void UMissile::SpawnMissiles()
         ////Set Spawn Collision Handling Override
         FActorSpawnParameters ActorSpawnParams;
         ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+        ActorSpawnParams.Instigator = _Instigator;
 
         TArray<TWeakObjectPtr<AMissileActor>> MissilesToFire;
         MissilesToFire.SetNum(_MissilesToFireCount);
@@ -108,14 +109,13 @@ void UMissile::SpawnMissiles()
         for (size_t i = 0; i < _MissilesToFireCount; i++)
         {
             if (_TSubMissileActor == nullptr) return;
-            MissilesToFire[i] = World->SpawnActorDeferred<AMissileActor>(_TSubMissileActor, FTransform(SpawnRotation, SpawnLocation));
+            MissilesToFire[i] = World->SpawnActorDeferred<AMissileActor>(_TSubMissileActor, FTransform(SpawnRotation, SpawnLocation), _Instigator, _Instigator, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
             if (MissilesToFire[i] != nullptr)
             {
                 FVector Location = SpawnLocation;
                 Location.X += FMath::FRandRange(-100.f, 100.f);
                 Location.Y += FMath::FRandRange(-100.f, 100.f);
-                Location.Z += FMath::FRandRange(200.f, 250.f);
-                MissilesToFire[i]->SetInstigator(_Instigator);
+                Location.Z += FMath::FRandRange(150.f, 250.f);
                 MissilesToFire[i]->SetTarget(Cast<AActor>(OverlappedCharacters[FMath::RandRange(0, OverlappedCharacters.Num() - 1)]));
                 MissilesToFire[i]->SetDamage(_Damage);
                 UGameplayStatics::FinishSpawningActor(MissilesToFire[i].Get(), FTransform(SpawnRotation, Location));

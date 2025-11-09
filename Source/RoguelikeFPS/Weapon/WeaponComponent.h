@@ -6,6 +6,8 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Weapon/PickUpComponent.h"
 #include "WeaponSkillComponent.h"
+//#include "Animation/AnimInstance.h"
+//#include "Animation/AnimMontage.h"
 #include "WeaponComponent.generated.h"
 
 /**
@@ -13,6 +15,7 @@
  */
 class ACharacter;
 class UEnhancedInputComponent;
+class UAnimInstance;
 
 DECLARE_MULTICAST_DELEGATE(FOnDoAttack);
 
@@ -37,6 +40,12 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay, meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* _AttackAnimation;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Gameplay, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UAnimInstance> _TSubAnimInstance;
+
+	UPROPERTY()
+	UAnimInstance* _AnimInstance;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputMappingContext* _AttackMappingContext;
 
@@ -55,7 +64,7 @@ protected:
 private:
 	
 public:
-	ACharacter* GetOwnerCharacter() { return _Character;  };
+	ACharacter* GetOwnerCharacter() {return _Character;};
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	virtual void DoAttack();

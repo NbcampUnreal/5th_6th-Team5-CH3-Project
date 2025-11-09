@@ -34,7 +34,8 @@ void UWeaponComponent::AttachWeapon(ACharacter* TargetCharacter)
 
 	// Attach the weapon to the First Person Character
 	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
-	GetOwner()->AttachToComponent(_Character->GetMesh(), AttachmentRules, FName(WeaponSocketName));
+	//GetOwner()->AttachToComponent(_Character->GetMesh(), AttachmentRules, FName(WeaponSocketName));
+	this->AttachToComponent(_Character->GetMesh(), AttachmentRules, FName(WeaponSocketName));
 
 	// Set up action bindings
 	if (APlayerController* PlayerController = Cast<APlayerController>(_Character->GetController()))
@@ -51,6 +52,18 @@ void UWeaponComponent::AttachWeapon(ACharacter* TargetCharacter)
 			if (_SkillComponent) _SkillComponent->SetUp();
 		}
 	}
+
+	if (_TSubAnimInstance)
+	{
+		_Character->GetMesh()->SetAnimInstanceClass(_TSubAnimInstance);
+		_AnimInstance = _Character->GetMesh()->GetAnimInstance();
+		GEngine->AddOnScreenDebugMessage(1, 3.f, FColor::Blue, FString::Printf(TEXT("SetAnimInstanceClass")));
+	}
+
+	/*if (_AnimInstance)
+	{
+		_Character->GetMesh()->SetAnimInstanceClass(_TSubAnimInstance);
+	}*/
 }
 
 void UWeaponComponent::ActiveSkill()
@@ -118,6 +131,11 @@ void UWeaponComponent::BeginPlay()
 	}
 	else {
 		UE_LOG(LogTemp, Warning, TEXT("TSubSkillComponent is null"));
+	}
+
+	if (_TSubAnimInstance)
+	{
+		_AnimInstance = _TSubAnimInstance.GetDefaultObject();
 	}
 }
 
