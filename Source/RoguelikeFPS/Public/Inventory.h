@@ -8,6 +8,9 @@
 
 class UInventoryWidget;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGoldChanged, int32, NewGold);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInventoryUpdated);
+
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class ROGUELIKEFPS_API UInventory : public UActorComponent
 {
@@ -48,6 +51,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	UInventoryWidget* InventoryUI;
+	
+	//델리게이트
+	UPROPERTY(BlueprintAssignable, Category = "Inventory")
+	FOnGoldChanged OnGoldChanged;
+	UPROPERTY(BlueprintAssignable, Category = "Inventory")
+	FOnInventoryUpdated OnInventoryUpdated;
 
 	//검색
 	UFUNCTION(BlueprintCallable)

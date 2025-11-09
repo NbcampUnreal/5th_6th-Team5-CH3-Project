@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ItemData.h"
 #include "UObject/NoExportTypes.h"
 #include "ItemBase.generated.h"
 
@@ -11,33 +12,50 @@ class ROGUELIKEFPS_API UItemBase : public UObject
 	
 public:
 
-	UItemBase();
+    // 공통 데이터
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+    int32 ItemNumber;
 
-	//ID
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	int32 ItemNumber;
-	//이름
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	FName ItemName;
-	//설명
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	FString Description;
-	//효과 설명
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	FString EffectDescription;
-	//수량
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	int32 Amount;
-	//구입 가격
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	int32 BuyPrice;
-	//판매 가격
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	int32 SellPrice;
-	//아이템 타입
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	FString ItemType;
-	//이미지
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	UTexture2D* Thumbnail;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+    FName ItemName;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+    EItemType ItemType;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+    EPartGrade PartGrade;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+    FText Description;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+    UTexture2D* Thumbnail;
+
+    // 능력치
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Part")
+    float BaseDamage;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Part")
+    float BaseAttackSpeed;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Part")
+    int32 Ammo;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Part")
+    int32 Amount;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shop")
+    int32 BuyPrice;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shop")
+    int32 SellPrice;
+
+public:
+    void InitItemData(const FItemData& Data);
+
+    float ApplyDamage(float BaseDamage) const;
+    int32 ApplyAmmo(int32 BaseAmmo) const;
+    float ApplyAttackSpeed(float BaseAttackSpeed) const;
+
+    void ApplyToWeapon(float& InOutDamage, int32& InOutAmmo, float& InOutAttackSpeed) const;
 };

@@ -15,18 +15,29 @@ class ROGUELIKEFPS_API UUpgradeSystem : public UActorComponent
 public:	
 	UUpgradeSystem();
 
-	//테스트용
-	void TestPartUpgrade(UInventory* Inventory);
+	UFUNCTION(BlueprintCallable)
+	bool CanUpgrade(UItemBase* TargetItem, UItemBase* UpgradeItem, UInventory* Inventory, int32 CostGold);
 
 	UFUNCTION(BlueprintCallable)
-	bool CanUpgrade(UPartItem* TargetItem, UItemBase* UpgradeItem, UInventory* Inventory, int32 CostGold);
+	bool UpgradeItem(UItemBase* TargetItem, UItemBase* UpgradeItem, UInventory* Inventory, int32 CostGold);
 
-	UFUNCTION(BlueprintCallable)
-	bool UpgradeItem(UPartItem* TargetItem, UItemBase* UpgradeItem, UInventory* Inventory, int32 CostGold);
+
+protected:
+	virtual void BeginPlay() override;		
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Upgrade")
 	float SuccessRate = 0.0f;
 
-protected:
-	virtual void BeginPlay() override;		
+    //강화시 능력치 상승
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Upgrade|Bonus")
+	float NormalBonusRate = 0.10f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Upgrade|Bonus")
+	float RareBonusRate = 0.20f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Upgrade|Bonus")
+	float HeroBonusRate = 0.30f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Upgrade|Bonus")
+	float LegendaryBonusRate = 0.40f;
 };

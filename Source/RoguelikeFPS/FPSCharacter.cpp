@@ -61,10 +61,10 @@ void AFPSCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (Inventory && UpgradeSystem)
-	{
-		UpgradeSystem->TestPartUpgrade(Inventory);
-	}
+	//if (Inventory && UpgradeSystem)
+	//{
+	//	UpgradeSystem->TestPartUpgrade(Inventory);
+	//}
 }
 
 

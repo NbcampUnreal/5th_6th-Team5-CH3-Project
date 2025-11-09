@@ -1,118 +1,179 @@
 #include "CraftingSystem.h"
-#include "RoguelikeFPS/WeaponPart/PartItem.h"
-#include "ResourceItem.h"
-#include "RoguelikeFPS/WeaponPart/PartData.h"
+#include "Inventory.h"
+#include "ItemBase.h"
 #include "Engine/DataTable.h"
-#include "Engine/Engine.h"
-#include "Math/UnrealMathUtility.h"
+#include "ItemData.h"
 
-void UCraftingSystem::DecomposePart(UPartItem* Part, TArray<UResourceItem*>& PlayerResources)
+int32 UCraftingSystem::GetItemCount(UInventory* PlayerInventory, const FName& ItemName) const
 {
-    if (!Part) return;
+    if (!PlayerInventory) return 0;
 
-    int32 BaseAmount = 1;
-    switch (Part->PartGrade)
+    int32 Count = 0;
+    for (const UItemBase* Item : PlayerInventory->InventoryItems)
     {
-    case EPartGrade::Nomal: BaseAmount = 1; break;
-    case EPartGrade::Rare: BaseAmount = 2; break;
-    case EPartGrade::Hero: BaseAmount = 3; break;
-    case EPartGrade::Legend: BaseAmount = 5; break;
+        if (Item && Item->ItemName == ItemName)
+            Count += Item->Amount;
     }
-
-    UResourceItem* NewRes = NewObject<UResourceItem>(this, UResourceItem::StaticClass());
-    NewRes->ItemName = Part->PartName; 
-    NewRes->Amount = BaseAmount;
-
-    PlayerResources.Add(NewRes);
-
-    UE_LOG(LogTemp, Log, TEXT("Decomposed Part: %s -> %d Resource"), *Part->PartName.ToString(), BaseAmount);
+    return Count;
 }
 
-bool UCraftingSystem::CraftPart(
-    TArray<UPartItem*>& PlayerParts,
-    TArray<UResourceItem*>& PlayerResources,
-    const TMap<TSubclassOf<UResourceItem>, int32>& RequiredResources,
-    const TMap<TSubclassOf<UPartItem>, int32>& RequiredParts,
-    UDataTable* PartDataTable,
-    const FName& ResultPartRowName
-)
+bool UCraftingSystem::RemoveItem(UInventory* PlayerInventory, const FName& ItemName, int32 Amount)
 {
-    if (!PartDataTable)
+    if (!PlayerInventory || Amount <= 0)
+        return false;
+
+    for (int32 i = 0; i < PlayerInventory->InventoryItems.Num(); i++)
     {
-        UE_LOG(LogTemp, Warning, TEXT("No DataTable provided!"));
+        UItemBase* Item = PlayerInventory->InventoryItems[i];
+        if (Item && Item->ItemName == ItemName)
+        {
+            const int32 RemoveCount = FMath::Min(Item->Amount, Amount);
+            Item->Amount -= RemoveCount;
+            Amount -= RemoveCount;
+
+            if (Item->Amount <= 0)
+                PlayerInventory->InventoryItems.RemoveAt(i--);
+
+            if (Amount <= 0)
+                return true;
+        }
+    }
+    return false;
+}
+
+bool UCraftingSystem::AddItem(UInventory* PlayerInventory, UDataTable* ItemDataTable, const FName& ItemName, int32 Amount)
+{
+    if (!PlayerInventory || !ItemDataTable || Amount <= 0)
+        return false;
+
+    const FString Context(TEXT("AddItem"));
+    FItemData* ItemInfo = ItemDataTable->FindRow<FItemData>(ItemName, Context);
+    if (!ItemInfo)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[CraftingSystem] Invalid Item Row: %s"), *ItemName.ToString());
         return false;
     }
 
-    for (auto& Pair : RequiredParts)
+    // 이미 있는 아이템이면 합산
+    for (UItemBase* Existing : PlayerInventory->InventoryItems)
     {
-        int32 Count = 0;
-        for (auto* Part : PlayerParts)
+        if (Existing && Existing->ItemName == ItemName)
         {
-            if (Part->IsA(Pair.Key))
-                Count++;
+            Existing->Amount += Amount;
+            return true;
         }
-        if (Count < Pair.Value)
+    }
+
+    // 새로 추가
+    UItemBase* NewItem = NewObject<UItemBase>(this);
+    if (NewItem)
+    {
+        NewItem->InitItemData(*ItemInfo);
+        NewItem->Amount = Amount;
+        PlayerInventory->InventoryItems.Add(NewItem);
+        return true;
+    }
+
+    return false;
+}
+
+///////////////////////////////////////////////////////////
+// 제작
+///////////////////////////////////////////////////////////
+
+bool UCraftingSystem::CraftItem(UInventory* PlayerInventory, UDataTable* ItemDataTable, const FName& TargetItemName)
+{
+    if (!PlayerInventory || !ItemDataTable)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[CraftingSystem] Invalid references."));
+        return false;
+    }
+
+    const FString Context(TEXT("Crafting"));
+    FItemData* ItemInfo = ItemDataTable->FindRow<FItemData>(TargetItemName, Context);
+
+    if (!ItemInfo)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[CraftingSystem] No data found for %s"), *TargetItemName.ToString());
+        return false;
+    }
+
+    if (ItemInfo->CraftingItems.Num() == 0)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[CraftingSystem] %s has no crafting recipe."), *TargetItemName.ToString());
+        return false;
+    }
+
+    // 재료 보유 확인
+    for (const auto& Pair : ItemInfo->CraftingItems)
+    {
+        int32 Have = GetItemCount(PlayerInventory, Pair.Key);
+        if (Have < Pair.Value)
         {
-            UE_LOG(LogTemp, Warning, TEXT("Not enough parts for crafting"));
+            UE_LOG(LogTemp, Warning, TEXT("[CraftingSystem] Not enough %s (Need %d, Have %d)"),
+                *Pair.Key.ToString(), Pair.Value, Have);
             return false;
         }
     }
 
-    for (auto& Pair : RequiredResources)
+    // 재료 차감
+    for (const auto& Pair : ItemInfo->CraftingItems)
     {
-        int32 Count = 0;
-        for (auto* Res : PlayerResources)
-        {
-            if (Res->IsA(Pair.Key))
-                Count += Res->Amount;
-        }
-        if (Count < Pair.Value)
-        {
-            UE_LOG(LogTemp, Warning, TEXT("Not enough resources for crafting"));
-            return false;
-        }
+        RemoveItem(PlayerInventory, Pair.Key, Pair.Value);
     }
 
-    for (auto& Pair : RequiredParts)
-    {
-        int32 Remaining = Pair.Value;
-        for (int32 i = PlayerParts.Num() - 1; i >= 0 && Remaining > 0; i--)
-        {
-            if (PlayerParts[i]->IsA(Pair.Key))
-            {
-                PlayerParts.RemoveAt(i);
-                Remaining--;
-            }
-        }
-    }
+    // 결과 아이템 지급
+    AddItem(PlayerInventory, ItemDataTable, TargetItemName, 1);
 
-    for (auto& Pair : RequiredResources)
-    {
-        int32 Remaining = Pair.Value;
-        for (auto* Res : PlayerResources)
-        {
-            if (Res->IsA(Pair.Key))
-            {
-                int32 Deduct = FMath::Min(Remaining, Res->Amount);
-                Res->Amount -= Deduct;
-                Remaining -= Deduct;
-            }
-        }
-    }
+    UE_LOG(LogTemp, Log, TEXT("[CraftingSystem] Crafted new item: %s"), *TargetItemName.ToString());
+    return true;
+}
 
-    static const FString ContextString(TEXT("PART CRAFTING SYSTEM"));
-    FPartData* PartData = PartDataTable->FindRow<FPartData>(ResultPartRowName, ContextString);
-    if (!PartData)
+///////////////////////////////////////////////////////////
+// 분해
+///////////////////////////////////////////////////////////
+
+bool UCraftingSystem::DecomposeItem(UInventory* PlayerInventory, UDataTable* ItemDataTable, const FName& TargetItemName)
+{
+    if (!PlayerInventory || !ItemDataTable)
     {
-        UE_LOG(LogTemp, Warning, TEXT("Failed to find part data for %s"), *ResultPartRowName.ToString());
+        UE_LOG(LogTemp, Warning, TEXT("[CraftingSystem] Invalid references."));
         return false;
     }
 
-    UPartItem* NewPart = NewObject<UPartItem>(this, UPartItem::StaticClass());
-    NewPart->InitializeFromData(*PartData);
+    const FString Context(TEXT("Decompose"));
+    FItemData* ItemInfo = ItemDataTable->FindRow<FItemData>(TargetItemName, Context);
 
-    PlayerParts.Add(NewPart);
+    if (!ItemInfo)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[CraftingSystem] No data found for %s"), *TargetItemName.ToString());
+        return false;
+    }
 
-    UE_LOG(LogTemp, Log, TEXT("Crafted new Part: %s"), *NewPart->PartName.ToString());
+    if (ItemInfo->DestroyItems.Num() == 0)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[CraftingSystem] %s cannot be decomposed."), *TargetItemName.ToString());
+        return false;
+    }
+
+    // 대상 아이템 존재 확인
+    int32 Count = GetItemCount(PlayerInventory, TargetItemName);
+    if (Count <= 0)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[CraftingSystem] You don't have %s to decompose."), *TargetItemName.ToString());
+        return false;
+    }
+
+    // 분해 대상 제거
+    RemoveItem(PlayerInventory, TargetItemName, 1);
+
+    // 재료 환원
+    for (const auto& Pair : ItemInfo->DestroyItems)
+    {
+        AddItem(PlayerInventory, ItemDataTable, Pair.Key, Pair.Value);
+        UE_LOG(LogTemp, Log, TEXT("[CraftingSystem] Decomposed %s -> %s x%d"),
+            *TargetItemName.ToString(), *Pair.Key.ToString(), Pair.Value);
+    }
+
     return true;
 }

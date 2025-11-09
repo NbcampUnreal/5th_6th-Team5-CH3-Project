@@ -1,6 +1,8 @@
-#include "UpgradeSystem.h"
+ï»¿#include "UpgradeSystem.h"
 #include "Inventory.h"
-#include "RoguelikeFPS/WeaponPart/PartItem.h"
+#include "ItemBase.h"
+#include "Weapon/GunComponent.h"
+#include "FPSCharacter.h"
 #include "Kismet/KismetMathLibrary.h"
 
 UUpgradeSystem::UUpgradeSystem()
@@ -16,7 +18,7 @@ void UUpgradeSystem::BeginPlay()
 
 }
 
-bool UUpgradeSystem::CanUpgrade(UPartItem* TargetItem, UItemBase* UpgradeItem, UInventory* Inventory, int32 CostGold)
+bool UUpgradeSystem::CanUpgrade(UItemBase* TargetItem, UItemBase* UpgradeItem, UInventory* Inventory, int32 CostGold)
 {
 	if (!TargetItem || !UpgradeItem || !Inventory)
 	{
@@ -33,7 +35,7 @@ bool UUpgradeSystem::CanUpgrade(UPartItem* TargetItem, UItemBase* UpgradeItem, U
 	return true;
 }
 
-bool UUpgradeSystem::UpgradeItem(UPartItem* TargetItem, UItemBase* UpgradeItem, UInventory* Inventory, int32 CostGold)
+bool UUpgradeSystem::UpgradeItem(UItemBase* TargetItem, UItemBase* UpgradeItem, UInventory* Inventory, int32 CostGold)
 {
 	if (!CanUpgrade(TargetItem, UpgradeItem, Inventory, CostGold))
 	{
@@ -47,7 +49,7 @@ bool UUpgradeSystem::UpgradeItem(UPartItem* TargetItem, UItemBase* UpgradeItem, 
 	{
 		switch (TargetItem->PartGrade)
 		{
-		case EPartGrade::Nomal:
+		case EPartGrade::Normal:
 			RateToUse = 0.8f;
 			break;
 		case EPartGrade::Rare:
@@ -56,7 +58,7 @@ bool UUpgradeSystem::UpgradeItem(UPartItem* TargetItem, UItemBase* UpgradeItem, 
 		case EPartGrade::Hero:
 			RateToUse = 0.45f;
 			break;
-		case EPartGrade::Legend:
+		case EPartGrade::Legendary:
 			RateToUse = 0.25;
 			break;
 		default:
@@ -68,45 +70,60 @@ bool UUpgradeSystem::UpgradeItem(UPartItem* TargetItem, UItemBase* UpgradeItem, 
 	const float RandomValue = UKismetMathLibrary::RandomFloat();
 	UE_LOG(LogTemp, Log, TEXT("Upgrade Attempt: RandomValue=%.2f, SuccessRate=%.2f"), RandomValue, RateToUse);
 
-	if (RandomValue <= RateToUse)
+	if (RandomValue > RateToUse)
 	{
-		TargetItem->PartGrade = static_cast<EPartGrade>(FMath::Clamp((uint8)TargetItem->PartGrade + 1, 0, 3));
-		UE_LOG(LogTemp, Log, TEXT("Upgrade Success! Part : %s, New Grade : %d"), *TargetItem->PartName.ToString(), (uint8)TargetItem->PartGrade);
-		return true;
+		UE_LOG(LogTemp, Warning, TEXT("[UpgradeSystem] Upgrade Failed... %s"), *TargetItem->ItemName.ToString());
+		return false;
 	}
 
-	UE_LOG(LogTemp, Log, TEXT("Upgrade Failed Part : %s"), *TargetItem->PartName.ToString());
-	return false;
-}
+	EPartGrade OldGrade = TargetItem->PartGrade;
+	TargetItem->PartGrade = static_cast<EPartGrade>(FMath::Clamp((uint8)TargetItem->PartGrade + 1, 0, 3));
 
-//Å×½ºÆ®¿ë
-void UUpgradeSystem::TestPartUpgrade(UInventory* Inventory)
-{
-	if (!Inventory)
-	{
-		return;
-	}
-	// ÆÄÃ÷ »ý¼º
-	UPartItem* Part = NewObject<UPartItem>(Inventory);
-	Part->PartName = "TestBarrel";
-	Part->PartGrade = EPartGrade::Nomal;
+	const float FixedIncrease = 0.10f; 
 
-	// Àç·á »ý¼º
-	UItemBase* Stone = NewObject<UItemBase>(Inventory);
-	Stone->ItemName = "UpgradeStone";
-	Stone->Amount = 5;
+	float OldDamage = TargetItem->BaseDamage;
+	int32 OldAmmo = TargetItem->Ammo;
+	float OldAS = TargetItem->BaseAttackSpeed;
 
-	Inventory->AddItem(Part, 1, NAME_None);
-	Inventory->AddItem(Stone, 5, NAME_None);
-	Inventory->SetGold(500);
+	TargetItem->BaseDamage *= 1.10f;
+	TargetItem->Ammo = FMath::CeilToInt(TargetItem->Ammo * 1.10f);
+	TargetItem->BaseAttackSpeed *= 1.10f;
 
-	int32 GoldCost = 100;
+	//AFPSCharacter* OwnerChar = Cast<AFPSCharacter>(Inventory->GetOwner());
+	//if (OwnerChar)
+	//{
+	//	int32 OldAttack = OwnerChar->GetAttack();
+	//	int32 AddedAttack = FMath::RoundToInt(OldDamage * FixedIncrease);
+	//	OwnerChar->SetAttack(OldAttack + AddedAttack);
 
-	UE_LOG(LogTemp, Log, TEXT("=== Start Part Upgrade Test ==="));
-	for (int i = 0; i < 5; i++)
-	{
-		UpgradeItem(Part, Stone, Inventory, GoldCost);
-		UE_LOG(LogTemp, Log, TEXT("After attempt %d: Gold=%d, PartGrade=%d"),
-			i + 1, Inventory->GetGold(), (uint8)Part->PartGrade);
-	}
+	//	UE_LOG(LogTemp, Warning, TEXT("[UpgradeSystem] Character Attack Increased: %d â†’ %d"), OldAttack, OwnerChar->GetAttack());
+
+	//	if (UGunComponent* GunComp = OwnerChar->FindComponentByClass<UGunComponent>())
+	//	{
+	//		float OldGunDamage = GunComp->_Status.AttackPoint;
+	//		GunComp->_Status.AttackPoint *= 1.10f;
+
+	//		int32 OldMaxBullet = GunComp->_Status.MaxBulletCount;
+	//		GunComp->_Status.MaxBulletCount = FMath::CeilToInt(OldMaxBullet * 1.10f);
+
+	//		float OldGunAS = GunComp->_Status.AttackSpeed;
+	//		GunComp->_Status.AttackSpeed *= 1.10f;
+
+	//		UE_LOG(LogTemp, Warning,
+	//			TEXT("[UpgradeSystem] Gun Enhanced -> Dmg: %.2fâ†’%.2f | MaxAmmo: %dâ†’%d | AS: %.2fâ†’%.2f"),
+	//			OldGunDamage, GunComp->_Status.AttackPoint,
+	//			OldMaxBullet, GunComp->_Status.MaxBulletCount,
+	//			OldGunAS, GunComp->_Status.AttackSpeed);
+	//	}
+	//}
+
+	//UE_LOG(LogTemp, Warning,
+	//	TEXT("[UpgradeSystem] Upgrade Success -> %s | Grade %d â†’ %d | +10%% | Dmg: %.2fâ†’%.2f | Ammo: %dâ†’%d | AS: %.2fâ†’%.2f"),
+	//	*TargetItem->ItemName.ToString(),
+	//	(uint8)OldGrade, (uint8)TargetItem->PartGrade,
+	//	OldDamage, TargetItem->BaseDamage,
+	//	OldAmmo, TargetItem->Ammo,
+	//	OldAS, TargetItem->BaseAttackSpeed);
+
+	return true;
 }

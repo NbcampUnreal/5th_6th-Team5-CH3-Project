@@ -1,5 +1,5 @@
 #include "RoguelikeFPS/WeaponPart/TestWeapon.h"
-#include "RoguelikeFPS/WeaponPart/PartItem.h"
+#include "ItemData.h"
 
 ATestWeapon::ATestWeapon()
 {
@@ -15,28 +15,28 @@ void ATestWeapon::BeginPlay()
 	{
 		if (MuzzleRow != NAME_None)
 		{
-			if (const FPartData* Row = PartDataTable->FindRow<FPartData>(MuzzleRow, TEXT("")))
+			if (const FItemData* Row = PartDataTable->FindRow<FItemData>(MuzzleRow, TEXT("")))
 			{
-				MuzzlePart = NewObject<UPartItem>();
-				MuzzlePart->InitializeFromData(*Row);
+				MuzzlePart = NewObject<UItemBase>();
+				MuzzlePart->InitItemData(*Row);
 			}
 		}
 
 		if (MagazineRow != NAME_None)
 		{
-			if (const FPartData* Row = PartDataTable->FindRow<FPartData>(MagazineRow, TEXT("")))
+			if (const FItemData* Row = PartDataTable->FindRow<FItemData>(MagazineRow, TEXT("")))
 			{
-				MagazinPart = NewObject<UPartItem>();
-				MagazinPart->InitializeFromData(*Row);
+				MagazinPart = NewObject<UItemBase>();
+				MagazinPart->InitItemData(*Row);
 			}
 		}
 
 		if (StockRow != NAME_None)
 		{
-			if (const FPartData* Row = PartDataTable->FindRow<FPartData>(StockRow, TEXT("")))
+			if (const FItemData* Row = PartDataTable->FindRow<FItemData>(StockRow, TEXT("")))
 			{
-				StockPart = NewObject<UPartItem>();
-				StockPart->InitializeFromData(*Row);
+				StockPart = NewObject<UItemBase>();
+				StockPart->InitItemData(*Row);
 			}
 		}
 	}
