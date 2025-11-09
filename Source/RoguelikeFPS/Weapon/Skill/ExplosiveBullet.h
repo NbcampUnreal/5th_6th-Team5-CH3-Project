@@ -35,6 +35,4 @@ private:
 
 	UFUNCTION()
 	void Spawn_Explosion(AActor* DestroyedActor);
-
-	void UpdateDamge();
 };

@@ -1,12 +1,16 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "InputActionValue.h"
+#include "EnhancedInputComponent.h"
 #include "FPSCharacter.generated.h"
 
 class USpringArmComponent;
 class UCameraComponent;
 class UInventory;
+class UUpgradeSystem;
 struct FInputActionValue;
+
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLevelUpSignature, APlayerController*, PlayerController);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerDeathSignature, AController*, KillerController);
@@ -18,6 +22,7 @@ class ROGUELIKEFPS_API AFPSCharacter : public ACharacter
     GENERATED_BODY()
 public:
     AFPSCharacter();
+    virtual void BeginPlay() override;
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
     UFUNCTION(BlueprintCallable)
     void AddXP(float Amount);
@@ -37,6 +42,9 @@ public:
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
     UInventory* Inventory;//인벤토리 정보
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
+	UUpgradeSystem* UpgradeSystem;
 
     int32 GetLevel() const { return Level; }
     int32 GetHealth() const { return Health; }
@@ -46,6 +54,7 @@ public:
     int32 GetShield() const { return Shield; }
     int32 GetAttackSpeed() const { return AttackSpeed; }
     int32 GetMovingSpeed() const { return MovingSpeed; }
+    int32 GetDashSpeed() const { return DashSpeed; }
     int32 GetStamina() const { return Stamina; }
     int32 GetExperience() const { return Experience; }
     int32 GetMaxExperience() const { return MaxExperience; }
@@ -55,6 +64,7 @@ public:
     float GetSkill1CooldownRemaining() const { return Skill1CooldownRemaining; }
     float GetSkill2CooldownRemaining() const { return Skill2CooldownRemaining; }
     int32 GetGoldAmount() const { return GoldAmount; }
+    bool GetIsDash() const { return bIsDashing; }
 
     UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
     void SetLevel(int32 level);
@@ -78,8 +88,25 @@ public:
     void SetExperience(int32 experience);
     UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
     void SetMaxExperience(int32 maxExperience);
+    UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
+    void SetIsDashing(bool isdash);
+
+    // 무적 상태변수
+    bool Undead = false;
+    // 무적 지속 시간
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Undead")
+    float UndeadTime = 3.0f;
+    FTimerHandle UndeadTimeHandle;
+    // 무적 함수
+    void OnUndead();
+    void OffUndead();
+    void OnUndeadTime();
 
 protected:
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input|Debug")
+    class UInputAction* LevelUpTestAction;
+
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
     TObjectPtr<USpringArmComponent> SpringArmComp;
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")

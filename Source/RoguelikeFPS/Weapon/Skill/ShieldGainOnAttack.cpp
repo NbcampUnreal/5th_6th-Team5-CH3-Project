@@ -12,7 +12,6 @@ void UShieldGainOnAttack::SetUp()
 	UGunComponent* GunComp = Cast<UGunComponent>(GetAttachParent());
 	if (GunComp)
 	{
-
 		GunComp->ProjectileSpawn.AddUObject(this, &UShieldGainOnAttack::Projectile_AddDynamic);
 	}
 }

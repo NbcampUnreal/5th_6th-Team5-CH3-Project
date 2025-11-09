@@ -5,6 +5,7 @@
 #include "GameFramework/Character.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AExplosiveActor::AExplosiveActor()
@@ -43,9 +44,9 @@ void AExplosiveActor::Tick(float DeltaTime)
 
 void AExplosiveActor::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) 
 {
-	ACharacter* Character = Cast<ACharacter>(OtherActor);
-	if (Character)
+	ACharacter* character = Cast<ACharacter>(OtherActor);
+	if (character)
 	{  
-		
+		UGameplayStatics::ApplyDamage(character, _Damage, nullptr, this, UDamageType::StaticClass());
 	}
 }

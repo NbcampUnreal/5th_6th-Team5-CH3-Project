@@ -28,6 +28,13 @@ void ATeleportVolume::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor
 
     if (OtherActor->IsA<AFPSCharacter>())
     {
+        if (AFPSCharacter* Character = Cast<AFPSCharacter>(OtherActor))
+        {
+            GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, TEXT("LEVELEXP"));
+            Character->AddXP(50.0f);
+            Character->GainGold(50);
+            //Character->TakeDamage(50.0f, , , this);
+        }
         // 기존 타이머가 있으면 클리어
         if (GetWorldTimerManager().IsTimerActive(TeleportTimerHandle))
         {

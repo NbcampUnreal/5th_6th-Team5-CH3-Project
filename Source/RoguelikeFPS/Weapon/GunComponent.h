@@ -23,8 +23,6 @@ class ROGUELIKEFPS_API UGunComponent : public UWeaponComponent
 	
 
 public:
-
-
 	UGunComponent();
 	~UGunComponent();
 
@@ -40,14 +38,20 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data, meta = (AllowPrivateAccess = "true"))
 	FGunStatus _Status;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data, meta = (AllowPrivateAccess = "true"))
 	int32 CurrentBulletCount = 0;
 
 	UPROPERTY()
 	FTimerHandle _GunTimerHandle;
 
 	UPROPERTY()
+	FTimerHandle _ReloadTimerHandle;
+
+	UPROPERTY()
 	bool CanAttack; 
+
+	UPROPERTY()
+	bool _IsReloading = false;
 
 public:
 	virtual void DoAttack() override;
@@ -55,6 +59,23 @@ public:
 	void Fire();
 
 	float ReturnDamage();
+
+	void AddBullet(int32 amount);
+	int32 GetBulletCount() { return CurrentBulletCount; };
+	void SetBulletCount(int32 count);
+
+	int32 GetMaxBulletCount() { return _Status.MaxBulletCount; };
+
+	float GetRealodTime() { return _Status.ReloadTime; };
+	void SetRealodTime(float time);
+
+	void SetProjectilesPerShot(int32 count);
+
+	float GetAttackPoint() { return _Status.AttackPoint; };
+	void SetAttackPoint(float attackpoint);
+
+	void IncreaseHeadShotMultiplier(float value);
+	
 
 protected:
 	virtual void BeginPlay() override;
@@ -67,4 +88,5 @@ private:
 
 	void InitSpawnProjectile(AProjectile* proejectile);
 	void ReloadBullet();
+	void SpawnProejectile();
 };

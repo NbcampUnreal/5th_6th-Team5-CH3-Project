@@ -18,7 +18,7 @@ UWeaponComponent::UWeaponComponent()
 
 void UWeaponComponent::DoAttack()
 {
-
+	OnDoAttack.Broadcast();
 }
 
 void UWeaponComponent::AttachWeapon(ACharacter* TargetCharacter)
@@ -34,7 +34,7 @@ void UWeaponComponent::AttachWeapon(ACharacter* TargetCharacter)
 
 	// Attach the weapon to the First Person Character
 	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
-	GetOwner()->AttachToComponent(_Character->GetMesh(), AttachmentRules, FName(WeaponSocketName));
+	this->AttachToComponent(_Character->GetMesh(), AttachmentRules, FName(WeaponSocketName));
 
 	// Set up action bindings
 	if (APlayerController* PlayerController = Cast<APlayerController>(_Character->GetController()))
@@ -48,18 +48,23 @@ void UWeaponComponent::AttachWeapon(ACharacter* TargetCharacter)
 		{
 			// Attack
 			EnhancedInputComponent->BindAction(_AttackAction, ETriggerEvent::Triggered, this, &UWeaponComponent::DoAttack);
-			if (_SkillComponent) _SkillComponent->SetUp();
+			SetUpWeaponSkills();
 		}
+	}
+
+	if (_TSubAnimInstance)
+	{
+		_Character->GetMesh()->SetAnimInstanceClass(_TSubAnimInstance);
 	}
 }
 
-void UWeaponComponent::ActiveSkill()
-{
-	if (_SkillComponent)
-	{
-		_SkillComponent->Active();
-	}
-}
+//void UWeaponComponent::ActiveSkill()
+//{
+//	if (_SkillComponent)
+//	{
+//		_SkillComponent->Active();
+//	}
+//}
 
 UEnhancedInputComponent* UWeaponComponent::GetCharacterEnhancedInputComponent()
 {
@@ -104,21 +109,26 @@ void UWeaponComponent::BeginPlay()
 		}
 	}
 
-	if (_TSubSkillComponent)
-	{
-		_SkillComponent = NewObject<UWeaponSkillComponent>(GetOwner(), _TSubSkillComponent);
-		if (_SkillComponent)
-		{
-			_SkillComponent->RegisterComponent(); // 반드시 등록해야 월드에서 동작
-			_SkillComponent->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
-		}
-		else {
-			UE_LOG(LogTemp, Warning, TEXT("SkillComponent is null"));
-		}
-	}
-	else {
-		UE_LOG(LogTemp, Warning, TEXT("TSubSkillComponent is null"));
-	}
+	//if (_TSubSkillComponent)
+	//{
+	//	_SkillComponent = NewObject<UWeaponSkillComponent>(GetOwner(), _TSubSkillComponent);
+	//	if (_SkillComponent)
+	//	{
+	//		_SkillComponent->RegisterComponent(); // 반드시 등록해야 월드에서 동작
+	//		_SkillComponent->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
+	//	}
+	//	else {
+	//		UE_LOG(LogTemp, Warning, TEXT("SkillComponent is null"));
+	//	}
+	//}
+	//else {
+	//	UE_LOG(LogTemp, Warning, TEXT("TSubSkillComponent is null"));
+	//}
+
+	//if (_TSubAnimInstance)
+	//{
+	//	//_AnimInstance = _TSubAnimInstance.GetDefaultObject();
+	//}
 }
 
 void UWeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -139,4 +149,14 @@ void UWeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 }
 
-
+void UWeaponComponent::SetUpWeaponSkills()
+{
+	const TArray<USceneComponent*>& Children = this->GetAttachChildren();
+	for (USceneComponent* Child : Children)
+	{
+		if (UWeaponSkillComponent* Skill = Cast<UWeaponSkillComponent>(Child))
+		{
+			Skill->SetUp();
+		}
+	}
+}

@@ -6,6 +6,8 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Weapon/PickUpComponent.h"
 #include "WeaponSkillComponent.h"
+//#include "Animation/AnimInstance.h"
+//#include "Animation/AnimMontage.h"
 #include "WeaponComponent.generated.h"
 
 /**
@@ -13,6 +15,9 @@
  */
 class ACharacter;
 class UEnhancedInputComponent;
+class UAnimInstance;
+
+DECLARE_MULTICAST_DELEGATE(FOnDoAttack);
 
 UCLASS(Blueprintable, BlueprintType, ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class ROGUELIKEFPS_API UWeaponComponent : public USkeletalMeshComponent
@@ -21,6 +26,8 @@ class ROGUELIKEFPS_API UWeaponComponent : public USkeletalMeshComponent
 
 public:
 	UWeaponComponent();
+
+	FOnDoAttack OnDoAttack;
 
 protected:
 	//Owner
@@ -33,14 +40,20 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay, meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* _AttackAnimation;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Gameplay, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UAnimInstance> _TSubAnimInstance;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputMappingContext* _AttackMappingContext;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* _AttackAction;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Skill, meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<UWeaponSkillComponent> _TSubSkillComponent;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Skill, meta = (AllowPrivateAccess = "true"))
+	//TSubclassOf<UWeaponSkillComponent> _TSubSkillComponent;
+
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Skill, meta = (AllowPrivateAccess = "true"))
+	//TArray<TSubclassOf<UWeaponSkillComponent>> _TSubSkillComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Mesh, meta = (AllowPrivateAccess = "true"))
 	FName WeaponSocketName;
@@ -51,7 +64,7 @@ protected:
 private:
 	
 public:
-	ACharacter* GetOwnerCharacter() { return _Character;  };
+	ACharacter* GetOwnerCharacter() {return _Character;};
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	virtual void DoAttack();
@@ -59,8 +72,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void AttachWeapon(ACharacter* TargetCharacter); // 델리게이트용 (void)
 
-	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	virtual void ActiveSkill();
+	//UFUNCTION(BlueprintCallable, Category = "Weapon")
+	//virtual void ActiveSkill();
 
 	UEnhancedInputComponent* GetCharacterEnhancedInputComponent();
 
@@ -70,7 +83,7 @@ protected:
 	UFUNCTION()
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-
+	void SetUpWeaponSkills();
 private:
 
 };

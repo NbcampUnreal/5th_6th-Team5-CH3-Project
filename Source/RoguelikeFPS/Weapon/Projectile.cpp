@@ -8,6 +8,8 @@
 #include "FPSCharacter.h"
 #include "AI/Character/AIEnemyCharacter.h"
 #include "Kismet/GameplayStatics.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 
 // Sets default values
 AProjectile::AProjectile()
@@ -40,14 +42,18 @@ AProjectile::AProjectile()
 
 	// Die after 3 seconds by default
 	InitialLifeSpan = 3.0f;
+
+	RibbonParticleComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("RibbonParticleComponent"));
+	RibbonParticleComponent->SetupAttachment(_Collision);
 }
 
 // Called when the game starts or when spawned
 void AProjectile::BeginPlay()
 {
 	Super::BeginPlay();
-	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green , FString::Printf(TEXT("BeginPlay")));
-	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("%s"), *GetActorLocation().ToString()));
+	//RibbonParticleComponent->Activate();
+	RibbonParticleComponent->SetActive(true);
+	RibbonParticleComponent->ActivateSystem(true);
 }
 
 void AProjectile::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -98,8 +104,15 @@ void AProjectile::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	if (OtherComp->IsA(UWeaponComponent::StaticClass())) return;
-	if (!IsValid(_Instigator)) return;
-	if (_Instigator == OtherActor) return;
+	if (!IsValid(GetInstigator())) { return; }
+	if (GetInstigator() == OtherActor) return;
+
+
+	if (IsHeadBone(Hit.BoneName))
+	{
+		_Damage *= _HeadShotMultiplier;
+		OnHitHead.Broadcast();
+	}
 	
 	ACharacter* Victim = Cast<ACharacter>(OtherActor);	
 
@@ -109,19 +122,10 @@ void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimi
 		return;
 	}
 
-	ACharacter* Attacker = Cast<ACharacter>(_Instigator);
-
-	AActor* ActualDamageCauser = this;
-	AController* AttackerController = nullptr;
-	if (IsValid(Attacker))
-	{
-		AttackerController = Attacker->GetController();
-	}
+	AController* AttackerController = GetInstigator()->GetController();
 
 	const FVector ShotDir = (OtherActor->GetActorLocation() - GetActorLocation()).GetSafeNormal();
-	UGameplayStatics::ApplyPointDamage(OtherActor, _Damage, ShotDir, Hit, AttackerController, this, UDamageType::StaticClass()
-	);
-	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("ApplyDamage : %d"), _Damage));
+	UGameplayStatics::ApplyPointDamage(OtherActor, _Damage, ShotDir, Hit, AttackerController, this, UDamageType::StaticClass());
 	OnDamagedEnemy.Broadcast(Victim);
 	Destroy();
 }
@@ -140,16 +144,24 @@ void AProjectile::SetMovementSpeed(float speed)
 	_ProjectileMovement->Velocity = CurrentDir * speed;
 }
 
-void AProjectile::SetInstigator(AActor* instigator)
-{
-	if (instigator) _Instigator = instigator;
-}
-
 void AProjectile::SetDamage(float damage)
 {
 	if (0 < damage)
 	{
 		_Damage = damage;
 	}
+}
+
+void AProjectile::AddDamage(float damage)
+{
+	if (0 < damage)
+	{
+		_Damage += damage;
+	}
+}
+
+void AProjectile::SetHeadShotMultiplier(float value)
+{
+	if (value >= 0) _HeadShotMultiplier = value;
 }
 

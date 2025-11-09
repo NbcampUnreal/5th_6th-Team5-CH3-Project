@@ -5,9 +5,11 @@
 #include "InventoryWidget.generated.h"
 
 class UInventory;
-class UScrollBox;
+class UUniformGridPanel; 
 class UTextBlock;
-class UInventoryItemWidget;
+class UInventorySlotWidget;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInventoryItemClicked, UItemBase*, ClickedItem);
 
 UCLASS()
 class ROGUELIKEFPS_API UInventoryWidget : public UUserWidget
@@ -21,6 +23,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	void UpdateUI();
+
+	UFUNCTION()
+	void UpdateGoldUI(int32 NewGold);
+
+	UPROPERTY(BlueprintAssignable, Category = "Event")
+	FOnInventoryItemClicked OnItemClicked;
 	
 protected:
 
@@ -28,11 +36,17 @@ protected:
 	UInventory* Inventory;
 
 	UPROPERTY(meta = (BindWidget))
-	UScrollBox* ItemBox;
+	UUniformGridPanel* ItemGrid;
 
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* GoldText;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
-	TSubclassOf<UInventoryItemWidget> InventoryItemWidgetClass;
+	TSubclassOf<UInventorySlotWidget> InventorySlotWidgetClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
+	int32 Columns = 10;
+
+	UFUNCTION()
+	void HandleSlotClicked(UItemBase* ClickedItem);
 };
