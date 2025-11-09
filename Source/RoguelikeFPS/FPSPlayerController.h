@@ -9,7 +9,6 @@ class UInputAction;
 class UInventory;
 class UInventoryWidget;
 class UShopWidget;
-//class UTitleWidget;	//타이틀 테스트
 
 UCLASS()
 class ROGUELIKEFPS_API AFPSPlayerController : public APlayerController

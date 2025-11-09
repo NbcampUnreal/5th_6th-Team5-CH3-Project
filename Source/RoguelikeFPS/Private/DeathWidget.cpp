@@ -1,4 +1,5 @@
 #include "DeathWidget.h"
+#include "UIManager.h"
 #include "Components/Button.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerController.h"
@@ -6,65 +7,28 @@
 
 bool UDeathWidget::Initialize()
 {
-    if (!Super::Initialize())
-    {
-        return false;
-    }
-
-    if (RestartButton)
-    {
-        RestartButton->OnClicked.AddDynamic(this, &UDeathWidget::OnRestartClicked);
-    }
-
-    if (ExitButton)
-    {
-        ExitButton->OnClicked.AddDynamic(this, &UDeathWidget::OnExitClicked);
-    }
-
+    RestartButton->OnClicked.AddDynamic(this, &UDeathWidget::OnRestartClicked);
+    ExitButton->OnClicked.AddDynamic(this, &UDeathWidget::OnExitClicked);
     return true;
 }
 
 void UDeathWidget::OnRestartClicked()
 {
-    UWorld* World = GetWorld();
-    if (!World) return;
-
-    UGameDataInstance* GameInstance = Cast<UGameDataInstance>(UGameplayStatics::GetGameInstance(World));
-    if (GameInstance)
+    if (UGameDataInstance* GameData = Cast<UGameDataInstance>(GetGameInstance()))
     {
-        GameInstance->ResetGameStatsToLevelOne();
-    }
-
-    FString CurrentLevelName = UGameplayStatics::GetCurrentLevelName(World, true);
-    // OwningController가 유효하면 그 컨텍스트로, 아니면 World로 열기
-    if (OwningController)
-    {
-        UGameplayStatics::OpenLevel(OwningController, FName(*CurrentLevelName));
-    }
-    else
-    {
-        UGameplayStatics::OpenLevel(World, FName(*CurrentLevelName));
+        GameData->ResetGameStatsToLevelOne();
+        UGameplayStatics::OpenLevel(GetWorld(), GameData->StageLevelNames[0]);
     }
 }
 
 void UDeathWidget::OnExitClicked()
 {
-    UWorld* World = GetWorld();
-    if (!World) return;
-
-    UGameDataInstance* GameInstance = Cast<UGameDataInstance>(UGameplayStatics::GetGameInstance(World));
-    if (GameInstance)
+    if (UGameDataInstance* GameData = Cast<UGameDataInstance>(GetGameInstance()))
     {
-        GameInstance->ResetGameStatsToLevelOne();
-    }
-
-    // 메인 메뉴로 (L_MainMenu)
-    if (OwningController)
-    {
-        UGameplayStatics::OpenLevel(OwningController, TEXT("L_MainMenu"));
-    }
-    else
-    {
-        UGameplayStatics::OpenLevel(World, TEXT("L_MainMenu"));
+        GameData->ResetGameStatsToLevelOne();
+        if (UUIManager* UIManager = GetGameInstance()->GetSubsystem<UUIManager>())
+        {
+            UIManager->ShowTitleScreen();
+        }
     }
 }

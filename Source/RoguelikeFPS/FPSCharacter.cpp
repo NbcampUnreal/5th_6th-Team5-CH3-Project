@@ -4,13 +4,16 @@
 #include "EnhancedInputComponent.h"
 #include "FPSPlayerController.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "AugmentSystem.h"
 #include "AugmentWidget.h"
+#include "UIManager.h"
 #include "FPSGameMode.h"
+#include "StatsHUD.h"
+#include "Inventory.h"
 #include "Engine/DataTable.h"
 #include "Engine/Engine.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
-#include "Inventory.h"
 
 // GETTER 구현 (모두 헤더에 인라인으로 선언되어 있으므로 이 파일에 구현이 없습니다.)
 // int32 AFPSCharacter::GetLevel() { return Level; }
@@ -26,8 +29,8 @@ void AFPSCharacter::SetShield(int32 shield) { Shield = shield; }
 void AFPSCharacter::SetAttackSpeed(int32 attackSpeed) { AttackSpeed = attackSpeed; }
 void AFPSCharacter::SetMovingSpeed(int32 movingSpeed) { MovingSpeed = movingSpeed; }
 void AFPSCharacter::SetStamina(int32 stamina) { Stamina = stamina; }
-void AFPSCharacter::SetExperience(int32 experience) { Experience = experience; }
-void AFPSCharacter::SetMaxExperience(int32 maxExperience) { MaxExperience = maxExperience; }
+void AFPSCharacter::SetExperience(float experience) { Experience = experience; }
+void AFPSCharacter::SetMaxExperience(float maxExperience) { MaxExperience = maxExperience; }
 void AFPSCharacter::SetIsDashing(bool isdash) { bIsDashing = isdash; }
 
 
@@ -90,6 +93,7 @@ void AFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	{
 		if (TObjectPtr<AFPSPlayerController> PlayerController = Cast<AFPSPlayerController>(GetController()))
 		{
+			UE_LOG(LogTemp, Log, TEXT(" Action Check"));
 			if (PlayerController->MoveAction)
 			{
 				EnhancedInput->BindAction(
@@ -351,6 +355,7 @@ void AFPSCharacter::LevelUp()
 		UpdateHUDStats(TEXT("Attack"));
 		UpdateHUDStats(TEXT("Defence"));
 		UpdateHUDStats(TEXT("Experience"));
+		UpdateHUDStats(TEXT("Level"));
 		if (APlayerController* PC = Cast<APlayerController>(GetController()))
 		{
 			OnLevelUp.Broadcast(PC);
@@ -362,6 +367,16 @@ void AFPSCharacter::OnDeath(AController* KillerController)
 {
 	if (Health <= 0) bIsAlive = false;
 	OnPlayerDeath.Broadcast(KillerController);
+}
+
+void AFPSCharacter::OnUndead()
+{
+	Undead = true;
+}
+
+void AFPSCharacter::OffUndead()
+{
+	Undead = false;
 }
 
 float AFPSCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
@@ -379,68 +394,33 @@ float AFPSCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	return ActualDamage;
 }
 
-void AFPSCharacter::ApplyAugment(FName AugmentName)
+void AFPSCharacter::ApplyAugment(FName AugmentID)
 {
-	UE_LOG(LogTemp, Warning, TEXT("ApplyAugment called with: %s"), *AugmentName.ToString());
-	AFPSGameMode* GameMode = Cast<AFPSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
-	if (!GameMode || !GameMode->AugmentDataTable)
+	if (UAugmentSystem* AugmentSys = GetGameInstance()->GetSubsystem<UAugmentSystem>())
 	{
-		UE_LOG(LogTemp, Error, TEXT("증강 데이터 테이블을 찾을 수 없습니다!"));
-		return;
-	}
-	if (AppliedAugments.Contains(AugmentName))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("증강 %s 이미 적용됨!"), *AugmentName.ToString());
-		return;
-	}
-	FAugmentData* AugmentData = GameMode->AugmentDataTable->FindRow<FAugmentData>(AugmentName, TEXT(""));
-	if (AugmentData)
-	{
-		if (AugmentData->HealthBonus != 0)
+		FAugmentData* Data = AugmentSys->AugmentDataTable->FindRow<FAugmentData>(AugmentID, TEXT(""));
+		if (Data)
 		{
-			SetMaxHealth(GetMaxHealth() + AugmentData->HealthBonus);
-			SetHealth(GetHealth() + AugmentData->HealthBonus);
+			Health += Data->HealthBonus;
+			Attack += Data->DamageBonus;
+			AppliedAugments.AddUnique(AugmentID);
 			UpdateHUDStats(TEXT("Health"));
-		}
-		if (AugmentData->AttackBonus != 0)
-		{
-			SetAttack(GetAttack() + AugmentData->AttackBonus);
 			UpdateHUDStats(TEXT("Attack"));
+			UE_LOG(LogTemp, Log, TEXT("Applied Augment: %s, Health: %d, Attack: %d"),
+				*AugmentID.ToString(), Health, Attack);
 		}
-		if (AugmentData->DefenseBonus != 0)
+		else
 		{
-			SetDefence(GetDefence() + AugmentData->DefenseBonus);
-			UpdateHUDStats(TEXT("Defence"));
+			UE_LOG(LogTemp, Warning, TEXT("AugmentID %s not found in DataTable"), *AugmentID.ToString());
 		}
-		if (AugmentData->ShieldBonus != 0)
-		{
-			SetShield(GetShield() + AugmentData->ShieldBonus);
-			UpdateHUDStats(TEXT("Shield"));
-		}
-		if (AugmentData->AttackSpeedMultiplier != 1.0f)
-		{
-			SetAttackSpeed(GetAttackSpeed() * AugmentData->AttackSpeedMultiplier);
-			UpdateHUDStats(TEXT("AttackSpeed"));
-		}
-		if (AugmentData->MovingSpeedMultiplier != 1.0f)
-		{
-			SetMovingSpeed(GetMovingSpeed() * AugmentData->MovingSpeedMultiplier);
-			GetCharacterMovement()->MaxWalkSpeed = GetMovingSpeed();
-			UpdateHUDStats(TEXT("MovingSpeed"));
-		}
-		AppliedAugments.Add(AugmentName);
-		UE_LOG(LogTemp, Log, TEXT("증강 적용됨: %s"), *AugmentName.ToString());
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("증강 %s 데이터 테이블에서 찾을 수 없음!"), *AugmentName.ToString());
 	}
 }
 
 void AFPSCharacter::AddXP(float Amount)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Gained XP: %f"), Amount);
-	CurrentExperience += Amount;
+	Experience += Amount;
+	Experience = FMath::Clamp(Experience, 0.0f, MaxExperience);
 	UpdateHUDStats(TEXT("Experience"));
 	LevelUp();
 }
@@ -454,8 +434,77 @@ void AFPSCharacter::GainGold(int32 Amount)
 
 void AFPSCharacter::UpdateHUDStats(FName StatName)
 {
-	// HUD 업데이트를 위한 델리게이트 전파 (FOnHUDStatChangedSignature 사용)
-	OnHUDStatChanged.Broadcast(StatName);
+	if (UUIManager* UIManager = GetGameInstance()->GetSubsystem<UUIManager>())
+	{
+		if (UIManager->IsWidgetActive(UIManager->StatsHUDClass))
+		{
+			if (UStatsHUD* StatsHUD = Cast<UStatsHUD>(UIManager->ShowWidget(UIManager->StatsHUDClass, EUILayer::Background)))
+			{
+				if (StatName == TEXT("Level"))
+				{
+					FName FunctionName = TEXT("UpdateLevelText");
+					if (StatsHUD->FindFunction(FunctionName))
+					{
+						StatsHUD->ProcessEvent(StatsHUD->FindFunction(FunctionName), &Level);
+					}
+				}
+				else if (StatName == TEXT("Experience"))
+				{
+					FName FunctionName = TEXT("UpdateEXPProgress");
+					if (StatsHUD->FindFunction(FunctionName))
+					{
+						struct FEXPParams
+						{
+							float CurrentEXP;
+							float MaxEXP;
+						} Params{ Experience, MaxExperience };
+						StatsHUD->ProcessEvent(StatsHUD->FindFunction(FunctionName), &Params);
+					}
+				}
+				else if (StatName == TEXT("Health"))
+				{
+					FName FunctionName = TEXT("UpdateHealthText");
+					if (StatsHUD->FindFunction(FunctionName))
+					{
+						StatsHUD->ProcessEvent(StatsHUD->FindFunction(FunctionName), &Health);
+					}
+				}
+				else if (StatName == TEXT("Attack"))
+				{
+					FName FunctionName = TEXT("UpdateAttackText");
+					if (StatsHUD->FindFunction(FunctionName))
+					{
+						StatsHUD->ProcessEvent(StatsHUD->FindFunction(FunctionName), &Attack);
+					}
+				}
+				else if (StatName == TEXT("Skill1CooldownRemaining"))
+				{
+					FName FunctionName = TEXT("UpdateSkill1CooldownRemainingText");
+					if (StatsHUD->FindFunction(FunctionName))
+					{
+						StatsHUD->ProcessEvent(StatsHUD->FindFunction(FunctionName), &Skill1CooldownRemaining);
+					}
+				}
+				else if (StatName == TEXT("Skill2CooldownRemaining"))
+				{
+					FName FunctionName = TEXT("UpdateSkill2CooldownRemainingText");
+					if (StatsHUD->FindFunction(FunctionName))
+					{
+						StatsHUD->ProcessEvent(StatsHUD->FindFunction(FunctionName), &Skill2CooldownRemaining);
+					}
+				}
+				else if (StatName == TEXT("Gold"))
+				{
+					FName FunctionName = TEXT("UpdateGoldText");
+					if (StatsHUD->FindFunction(FunctionName))
+					{
+						StatsHUD->ProcessEvent(StatsHUD->FindFunction(FunctionName), &GoldAmount);
+					}
+				}
+				OnHUDStatChanged.Broadcast(StatName);
+			}
+		}
+	}
 }
 
 void AFPSCharacter::Tick(float DeltaTime)

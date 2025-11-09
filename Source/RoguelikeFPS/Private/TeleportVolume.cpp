@@ -4,6 +4,8 @@
 #include "TimerManager.h"
 #include "FPSCharacter.h"
 #include "Engine/World.h"
+#include "GameDataInstance.h"
+#include "FPSGameMode.h"
 #include "Engine/Engine.h"
 
 ATeleportVolume::ATeleportVolume()
@@ -52,14 +54,39 @@ void ATeleportVolume::TeleportPendingActor()
     AActor* ActorToTeleport = PendingTeleportActor.Get();
     if (!ActorToTeleport) return;
 
-    if (GEngine)
+    UGameDataInstance* GameData = Cast<UGameDataInstance>(GetGameInstance());
+    if (!GameData) return;
+
+    GameData->IncrementTeleportCount();
+
+    if (GameData->ShouldTriggerGameClear())
     {
-        GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, FString::Printf(TEXT("Teleporting to level: %s"), *NextLevelName.ToString()));
+        if (AFPSGameMode* GameMode = Cast<AFPSGameMode>(UGameplayStatics::GetGameMode(GetWorld())))
+        {
+            GameMode->SetGameState(EGameState::GameClear);
+        }
+        return;
     }
 
-    // 컨트롤러가 있다면 그 컨텍스트로 열고 아니라면 World로 열기
+    if (GEngine)
+    {
+        GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, FString::Printf(TEXT("레벨로 텔레포트: %s"), *NextLevelName.ToString()));
+    }
+
     UWorld* World = GetWorld();
     if (!World) return;
 
-    UGameplayStatics::OpenLevel(World, NextLevelName);
+    GameData->CurrentStageIndex++;
+    if (GameData->StageLevelNames.IsValidIndex(GameData->CurrentStageIndex))
+    {
+        UGameplayStatics::OpenLevel(World, GameData->StageLevelNames[GameData->CurrentStageIndex]);
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("더 이상 스테이지가 없습니다!"));
+        if (AFPSGameMode* GameMode = Cast<AFPSGameMode>(UGameplayStatics::GetGameMode(GetWorld())))
+        {
+            GameMode->SetGameState(EGameState::GameClear);
+        }
+    }
 }

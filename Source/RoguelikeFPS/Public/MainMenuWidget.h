@@ -1,47 +1,61 @@
 #pragma once
-
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/Button.h"
 #include "MainMenuWidget.generated.h"
 
 class UButton;
+class UGameDataInstance;
+class AFPSGameMode;
 
 UCLASS()
 class ROGUELIKEFPS_API UMainMenuWidget : public UUserWidget
 {
     GENERATED_BODY()
-
-protected:
+public:
     virtual bool Initialize() override;
 
-public:
-    // ===== 델리게이트 =====
-    DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnBackButtonClicked);
-    UPROPERTY(BlueprintAssignable, Category = "Events")
-    FOnBackButtonClicked OnBackButtonClicked;
+    UPROPERTY(meta = (BindWidget))
+    TObjectPtr<UButton> WeaponButton1;
 
-    // ===== 버튼 바인딩 =====
-    UPROPERTY(meta = (BindWidget)) TObjectPtr<UButton> Button_Weapon1;
-    UPROPERTY(meta = (BindWidget)) TObjectPtr<UButton> Button_Weapon2;
-    UPROPERTY(meta = (BindWidget)) TObjectPtr<UButton> Button_Weapon3;
-    UPROPERTY(meta = (BindWidget)) TObjectPtr<UButton> Button_Weapon4;
-    UPROPERTY(meta = (BindWidget)) TObjectPtr<UButton> Button_Start;
-    UPROPERTY(meta = (BindWidget)) TObjectPtr<UButton> Button_Exit;
+    UPROPERTY(meta = (BindWidget))
+    TObjectPtr<UButton> WeaponButton2;
+
+    UPROPERTY(meta = (BindWidget))
+    TObjectPtr<UButton> WeaponButton3;
+
+    UPROPERTY(meta = (BindWidget))  // 추가: 4번째 무기
+        TObjectPtr<UButton> WeaponButton4;
+
+    UPROPERTY(meta = (BindWidget))
+    TObjectPtr<UButton> StartGameButton;
+
+    UPROPERTY(meta = (BindWidget))  // 추가: Back 버튼
+        TObjectPtr<UButton> BacktoTitleButton;
 
 protected:
-    // ===== 무기 선택 핸들러 =====
-    UFUNCTION() void OnButtonWeapon1Clicked();
-    UFUNCTION() void OnButtonWeapon2Clicked();
-    UFUNCTION() void OnButtonWeapon3Clicked();
-    UFUNCTION() void OnButtonWeapon4Clicked();
+    UFUNCTION()
+    void OnWeapon1Selected();
 
-    // ===== 시작 / 종료 버튼 =====
-    UFUNCTION() void OnStartGameClicked();
-    UFUNCTION() void OnBackToTitleClicked();
+    UFUNCTION()
+    void OnWeapon2Selected();
 
-    // ===== 공통 선택 로직 =====
-    void HandleWeaponSelection(int32 WeaponIndex);
+    UFUNCTION()
+    void OnWeapon3Selected();
 
-    // 현재 선택된 무기 인덱스 캐시
-    int32 CurrentSelectedWeaponIndex = 0;
+    UFUNCTION()  // 추가: 4번째 무기 선택
+        void OnWeapon4Selected();
+
+    UFUNCTION()
+    void OnStartGameClicked();
+
+    UFUNCTION()  // 추가: Back 버튼 클릭
+        void OnBacktoTitleClicked();
+
+private:
+    UPROPERTY()
+    TObjectPtr<UGameDataInstance> GameDataInstance;
+
+    UPROPERTY()
+    TObjectPtr<AFPSGameMode> GameMode;
 };

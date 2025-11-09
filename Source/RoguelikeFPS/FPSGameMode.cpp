@@ -1,51 +1,42 @@
 #include "FPSGameMode.h"
-#include "FPSCharacter.h"
-#include "StatsComponent.h"
+#include "UIManager.h"
+#include "AugmentSystem.h"
 #include "AugmentWidget.h"
-#include "TitleWidget.h"
-#include "MainMenuWidget.h"
+#include "FPSPlayerController.h"
+#include "FPSCharacter.h"
 #include "GameDataInstance.h"
-#include "Kismet/KismetMathLibrary.h"
+#include "Inventory.h"
 #include "Kismet/GameplayStatics.h"
-#include "Kismet/KismetSystemLibrary.h"
-#include "GameFramework/PlayerController.h"
-#include "Engine/Engine.h"
+#include <StatsHUD.h>
 
-AFPSGameMode::AFPSGameMode(const FObjectInitializer& ObjectInitializer)
-    : Super(ObjectInitializer)
+AFPSGameMode::AFPSGameMode()
 {
-    static ConstructorHelpers::FObjectFinder<UDataTable> AugmentDataTableFinder(TEXT("/Game/Data/DT_Augments.DT_Augments"));
-    if (AugmentDataTableFinder.Succeeded())
-    {
-        AugmentDataTable = AugmentDataTableFinder.Object;
-    }
-    // 기본 가중치 설정
-    RarityWeights.Add(EAugmentRarity::Normal, 0.50f);
-    RarityWeights.Add(EAugmentRarity::Rare, 0.30f);
-    RarityWeights.Add(EAugmentRarity::Epic, 0.15f);
-    RarityWeights.Add(EAugmentRarity::Legendary, 0.05f);
+    UE_LOG(LogTemp, Log, TEXT("AFPSGameMode Constructor Called"));
+    CurrentGameState = EGameState::MainMenu;
 }
 
 void AFPSGameMode::BeginPlay()
 {
     Super::BeginPlay();
-    if (TitleWidgetClass)
+    if (UGameDataInstance* GameData = Cast<UGameDataInstance>(GetGameInstance()))
     {
-        TitleWidgetInstance = CreateWidget<UTitleWidget>(GetWorld(), TitleWidgetClass);
-        if (TitleWidgetInstance)
+        UE_LOG(LogTemp, Log, TEXT("bGameStarted: %d"), GameData->bGameStarted); // 수정: 형식 문자열
+        if (!GameData->bGameStarted)
         {
-            TitleWidgetInstance->AddToViewport();
-            if (MainMenuWidgetClass)
-            {
-                TitleWidgetInstance->MainMenuWidgetClass = MainMenuWidgetClass;
-            }
-            APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-            if (PC)
-            {
-                PC->bShowMouseCursor = true;
-                PC->SetInputMode(FInputModeUIOnly());
-            }
+            SetGameState(EGameState::MainMenu);
+            GameData->TeleportCount = 0;
+            UE_LOG(LogTemp, Log, TEXT("FPSGameMode: Main"));
         }
+        else
+        {
+            SetGameState(EGameState::Playing);
+            UE_LOG(LogTemp, Log, TEXT("FPSGameMode: Play Setting"));
+        }
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("GameDataInstance null"));
+        SetGameState(EGameState::MainMenu);
     }
 }
 
@@ -53,181 +44,98 @@ void AFPSGameMode::PostLogin(APlayerController* NewPlayer)
 {
     Super::PostLogin(NewPlayer);
     if (!NewPlayer || !NewPlayer->GetPawn()) return;
+
     if (AFPSCharacter* FPSChar = Cast<AFPSCharacter>(NewPlayer->GetPawn()))
     {
+        UE_LOG(LogTemp, Log, TEXT("HandlePlaterLevelUp"));
         FPSChar->OnLevelUp.AddDynamic(this, &AFPSGameMode::HandlePlayerLevelUp);
         FPSChar->OnPlayerDeath.AddDynamic(this, &AFPSGameMode::HandlePlayerDeath);
-    }
-}
 
-void AFPSGameMode::OnTitleStartClicked()
-{
-    if (TitleWidgetInstance)
-    {
-        TitleWidgetInstance->RemoveFromParent();
-        TitleWidgetInstance = nullptr;
-    }
-    if (MainMenuWidgetClass)
-    {
-        MainMenuWidgetInstance = CreateWidget<UMainMenuWidget>(GetWorld(), MainMenuWidgetClass);
-        if (MainMenuWidgetInstance)
+        if (UUIManager* UIMgr = GetGameInstance()->GetSubsystem<UUIManager>())
         {
-            MainMenuWidgetInstance->AddToViewport();
-            APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-            if (PC)
+            if (UUserWidget* HUDWidget = UIMgr->ShowWidget(StatsHUDClass, EUILayer::Background))
             {
-                PC->bShowMouseCursor = true;
-                PC->SetInputMode(FInputModeUIOnly());
+                if (UStatsHUD* StatsHUD = Cast<UStatsHUD>(HUDWidget))
+                {
+                    StatsHUD->SetOwningCharacter(FPSChar);  // 핵심: 캐릭터 이벤트 바인딩
+                }
             }
         }
     }
 }
 
-void AFPSGameMode::OnMainMenuBackClicked()
+void AFPSGameMode::SetGameState(EGameState NewState)
 {
-    if (MainMenuWidgetInstance)
+    UUIManager* UIManagerRef = GetGameInstance()->GetSubsystem<UUIManager>();
+    if (!UIManagerRef)
     {
-        MainMenuWidgetInstance->RemoveFromParent();
-        MainMenuWidgetInstance = nullptr;
+        UE_LOG(LogTemp, Warning, TEXT("UIManager가 null입니다!"));
+        return;
     }
-    if (TitleWidgetClass)
-    {
-        TitleWidgetInstance = CreateWidget<UTitleWidget>(GetWorld(), TitleWidgetClass);
-        if (TitleWidgetInstance)
-        {
-            TitleWidgetInstance->AddToViewport();
-            APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-            if (PC)
-            {
-                PC->bShowMouseCursor = true;
-                PC->SetInputMode(FInputModeUIOnly());
-            }
-        }
-    }
-}
 
-void AFPSGameMode::OnMainMenuStartClicked()
-{
     APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-    if (PC)
+    switch (NewState)
     {
-        PC->bShowMouseCursor = false;
-        PC->SetInputMode(FInputModeGameOnly());
-    }
-    UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(GetWorld());
-    FName NextLevelName = TEXT("L_GameMap01");
-    if (UGameDataInstance* GameDataInstance = Cast<UGameDataInstance>(GameInstance))
-    {
-        if (GameDataInstance->CurrentStageIndex >= 1 &&
-            GameDataInstance->CurrentStageIndex <= GameDataInstance->StageLevelNames.Num())
-        {
-            NextLevelName = GameDataInstance->StageLevelNames[GameDataInstance->CurrentStageIndex - 1];
-            GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Yellow,
-                FString::Printf(TEXT("Opening Level: %s (Stage Index: %d)"), *NextLevelName.ToString(), GameDataInstance->CurrentStageIndex));
-            GameDataInstance->CurrentStageIndex++;
-        }
-        else
-        {
-            GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red,
-                FString::Printf(TEXT("Error: CurrentStageIndex %d out of bounds for StageLevelNames array size %d. Using fallback."),
-                    GameDataInstance->CurrentStageIndex, GameDataInstance->StageLevelNames.Num()));
-        }
-    }
-    UGameplayStatics::OpenLevel(GetWorld(), NextLevelName);
-}
-
-void AFPSGameMode::CloseCurrentUIAndResumeGame(bool bResumeGameInput)
-{
-    APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-    if (PC)
-    {
-        for (TObjectIterator<UUserWidget> It; It; ++It)
-        {
-            if (It->IsInViewport())
-            {
-                It->RemoveFromParent();
-            }
-        }
-        if (bResumeGameInput)
-        {
-            PC->SetInputMode(FInputModeGameOnly());
-            PC->bShowMouseCursor = false;
-        }
-        else
-        {
-            FInputModeUIOnly InputMode;
-            PC->SetInputMode(InputMode);
-            PC->bShowMouseCursor = true;
-        }
-        PC->SetPause(false);
+    case EGameState::MainMenu:
+        UIManagerRef->ShowTitleScreen();
+        UIManagerRef->SetInputModeUI();
+        break;
+    case EGameState::Playing:
+        UIManagerRef->HideAllWidgetsExceptLayer(EUILayer::Background);
+        UIManagerRef->ShowWidget(StatsHUDClass, EUILayer::Background);
+        UIManagerRef->SetInputModeGame();
+        if (PC) PC->SetPause(false);
+        break;
+    case EGameState::LevelUp:
+        if (PC) HandlePlayerLevelUp(PC);
+        break;
+    case EGameState::GameOver:
+        UIManagerRef->ShowWidget(UIManagerRef->DeathWidgetClass, EUILayer::Modal);
+        UIManagerRef->SetInputModeUI();
+        if (PC) PC->SetPause(true);
+        break;
+    case EGameState::GameClear:
+        UIManagerRef->ShowWidget(UIManagerRef->GameClearWidgetClass, EUILayer::Modal);
+        UIManagerRef->SetInputModeUI();
+        if (PC) PC->SetPause(true);
+        break;
+    case EGameState::Paused:
+        if (PC) PC->SetPause(true);
+        break;
     }
 }
 
 void AFPSGameMode::HandlePlayerLevelUp(APlayerController* PlayerController)
 {
-    if (!PlayerController || !AugmentWidgetClass || !AugmentDataTable) return;
-
+    if (!PlayerController) return;
     PlayerController->SetPause(true);
-    FInputModeUIOnly InputMode;
-    PlayerController->SetInputMode(InputMode);
-    PlayerController->bShowMouseCursor = true;
 
-    TArray<FAugmentData*> AllAugments;
-    AugmentDataTable->GetAllRows(TEXT(""), AllAugments);
-    TArray<FAugmentData> SelectedAugments;
-
-    if (AllAugments.Num() > 0)
+    UUIManager* UIManagerRef = GetGameInstance()->GetSubsystem<UUIManager>();
+    if (UIManagerRef)
     {
-        for (int32 i = 0; i < 3 && AllAugments.Num() > 0; ++i)
+        if (UAugmentSystem* AugmentSys = GetGameInstance()->GetSubsystem<UAugmentSystem>())
         {
-            float TotalWeight = 0.0f;
-            TArray<FAugmentData*> WeightedAugments;
-
-            for (FAugmentData* Augment : AllAugments)
+            TArray<FAugmentData> Augments = AugmentSys->GetRandomAugments(3);
+            if (UIManagerRef->AugmentWidgetClass)
             {
-                float Weight = RarityWeights.FindRef(Augment->Rarity);
-                TotalWeight += Weight;
-                for (int32 j = 0; j < Weight * 100; ++j)
+                UAugmentWidget* AugmentWidget = Cast<UAugmentWidget>(
+                    UIManagerRef->ShowWidget(UIManagerRef->AugmentWidgetClass, EUILayer::Modal));
+                if (AugmentWidget)
                 {
-                    WeightedAugments.Add(Augment);
+                    AFPSCharacter* Character = Cast<AFPSCharacter>(PlayerController->GetPawn());
+                    if (Character)
+                    {
+                        AugmentWidget->Setup(Character, Augments);
+                        UIManagerRef->SetInputModeUI();
+                    }
                 }
             }
-
-            int32 RandomIndex = FMath::RandRange(0, WeightedAugments.Num() - 1);
-            FAugmentData* Selected = WeightedAugments[RandomIndex];
-            SelectedAugments.Add(*Selected);
-            AllAugments.Remove(Selected);
-        }
-    }
-
-    UAugmentWidget* AugmentWidget = CreateWidget<UAugmentWidget>(PlayerController, AugmentWidgetClass);
-    if (AugmentWidget)
-    {
-        AFPSCharacter* Character = Cast<AFPSCharacter>(PlayerController->GetPawn());
-        if (Character)
-        {
-            AugmentWidget->Setup(Character, SelectedAugments);
-            AugmentWidget->AddToViewport();
-            UKismetSystemLibrary::PrintString(GetWorld(), TEXT("증강 선택 화면이 열렸습니다."), true, true, FColor::Orange, 10.f);
         }
     }
 }
 
 void AFPSGameMode::HandlePlayerDeath(AController* KillerController)
 {
-    UKismetSystemLibrary::PrintString(GetWorld(), TEXT("GAME OVER!"), true, true, FColor::Red, 10.f);
-    FName MenuLevelName = TEXT("L_MainMenu");
-    UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(GetWorld());
-    if (UGameDataInstance* GameDataInstance = Cast<UGameDataInstance>(GameInstance))
-    {
-        MenuLevelName = GameDataInstance->MainMenuLevelName;
-        GameDataInstance->ResetGameStatsToLevelOne();
-    }
-    if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
-    {
-        PC->SetPause(true);
-        PC->bShowMouseCursor = true;
-        PC->SetInputMode(FInputModeUIOnly());
-    }
-    UGameplayStatics::OpenLevel(GetWorld(), MenuLevelName);
+    SetGameState(EGameState::GameOver);
 }
+

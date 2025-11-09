@@ -1,103 +1,123 @@
 #include "MainMenuWidget.h"
-#include "Components/Button.h"
-#include "FPSGameMode.h"
-#include "Kismet/GameplayStatics.h"
-#include "Kismet/KismetSystemLibrary.h"
 #include "GameDataInstance.h"
+#include "FPSGameMode.h"
+#include "UIManager.h"
+#include "Kismet/GameplayStatics.h"
+#include "GameFramework/PlayerController.h"
 
 bool UMainMenuWidget::Initialize()
 {
-    if (!Super::Initialize())
-        return false;
+    if (!Super::Initialize()) return false;
 
-    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Cyan, TEXT("MainMenuWidget Initialized."));
+    if (WeaponButton1)
+        WeaponButton1->OnClicked.AddDynamic(this, &UMainMenuWidget::OnWeapon1Selected);
+    if (WeaponButton2)
+        WeaponButton2->OnClicked.AddDynamic(this, &UMainMenuWidget::OnWeapon2Selected);
+    if (WeaponButton3)
+        WeaponButton3->OnClicked.AddDynamic(this, &UMainMenuWidget::OnWeapon3Selected);
+    if (WeaponButton4)
+        WeaponButton4->OnClicked.AddDynamic(this, &UMainMenuWidget::OnWeapon4Selected);
+    if (StartGameButton)
+        StartGameButton->OnClicked.AddDynamic(this, &UMainMenuWidget::OnStartGameClicked);
+    if (BacktoTitleButton)
+        BacktoTitleButton->OnClicked.AddDynamic(this, &UMainMenuWidget::OnBacktoTitleClicked);
 
-    // 버튼 클릭 이벤트 바인딩
-    if (Button_Weapon1) Button_Weapon1->OnClicked.AddDynamic(this, &UMainMenuWidget::OnButtonWeapon1Clicked);
-    if (Button_Weapon2) Button_Weapon2->OnClicked.AddDynamic(this, &UMainMenuWidget::OnButtonWeapon2Clicked);
-    if (Button_Weapon3) Button_Weapon3->OnClicked.AddDynamic(this, &UMainMenuWidget::OnButtonWeapon3Clicked);
-    if (Button_Weapon4) Button_Weapon4->OnClicked.AddDynamic(this, &UMainMenuWidget::OnButtonWeapon4Clicked);
+    GameDataInstance = Cast<UGameDataInstance>(GetGameInstance());
+    GameMode = Cast<AFPSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 
-    if (Button_Start) Button_Start->OnClicked.AddDynamic(this, &UMainMenuWidget::OnStartGameClicked);
-    if (Button_Exit) Button_Exit->OnClicked.AddDynamic(this, &UMainMenuWidget::OnBackToTitleClicked);
-
-    // 시작 시 Start 버튼 비활성화 (무기 선택 전)
-    if (Button_Start)
-        Button_Start->SetIsEnabled(false);
+    if (StartGameButton)
+    {
+        StartGameButton->SetIsEnabled(false);
+    }
+    if (GameDataInstance)
+    {
+        GameDataInstance->IsWeaponSelected = false;
+        GameDataInstance->SelectedWeaponIndex = -1;
+    }
 
     return true;
 }
 
-//  무기 선택 래퍼 
-void UMainMenuWidget::OnButtonWeapon1Clicked() { HandleWeaponSelection(1); }
-void UMainMenuWidget::OnButtonWeapon2Clicked() { HandleWeaponSelection(2); }
-void UMainMenuWidget::OnButtonWeapon3Clicked() { HandleWeaponSelection(3); }
-void UMainMenuWidget::OnButtonWeapon4Clicked() { HandleWeaponSelection(4); }
-
-// 공통 무기 선택 로직 
-void UMainMenuWidget::HandleWeaponSelection(int32 WeaponIndex)
+void UMainMenuWidget::OnWeapon1Selected()
 {
-    UGameDataInstance* GameInstance = Cast<UGameDataInstance>(GetGameInstance());
-
-    if (!GameInstance)
+    if (GameDataInstance)
     {
-        // 오류 메시지를 더 명확하게 변경
-        GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red,
-            TEXT("ERROR: GetGameInstance() is NOT UGameDataInstance! Check Project Settings -> Maps & Modes."));
-
-        // 이 시점에서 Start 버튼 활성화/비활성화가 무의미해지므로 종료
-        if (Button_Start) Button_Start->SetIsEnabled(false);
-        CurrentSelectedWeaponIndex = 0; // 안전하게 초기화
-        return;
+        GameDataInstance->SelectedWeaponIndex = 0;
+        GameDataInstance->IsWeaponSelected = true;
+        if (StartGameButton)
+            StartGameButton->SetIsEnabled(true);
+        UE_LOG(LogTemp, Log, TEXT("w1"));
     }
-
-    // 같은 무기를 다시 누르면 선택 해제
-    if (CurrentSelectedWeaponIndex == WeaponIndex)
-    {
-        CurrentSelectedWeaponIndex = 0;
-        GameInstance->SetSelectedOption(0);
-        GameInstance->bIsReadyToStart = false;
-        GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, TEXT("Weapon Deselected"));
-    }
-    else
-    {
-        CurrentSelectedWeaponIndex = WeaponIndex;
-        GameInstance->SetSelectedOption(WeaponIndex);
-        GameInstance->bIsReadyToStart = true;
-        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green,
-            FString::Printf(TEXT("Weapon Selected: %d"), WeaponIndex));
-    }
-    // Start 버튼 활성화 / 비활성화
-    if (Button_Start)
-        Button_Start->SetIsEnabled(GameInstance->bIsReadyToStart);
 }
 
-// ===================== 게임 시작 버튼 ===================== //
+void UMainMenuWidget::OnWeapon2Selected()
+{
+    if (GameDataInstance)
+    {
+        GameDataInstance->SelectedWeaponIndex = 1;
+        GameDataInstance->IsWeaponSelected = true;
+        if (StartGameButton)
+            StartGameButton->SetIsEnabled(true);
+        UE_LOG(LogTemp, Log, TEXT("w2"));
+    }
+}
+
+void UMainMenuWidget::OnWeapon3Selected()
+{
+    if (GameDataInstance)
+    {
+        GameDataInstance->SelectedWeaponIndex = 2;
+        GameDataInstance->IsWeaponSelected = true;
+        if (StartGameButton)
+            StartGameButton->SetIsEnabled(true);
+        UE_LOG(LogTemp, Log, TEXT("w3"));
+    }
+}
+
+void UMainMenuWidget::OnWeapon4Selected()
+{
+    if (GameDataInstance)
+    {
+        GameDataInstance->SelectedWeaponIndex = 3;
+        GameDataInstance->IsWeaponSelected = true;
+        if (StartGameButton)
+            StartGameButton->SetIsEnabled(true);
+        UE_LOG(LogTemp, Log, TEXT("w4"));
+    }
+}
+
 void UMainMenuWidget::OnStartGameClicked()
 {
-    UGameDataInstance* GameInstance = Cast<UGameDataInstance>(GetGameInstance());
-    if (!GameInstance || !GameInstance->bIsReadyToStart)
+    if (GameDataInstance && GameDataInstance->IsWeaponSelected)
     {
-        GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, TEXT("Cannot start game"));
-        return;
-    }
-
-    RemoveFromParent();
-    UGameplayStatics::OpenLevel(GetWorld(), TEXT("L_Map1"));
-}
-
-// ===================== 뒤로가기 버튼 ===================== //
-void UMainMenuWidget::OnBackToTitleClicked()
-{
-    RemoveFromParent();
-    UGameDataInstance* GameInstance = Cast<UGameDataInstance>(GetGameInstance());
-    AFPSGameMode* FPSGameMode = Cast<AFPSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
-    if (FPSGameMode)
-    {
-        FPSGameMode->OnMainMenuBackClicked();
+        GameDataInstance->bGameStarted = true;
+        GameDataInstance->CurrentStageIndex = 0;
+        if (GameMode)
+        {
+            GameMode->SetGameState(EGameState::Playing);
+        }
+        if (UUIManager* UIManager = GetGameInstance()->GetSubsystem<UUIManager>())
+        {
+            UIManager->HideAllWidgetsExceptLayer(EUILayer::Background);
+            UIManager->SetInputModeGame();
+        }
+        UGameplayStatics::OpenLevel(GetWorld(), GameDataInstance->StageLevelNames[0]);
     }
     else
     {
-        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("GameMode Cast Failed in MainMenuWidget::OnBackToTitleClicked"));
+        UE_LOG(LogTemp, Warning, TEXT("무기가 선택되지 않았습니다!"));
+    }
+}
+
+void UMainMenuWidget::OnBacktoTitleClicked()
+{
+    if (UUIManager* UIManager = GetGameInstance()->GetSubsystem<UUIManager>())
+    {
+        UIManager->ShowTitleScreen();
+    }
+    if (GameDataInstance)
+    {
+        GameDataInstance->IsWeaponSelected = false;
+        GameDataInstance->SelectedWeaponIndex = -1;
     }
 }

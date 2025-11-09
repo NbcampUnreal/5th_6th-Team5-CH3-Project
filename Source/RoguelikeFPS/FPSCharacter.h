@@ -1,6 +1,9 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "InputActionValue.h"
+#include "EnhancedInputComponent.h"
+#include "Inventory.h"
 #include "FPSCharacter.generated.h"
 
 class USpringArmComponent;
@@ -22,7 +25,7 @@ public:
     UFUNCTION(BlueprintCallable)
     void AddXP(float Amount);
     UFUNCTION(BlueprintCallable, Category = "Augment")
-    void ApplyAugment(FName AugmentName);
+    void ApplyAugment(FName AugmentID);
     UFUNCTION(BlueprintCallable)
     void UpdateHUDStats(FName StatName);
     UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
@@ -48,11 +51,9 @@ public:
     int32 GetMovingSpeed() const { return MovingSpeed; }
     int32 GetDashSpeed() const { return DashSpeed; }
     int32 GetStamina() const { return Stamina; }
-    int32 GetExperience() const { return Experience; }
-    int32 GetMaxExperience() const { return MaxExperience; }
+    float GetExperience() const { return Experience; }
+    float GetMaxExperience() const { return MaxExperience; }
     FName GetCurrentWeaponName() const { return CurrentWeaponName; }
-    int32 GetCurrentAmmo() const { return CurrentAmmo; }
-    int32 GetMaxAmmo() const { return MaxAmmo; }
     float GetSkill1CooldownRemaining() const { return Skill1CooldownRemaining; }
     float GetSkill2CooldownRemaining() const { return Skill2CooldownRemaining; }
     int32 GetGoldAmount() const { return GoldAmount; }
@@ -77,11 +78,25 @@ public:
     UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
     void SetStamina(int32 stamina);
     UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
-    void SetExperience(int32 experience);
+    void SetExperience(float experience);
     UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
-    void SetMaxExperience(int32 maxExperience);
+    void SetMaxExperience(float maxExperience);
     UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
     void SetIsDashing(bool isdash);
+
+    // 무적 상태변수
+    bool Undead = false;
+
+    // 무적 지속 시간
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Undead")
+    float UndeadTime = 3.0f;
+
+    FTimerHandle UndeadTimeHandle;
+
+    // 무적 함수
+    void OnUndead();
+    void OffUndead();
+    void OnUndeadTime(float duration);
 
 protected:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
@@ -106,19 +121,13 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
     int32 Stamina;
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
-    int32 Experience;
+    float Experience;
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
-    int32 MaxExperience;
+    float MaxExperience;
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
     bool bIsAlive;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterStatus")
     int32 GoldAmount = 100;
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterStatus")
-    int32 CurrentAmmo = 30;
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterStatus")
-    int32 MaxAmmo = 300;
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterStatus")
-    float CurrentExperience = 0.0f;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Skills")
     float Skill1CooldownRemaining = 0.0f;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Skills")
@@ -190,4 +199,5 @@ protected:
 
     virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
     virtual void Tick(float DeltaTime) override;
+
 };

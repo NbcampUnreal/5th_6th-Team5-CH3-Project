@@ -7,7 +7,6 @@
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
 #include "Blueprint/UserWidget.h"
-//#include "TitleWidget.h"
 
 AFPSPlayerController::AFPSPlayerController()
 	: InputMappingContext(nullptr),
@@ -22,7 +21,6 @@ AFPSPlayerController::AFPSPlayerController()
 	IA_InventoryOnOff(nullptr),
 	InventoryWidget(nullptr),
 	ShopWidget(nullptr)
-	//,TitleWidgetClass(nullptr) // Title Ãß°¡
 
 {
 }

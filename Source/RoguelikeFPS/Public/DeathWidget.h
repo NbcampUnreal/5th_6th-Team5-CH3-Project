@@ -15,24 +15,18 @@ class ROGUELIKEFPS_API UDeathWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
-    // UI 버튼을 UMG 디자이너에서 변수 이름으로 연결하기 위한 BindWidget
-    UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UButton> RestartButton;
+    UFUNCTION(BlueprintCallable, Category = "UI")
+    void OnRestartClicked();
+
+    UFUNCTION(BlueprintCallable, Category = "UI")
+    void OnExitClicked();
 
     UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UButton> ExitButton;
+    class UButton* RestartButton;
 
-    // 이 위젯을 소유하는 컨트롤러 포인터 (클릭 이벤트 처리용)
-    UPROPERTY(BlueprintReadOnly)
-    TObjectPtr<APlayerController> OwningController;
+    UPROPERTY(meta = (BindWidget))
+    class UButton* ExitButton;
 
 protected:
     virtual bool Initialize() override;
-
-private:
-    UFUNCTION()
-    void OnRestartClicked();
-
-    UFUNCTION()
-    void OnExitClicked();
 };
