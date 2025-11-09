@@ -1,4 +1,4 @@
-#include "FPSCharacter.h"
+ï»¿#include "FPSCharacter.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputComponent.h"
@@ -12,11 +12,11 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Inventory.h"
 
-// GETTER ±¸Çö (¸ğµÎ Çì´õ¿¡ ÀÎ¶óÀÎÀ¸·Î ¼±¾ğµÇ¾î ÀÖÀ¸¹Ç·Î ÀÌ ÆÄÀÏ¿¡ ±¸ÇöÀÌ ¾ø½À´Ï´Ù.)
+// GETTER êµ¬í˜„ (ëª¨ë‘ í—¤ë”ì— ì¸ë¼ì¸ìœ¼ë¡œ ì„ ì–¸ë˜ì–´ ìˆìœ¼ë¯€ë¡œ ì´ íŒŒì¼ì— êµ¬í˜„ì´ ì—†ìŠµë‹ˆë‹¤.)
 // int32 AFPSCharacter::GetLevel() { return Level; }
-// ... µî
+// ... ë“±
 
-// SETTER IMPLEMENTATIONS (Çì´õ¿¡ ÀÎ¶óÀÎÀ¸·Î ¼±¾ğµÇ¾î ÀÖÀ¸¹Ç·Î ÀÌ ÆÄÀÏ¿¡ ±¸ÇöÀÌ ¾ø½À´Ï´Ù.)
+// SETTER IMPLEMENTATIONS (í—¤ë”ì— ì¸ë¼ì¸ìœ¼ë¡œ ì„ ì–¸ë˜ì–´ ìˆìœ¼ë¯€ë¡œ ì´ íŒŒì¼ì— êµ¬í˜„ì´ ì—†ìŠµë‹ˆë‹¤.)
 void AFPSCharacter::SetLevel(int32 level) { Level = level; }
 void AFPSCharacter::SetHealth(int32 health) { Health = health; }
 void AFPSCharacter::SetMaxHealth(int32 maxHealth) { MaxHealth = maxHealth; }
@@ -30,7 +30,7 @@ void AFPSCharacter::SetExperience(int32 experience) { Experience = experience; }
 void AFPSCharacter::SetMaxExperience(int32 maxExperience) { MaxExperience = maxExperience; }
 
 // CONSTRUCTOR
-AFPSCharacter::AFPSCharacter()		// ÃÊ±â ¼³Á¤
+AFPSCharacter::AFPSCharacter()		// ì´ˆê¸° ì„¤ì •
 	: Level(1),
 	Health(100),
 	MaxHealth(100),
@@ -42,9 +42,9 @@ AFPSCharacter::AFPSCharacter()		// ÃÊ±â ¼³Á¤
 	Experience(0),
 	MaxExperience(100),
 	bIsAlive(true),
-	Shield(100) // Shield ÃÊ±â°ª ¼³Á¤
+	Shield(100) // Shield ì´ˆê¸°ê°’ ì„¤ì •
 {
-	// ¡Ú¡Ú¡Ú Tick »ç¿ëÀ» À§ÇØ true·Î º¯°æ (Äğ´Ù¿î µî¿¡ ÇÊ¿ä) ¡Ú¡Ú¡Ú
+	// â˜…â˜…â˜… Tick ì‚¬ìš©ì„ ìœ„í•´ trueë¡œ ë³€ê²½ (ì¿¨ë‹¤ìš´ ë“±ì— í•„ìš”) â˜…â˜…â˜…
 	PrimaryActorTick.bCanEverTick = true;
 
 
@@ -341,7 +341,7 @@ void AFPSCharacter::LevelUp()
 		Attack += 3;
 		Defence += 3;
 		Experience = 0;
-		MaxExperience *= 1.2f; // ´ÙÀ½ ·¹º§ ¿ä±¸ °æÇèÄ¡ Áõ°¡
+		MaxExperience *= 1.2f; // ë‹¤ìŒ ë ˆë²¨ ìš”êµ¬ ê²½í—˜ì¹˜ ì¦ê°€
 		UpdateHUDStats(TEXT("Health"));
 		UpdateHUDStats(TEXT("Attack"));
 		UpdateHUDStats(TEXT("Defence"));
@@ -380,12 +380,12 @@ void AFPSCharacter::ApplyAugment(FName AugmentName)
 	AFPSGameMode* GameMode = Cast<AFPSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 	if (!GameMode || !GameMode->AugmentDataTable)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Áõ°­ µ¥ÀÌÅÍ Å×ÀÌºíÀ» Ã£À» ¼ö ¾ø½À´Ï´Ù!"));
+		UE_LOG(LogTemp, Error, TEXT("ì¦ê°• ë°ì´í„° í…Œì´ë¸”ì„ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤!"));
 		return;
 	}
 	if (AppliedAugments.Contains(AugmentName))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Áõ°­ %s ÀÌ¹Ì Àû¿ëµÊ!"), *AugmentName.ToString());
+		UE_LOG(LogTemp, Warning, TEXT("ì¦ê°• %s ì´ë¯¸ ì ìš©ë¨!"), *AugmentName.ToString());
 		return;
 	}
 	FAugmentData* AugmentData = GameMode->AugmentDataTable->FindRow<FAugmentData>(AugmentName, TEXT(""));
@@ -424,18 +424,18 @@ void AFPSCharacter::ApplyAugment(FName AugmentName)
 			UpdateHUDStats(TEXT("MovingSpeed"));
 		}
 		AppliedAugments.Add(AugmentName);
-		UE_LOG(LogTemp, Log, TEXT("Áõ°­ Àû¿ëµÊ: %s"), *AugmentName.ToString());
+		UE_LOG(LogTemp, Log, TEXT("ì¦ê°• ì ìš©ë¨: %s"), *AugmentName.ToString());
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("Áõ°­ %s µ¥ÀÌÅÍ Å×ÀÌºí¿¡¼­ Ã£À» ¼ö ¾øÀ½!"), *AugmentName.ToString());
+		UE_LOG(LogTemp, Error, TEXT("ì¦ê°• %s ë°ì´í„° í…Œì´ë¸”ì—ì„œ ì°¾ì„ ìˆ˜ ì—†ìŒ!"), *AugmentName.ToString());
 	}
 }
 
 void AFPSCharacter::AddXP(float Amount)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Gained XP: %f"), Amount);
-	CurrentExperience += Amount;
+	Experience += Amount;
 	UpdateHUDStats(TEXT("Experience"));
 	LevelUp();
 }
@@ -443,21 +443,21 @@ void AFPSCharacter::AddXP(float Amount)
 void AFPSCharacter::GainGold(int32 Amount)
 {
 	GoldAmount += Amount;
-	// °ñµå º¯°æ ½Ã HUD ¾÷µ¥ÀÌÆ® ½ÅÈ£ Àü¼Û
+	// ê³¨ë“œ ë³€ê²½ ì‹œ HUD ì—…ë°ì´íŠ¸ ì‹ í˜¸ ì „ì†¡
 	UpdateHUDStats(TEXT("Gold"));
 }
 
 void AFPSCharacter::UpdateHUDStats(FName StatName)
 {
-	// HUD ¾÷µ¥ÀÌÆ®¸¦ À§ÇÑ µ¨¸®°ÔÀÌÆ® ÀüÆÄ (FOnHUDStatChangedSignature »ç¿ë)
+	// HUD ì—…ë°ì´íŠ¸ë¥¼ ìœ„í•œ ë¸ë¦¬ê²Œì´íŠ¸ ì „íŒŒ (FOnHUDStatChangedSignature ì‚¬ìš©)
 	OnHUDStatChanged.Broadcast(StatName);
 }
 
 void AFPSCharacter::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime); // TickÀ» »ç¿ëÇÏ·Á¸é »ı¼ºÀÚ¿¡¼­ PrimaryActorTick.bCanEverTick = true; ·Î º¯°æÇØ¾ß ÇÔ
+	Super::Tick(DeltaTime); // Tickì„ ì‚¬ìš©í•˜ë ¤ë©´ ìƒì„±ìì—ì„œ PrimaryActorTick.bCanEverTick = true; ë¡œ ë³€ê²½í•´ì•¼ í•¨
 
-	// ¿¹½Ã: Äğ´Ù¿î °¨¼Ò ·ÎÁ÷ µî
+	// ì˜ˆì‹œ: ì¿¨ë‹¤ìš´ ê°ì†Œ ë¡œì§ ë“±
 	if (Skill1CooldownRemaining > 0.0f)
 	{
 		Skill1CooldownRemaining -= DeltaTime;

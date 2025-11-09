@@ -44,17 +44,22 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "InventoryGold")
 	int32 ADDAmount;
 
+	UFUNCTION(BlueprintCallable)
+	int32 GetADDAmount() { return ADDAmount; }
 
 	UFUNCTION(BlueprintCallable)
-	void DropGoods1(int32 amount);
+	void SetADDAmount(int32 amount) { ADDAmount = amount; }
 
 	UFUNCTION(BlueprintCallable)
-	void DropGoods2(int32 amount);
+	void DropGoods1();
+
+	UFUNCTION(BlueprintCallable)
+	void DropGoods2();
 
 	UFUNCTION(BlueprintCallable)
 	void DropTestItem();
 
 	UFUNCTION(BlueprintCallable)
-	void Droptest(int32 amount);
+	void Droptest();
 
 };

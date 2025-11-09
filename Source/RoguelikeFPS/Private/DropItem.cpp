@@ -37,16 +37,16 @@ void ADropItem::Tick(float DeltaTime)
 
 }
 
-void ADropItem::DropGoods1(int32 amount)
+void ADropItem::DropGoods1()
 {
 	int32 goods1 = inven->GetGoods1();
-	inven->SetGoods1(goods1 + amount);
+	inven->SetGoods1(goods1 + ADDAmount);
 }
 
-void ADropItem::DropGoods2(int32 amount)
+void ADropItem::DropGoods2()
 {
 	int32 goods2 = inven->GetGoods2();
-	inven->SetGoods2(goods2 + amount);
+	inven->SetGoods2(goods2 + ADDAmount);
 }
 
 void ADropItem::DropTestItem()
@@ -57,16 +57,16 @@ void ADropItem::DropTestItem()
 	inven->AddItem(TestItem, TestItem->Amount, FName("NONE"));
 }
 
-void ADropItem::Droptest(int32 amount)
+void ADropItem::Droptest()
 {
 	switch (GoodsType)
 	{
 	case EDropItemType::Goods1:
-		DropGoods1(amount);
+		DropGoods1();
 		break;
 
 	case EDropItemType::Goods2:
-		DropGoods2(amount);
+		DropGoods2();
 		break;
 
 	case EDropItemType::DropItem:

@@ -9,6 +9,7 @@
 #include "AI/Structure/Component/Stage2BossAttackComponent.h"
 #include "DrawDebugHelpers.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "DropItem.h"
 
 #include "GameFramework/DamageType.h"
 #include "Components/CapsuleComponent.h"
@@ -260,11 +261,21 @@ void AAIEnemyCharacter::DropItem()
             const float RandValue = FMath::FRandRange(0.0f, 100.f);
             if (RandValue <= Row->SpawnChance)
             {
-                const float randX = FMath::FRandRange(-50.0f, 50.f);
-                const float randY = FMath::FRandRange(-50.0f, 50.f);
                 FVector randLocation = FVector();
 
-                AActor* Proj = GetWorld()->SpawnActor<AActor>(Row->ItemClass, FVector(randX, randY, GetActorLocation().Z), GetActorRotation());
+                for (int i = 0; i < Row->ItemAmount; ++i)
+                {
+                    const float randX = FMath::FRandRange(-50.0f, 50.f);
+                    const float randY = FMath::FRandRange(-50.0f, 50.f);
+                    AActor* Proj = GetWorld()->SpawnActor<AActor>(Row->ItemClass, FVector(GetActorLocation().X + randX, GetActorLocation().Y + randY, GetActorLocation().Z), GetActorRotation());
+                    auto* dropclass = Cast<ADropItem>(Proj);
+                    if (dropclass)
+                    {
+                        const float randAmount = FMath::FRandRange(0.f, Row->AddAmount/2);
+                        dropclass->SetADDAmount(Row->AddAmount + (int)randAmount);
+                    }
+                }
+                
             }
         }
    
