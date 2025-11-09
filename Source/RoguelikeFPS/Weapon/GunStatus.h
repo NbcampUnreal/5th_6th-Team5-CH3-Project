@@ -50,6 +50,10 @@ struct FGunStatus
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
     float CriticalMultiplier = 5.f;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+    float HeadShotMultiplier = 5.f;
+
+
     // 생성자에서 기본값 초기화도 가능
     /*FGunStatus()
         : Damage(10.f)

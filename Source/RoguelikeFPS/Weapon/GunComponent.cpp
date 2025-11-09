@@ -20,42 +20,17 @@ void UGunComponent::DoAttack()
 	if (!CanAttack) return;
 	if (_Character == nullptr || _Character->GetController() == nullptr) return;
 
-	if (!(CurrentBulletCount > 0)) {
-		ReloadBullet();
+	if ((CurrentBulletCount <= 0)) {
+		if(_IsReloading) return;
+		UWorld* const World = GetWorld();
+		World->GetTimerManager().SetTimer(_ReloadTimerHandle, this, &UGunComponent::ReloadBullet, _Status.ReloadTime, false);
+		_IsReloading = true;
 		return;
 	}
 
-	for (size_t count = 0; count < _Status.ProjectilesPerShot; count++)
-	{
-		Fire();
-	}
-
-	CurrentBulletCount--;
+	Fire();
+	
 	OnDoAttack.Broadcast();
-	//GEngine->AddOnScreenDebugMessage(1, 5.0f, FColor::Green, FString::Printf(TEXT("CurrentBulletCount : %d"), CurrentBulletCount));
-
-	CanAttack = false;
-
-	FTimerDelegate Delegate = FTimerDelegate::CreateLambda([this]()
-		{
-			CanAttack = true;
-		});
-
-	UWorld* const World = GetWorld();
-	World->GetTimerManager().SetTimer(_GunTimerHandle, Delegate, _Status.AttackDelay, false);
-
-	// Try and play the sound if specified b 
-	if (_AttackSound != nullptr) {
-		UGameplayStatics::PlaySoundAtLocation(this, _AttackSound, _Character->GetActorLocation());
-	}
-
-	// Try and play a firing animation if specified
-	if (_AttackAnimation != nullptr)
-	{
-		// Get the animation object for the arms mesh
-		UAnimInstance* AnimInstance = _Character->GetMesh()->GetAnimInstance();
-		AnimInstance->Montage_Play(_AttackAnimation, 1.f);
-	}
 }
 
 void UGunComponent::BeginPlay()
@@ -78,28 +53,36 @@ void UGunComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 
 void UGunComponent::Fire()
 {
-	if (_ProjectileClass != nullptr)
+	for (size_t count = 0; count < _Status.ProjectilesPerShot; count++)
 	{
-		UWorld* const World = GetWorld();
-		if (World != nullptr)
-		{
-			const FRotator SpawnRotation = CalculateSapwnRotaion();
-			const FVector SpawnLocation = this->GetSocketLocation(FName("Muzzle"));
-
-			//Set Spawn Collision Handling Override
-			FActorSpawnParameters ActorSpawnParams;
-			ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
-			// Spawn the projectile at the muzzle
-			AProjectile* SpawnProjectile = World->SpawnActorDeferred<AProjectile>(_ProjectileClass, FTransform(SpawnRotation, SpawnLocation));
-			if (!IsValid(SpawnProjectile)) return;
-			InitSpawnProjectile(SpawnProjectile);
-			ProjectileSpawn.Broadcast(SpawnProjectile);
-			UGameplayStatics::FinishSpawningActor(SpawnProjectile, FTransform(SpawnRotation, SpawnLocation));
-		}
+		SpawnProejectile();
 	}
-	else {
-		UE_LOG(LogTemp, Warning, TEXT("_ProjectileClass nullptr"));
+
+	CurrentBulletCount--;
+	CanAttack = false;
+
+	//FTimerDelegate Delegate = FTimerDelegate::CreateLambda([this]()
+	//	{
+	//		CanAttack = true;
+	//	});
+
+	UWorld* const World = GetWorld();
+	World->GetTimerManager().SetTimer(_GunTimerHandle, [this]()
+		{
+			CanAttack = true;
+		}, _Status.AttackDelay, false);
+
+	// Try and play the sound if specified b 
+	if (_AttackSound != nullptr) {
+		UGameplayStatics::PlaySoundAtLocation(this, _AttackSound, _Character->GetActorLocation());
+	}
+
+	// Try and play a firing animation if specified
+	if (_AttackAnimation != nullptr)
+	{
+		// Get the animation object for the arms mesh
+		//UAnimInstance* AnimInstance = _Character->GetMesh()->GetAnimInstance();
+		_AnimInstance->Montage_Play(_AttackAnimation, 1.f);
 	}
 }
 
@@ -116,6 +99,26 @@ void UGunComponent::AddBullet(int32 amount)
 void UGunComponent::SetBulletCount(int32 count)
 {
 	if (count >= 0) CurrentBulletCount = count;
+}
+
+void UGunComponent::SetRealodTime(float time)
+{
+	if (time >= 0) _Status.ReloadTime = time;
+}
+
+void UGunComponent::SetProjectilesPerShot(int32 count)
+{
+	_Status.ProjectilesPerShot = count < 1 ? 1 : count;
+}
+
+void UGunComponent::SetAttackPoint(float attackpoint)
+{
+	if (attackpoint >= 0) _Status.AttackPoint = attackpoint;
+}
+
+void UGunComponent::IncreaseHeadShotMultiplier(float value)
+{
+	if (value > 0) _Status.HeadShotMultiplier += value;
 }
 
 FRotator UGunComponent::CalculateSapwnRotaion()
@@ -158,13 +161,37 @@ void UGunComponent::InitSpawnProjectile(AProjectile* proejectile)
 	if (proejectile)
 	{
 		proejectile->SetMovementSpeed(_Status.ProjectileSpeed);
-		proejectile->SetInstigator(_Character);
 		proejectile->SetDamage(_Status.AttackPoint);
+		proejectile->SetHeadShotMultiplier(_Status.HeadShotMultiplier);
 	}
 }
 
 void UGunComponent::ReloadBullet()
 {
 	CurrentBulletCount = _Status.MaxBulletCount;
+	_IsReloading = false;
 	GEngine->AddOnScreenDebugMessage(2, 0.5f, FColor::Red, FString::Printf(TEXT("ReloadBullet")));
+}
+
+void UGunComponent::SpawnProejectile()
+{
+	if (_ProjectileClass != nullptr)
+	{
+		UWorld* const World = GetWorld();
+		if (World != nullptr)
+		{
+			const FRotator SpawnRotation = CalculateSapwnRotaion();
+			const FVector SpawnLocation = this->GetSocketLocation(FName("Muzzle"));
+
+			// Spawn the projectile at the muzzle
+			AProjectile* SpawnProjectile = World->SpawnActorDeferred<AProjectile>(_ProjectileClass, FTransform(SpawnRotation, SpawnLocation), nullptr, GetOwnerCharacter(), ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+			if (!IsValid(SpawnProjectile)) return;
+			InitSpawnProjectile(SpawnProjectile);
+			ProjectileSpawn.Broadcast(SpawnProjectile);
+			UGameplayStatics::FinishSpawningActor(SpawnProjectile, FTransform(SpawnRotation, SpawnLocation));
+		}
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("_ProjectileClass nullptr"));
+	}
 }
