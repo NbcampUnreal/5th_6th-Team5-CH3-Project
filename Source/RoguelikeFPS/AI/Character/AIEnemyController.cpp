@@ -2,6 +2,7 @@
 #include "AI/Character/AIEnemyCharacter.h"
 #include "Perception/AISenseConfig_Sight.h"
 #include "Perception/AISense_Sight.h"
+#include "Perception/AISense_Damage.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "Kismet/KismetMathLibrary.h"
 
@@ -221,39 +222,42 @@ void AAIEnemyController::OnPerceptionUpdated(const TArray<AActor*>&)
 
 void AAIEnemyController::OnTakeAnyDamage_Handled(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
-    if (!BlackboardComp) return;
+    //if (!BlackboardComp) return;
 
-    // 우선순위: DamageCauser(프로젝타일/무기 등) → Instigator Pawn
-    AActor* Attacker = nullptr;
+    //// 우선순위: DamageCauser(프로젝타일/무기 등) → Instigator Pawn
+    //AActor* Attacker = nullptr;
+    //
 
-    if (DamageCauser && DamageCauser != DamagedActor)
-    {
-        // 프로젝타일이면 그 Owner/Instigator를 따라 올라가는 것도 방법
-        if (APawn* CauserPawn = Cast<APawn>(DamageCauser))
-            Attacker = CauserPawn;
-        else if (AActor* CauserOwner = DamageCauser->GetOwner())
-            Attacker = CauserOwner;
-        else
-            Attacker = DamageCauser;
-    }
+    //if (DamageCauser && DamageCauser != DamagedActor)
+    //{
+    //    // 프로젝타일이면 그 Owner/Instigator를 따라 올라가는 것도 방법
+    //    if (APawn* CauserPawn = Cast<APawn>(DamageCauser))
+    //        Attacker = CauserPawn;
+    //    else if (AActor* CauserOwner = DamageCauser->GetOwner())
+    //        Attacker = CauserOwner;
+    //    else
+    //        Attacker = DamageCauser;
+    //}
 
-    if (!Attacker && InstigatedBy)
-        Attacker = InstigatedBy->GetPawn();
+    //if (!Attacker && InstigatedBy)
+    //    Attacker = InstigatedBy->GetPawn();
 
-    if (Attacker && Attacker != DamagedActor)
-    {
-        // 바로 타깃 지정(시야 없어도 추격 시작)
-        BlackboardComp->SetValueAsObject(BB_TargetActor, Attacker);
-        BlackboardComp->SetValueAsVector(BB_LastSeenLocation, Attacker->GetActorLocation());
+    //if (Attacker && Attacker != DamagedActor)
+    //{
+    //    UE_LOG(LogTemp, Log, TEXT("Attacker: %s"), *GetNameSafe(Attacker));
 
-        // 피격 플래그 (BT에서 우선 추격 시퀀스 선택하도록 쓰기 좋음)
-        //BlackboardComp->SetValueAsBool(BB_WasDamagedRecently, true);
+    //    // 바로 타깃 지정(시야 없어도 추격 시작)
+    //    BlackboardComp->SetValueAsObject(BB_TargetActor, Attacker);
+    //    BlackboardComp->SetValueAsVector(BB_LastSeenLocation, Attacker->GetActorLocation());
 
-        // 일정 시간 뒤 자동 해제(옵션)
-        GetWorld()->GetTimerManager().ClearTimer(Timer_DamagedFlagReset);
-        GetWorld()->GetTimerManager().SetTimer(
-            Timer_DamagedFlagReset, this, &AAIEnemyController::ClearDamagedFlag, 3.0f, false);
-    }
+    //    // 피격 플래그 (BT에서 우선 추격 시퀀스 선택하도록 쓰기 좋음)
+    //    //BlackboardComp->SetValueAsBool(BB_WasDamagedRecently, true);
+
+    //    // 일정 시간 뒤 자동 해제(옵션)
+    //    GetWorld()->GetTimerManager().ClearTimer(Timer_DamagedFlagReset);
+    //    GetWorld()->GetTimerManager().SetTimer(
+    //        Timer_DamagedFlagReset, this, &AAIEnemyController::ClearDamagedFlag, 3.0f, false);
+    //}
 }
 
 void AAIEnemyController::ClearDamagedFlag()
@@ -262,6 +266,35 @@ void AAIEnemyController::ClearDamagedFlag()
         //BlackboardComp->SetValueAsBool(BB_WasDamagedRecently, false);
 }
 
+
+void AAIEnemyController::OnDamagedBy(AActor* InstigatorActor, float Damage, const FVector& EventLocation, const FVector& HitLocation)
+{
+    if (!GetWorld() || !GetPawn()) return;
+
+    // 1) 퍼셉션에 Damage 이벤트 보고
+    if (InstigatorActor)
+    {
+        UAISense_Damage::ReportDamageEvent(
+            GetWorld(),
+            /*DamagedActor=*/GetPawn(),
+            /*Instigator=*/InstigatorActor,
+            /*DamageAmount=*/Damage,
+            /*EventLocation=*/EventLocation,
+            /*HitLocation=*/HitLocation
+        );
+
+        // 3) 타깃 고정(원하면)
+        if (UBlackboardComponent* BB = GetBlackboardComponent())
+        {
+            UE_LOG(LogTemp, Log, TEXT("AICon HITLOCATION : %f, %f, %f"), HitLocation.X, HitLocation.Y, HitLocation.Z);
+            //BB->SetValueAsObject(BB_TargetActor, InstigatorActor);
+            // 필요 시 LOS 초기값도 잡아둘 수 있음
+            BB->SetValueAsVector(BB_LastSeenLocation, HitLocation);
+            BB->SetValueAsBool(BB_HasLastSeen, true);
+
+        }
+    }
+}
 
 void AAIEnemyController::SendDeadToBT()
 {

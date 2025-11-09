@@ -204,8 +204,8 @@ void AAIEnemyCharacter::OnDeath()
         {
             AICon->SendDeadToBT();
         }
-        AActor* Proj = GetWorld()->SpawnActor<AActor>(DropItemClass, GetActorLocation(), GetActorRotation());
-
+        //AActor* Proj = GetWorld()->SpawnActor<AActor>(DropItemClass, GetActorLocation(), GetActorRotation());
+        DropItem();
         StateMachine->ChangeState(EEnemyState::Dead);
     }
 }
@@ -246,41 +246,84 @@ void AAIEnemyCharacter::ApplyStun(float Duration)
     UE_LOG(LogTemp, Warning, TEXT("[STUN START] Enemy stunned for %.1f sec"), Duration);
 }
 
+void AAIEnemyCharacter::DropItem()
+{
+    if (DropTable)
+    {
+        TArray<FDropTable*> AllRows;
+        static const FString ContextString(TEXT("ItemSpawnContext"));
+        DropTable->GetAllRows<FDropTable>(ContextString, AllRows);
+        if (AllRows.IsEmpty()) return;
 
+        for (const FDropTable* Row : AllRows)
+        {
+            const float RandValue = FMath::FRandRange(0.0f, 100.f);
+            if (RandValue <= Row->SpawnChance)
+            {
+                const float randX = FMath::FRandRange(-50.0f, 50.f);
+                const float randY = FMath::FRandRange(-50.0f, 50.f);
+                FVector randLocation = FVector();
 
+                AActor* Proj = GetWorld()->SpawnActor<AActor>(Row->ItemClass, FVector(randX, randY, GetActorLocation().Z), GetActorRotation());
+            }
+        }
+   
+        //if(RandValue <= AllRows->SpawnChance)
+    }
+}
 
 float AAIEnemyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) 
 {
     UE_LOG(LogTemp, Log, TEXT("TakeDamage"));
-    float FinalDamage = DamageAmount; // 포인트 데미지(부위 판정)인 경우만 헤드샷 배율 적용 
-    if (DamageEvent.GetTypeID() == FPointDamageEvent::ClassID) 
-    { 
-        const FPointDamageEvent* PDE = static_cast<const FPointDamageEvent*>(&DamageEvent); 
-        if (PDE)
-        {
-            const FName HitBone = PDE->HitInfo.BoneName;
+    float FinalDamage = DamageAmount; 
 
-            if (HitBone != NAME_None)
-            {
-                UE_LOG(LogTemp, Warning, TEXT("[DEBUG] Hit bone: %s"), *HitBone.ToString());
-            }
-            else
-            {
-                UE_LOG(LogTemp, Warning, TEXT("[DEBUG] Hit bone: (None)"));
-            }
 
-            if (IsHeadBone(HitBone))
-            {
-                FinalDamage *= HeadshotMultiplier;
-                UE_LOG(LogTemp, Error, TEXT("[HEADSHOT] %s  x%.2f"), *HitBone.ToString(), HeadshotMultiplier);
-            }
-        }
-        if (PDE && IsHeadBone(PDE->HitInfo.BoneName)) 
-        { 
-            FinalDamage *= HeadshotMultiplier; 
-            UE_LOG(LogTemp, Log, TEXT("HEADSHOT %s x%.2f"), *PDE->HitInfo.BoneName.ToString(), HeadshotMultiplier); 
-        } 
-    } // Super가 블루프린트 이벤트/데미지 라우팅을 처리하니 반드시 호출 
+    AActor* ShooterPawn = DamageCauser ? DamageCauser->GetInstigator() : nullptr;
+    if (!ShooterPawn && EventInstigator) ShooterPawn = EventInstigator->GetPawn();
+    UE_LOG(LogTemp, Log, TEXT("Name %s"), *ShooterPawn->GetName());
+
+    FVector HitLocation = ShooterPawn->GetActorLocation();
+
+    UE_LOG(LogTemp, Log, TEXT("TakeDamage HITLOCATION : %f, %f, %f"), HitLocation.X, HitLocation.Y, HitLocation.Z);
+    //// 포인트 데미지(부위 판정)인 경우만 헤드샷 배율 적용 
+    //if (DamageEvent.GetTypeID() == FPointDamageEvent::ClassID) 
+    //{ 
+    //    const FPointDamageEvent* PDE = static_cast<const FPointDamageEvent*>(&DamageEvent); 
+    //    if (PDE)
+    //    {
+    //        const FName HitBone = PDE->HitInfo.BoneName;
+
+    //        if (HitBone != NAME_None)
+    //        {
+    //            UE_LOG(LogTemp, Warning, TEXT("[DEBUG] Hit bone: %s"), *HitBone.ToString());
+    //        }
+    //        else
+    //        {
+    //            UE_LOG(LogTemp, Warning, TEXT("[DEBUG] Hit bone: (None)"));
+    //        }
+
+    //        if (IsHeadBone(HitBone))
+    //        {
+    //            FinalDamage *= HeadshotMultiplier;
+    //            UE_LOG(LogTemp, Error, TEXT("[HEADSHOT] %s  x%.2f"), *HitBone.ToString(), HeadshotMultiplier);
+    //        }
+    //    }
+    //    if (PDE && IsHeadBone(PDE->HitInfo.BoneName)) 
+    //    { 
+    //        FinalDamage *= HeadshotMultiplier; 
+    //        UE_LOG(LogTemp, Log, TEXT("HEADSHOT %s x%.2f"), *PDE->HitInfo.BoneName.ToString(), HeadshotMultiplier); 
+    //    } 
+    //} // Super가 블루프린트 이벤트/데미지 라우팅을 처리하니 반드시 호출 
+    if (AAIEnemyController* AICon = Cast<AAIEnemyController>(GetController()))
+    {
+        AICon->OnDamagedBy(
+            /*InstigatorActor=*/ShooterPawn ? ShooterPawn : DamageCauser,
+            /*Damage=*/FinalDamage,
+            /*EventLocation=*/GetActorLocation(),
+            /*HitLocation=*/HitLocation
+        );
+    }
+
 
     const float Applied = Super::TakeDamage(FinalDamage, DamageEvent, EventInstigator, DamageCauser); 
     // HP 처리 

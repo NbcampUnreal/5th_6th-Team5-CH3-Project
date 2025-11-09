@@ -70,7 +70,9 @@ public:
     UPROPERTY(EditAnywhere, Category = "AI|Perception")
     float HearingForgetSeconds = 3.f;
 
-
+    // TakeDamage에서 데이터 수신
+    UFUNCTION(BlueprintCallable, Category = "Perception")
+    void OnDamagedBy(AActor* InstigatorActor, float Damage, const FVector& EventLocation, const FVector& HitLocation);
 
 
     UFUNCTION()

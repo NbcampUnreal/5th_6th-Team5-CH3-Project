@@ -9,24 +9,27 @@ void UAnimNotify_AttackHit::Notify(USkeletalMeshComponent* MeshComp, UAnimSequen
     if (!MeshComp) return;
     if (AActor* Owner = MeshComp->GetOwner())
     {
-        UE_LOG(LogTemp, Log, TEXT("AnimNotify_AttackHit start"));
+        UE_LOG(LogTemp, Log, TEXT("AnimNotify_AttackHit"));
+
         if (auto* Melee = Owner->FindComponentByClass<UMeleeAttackComponent>())
         {
-            UE_LOG(LogTemp, Log, TEXT("AnimNotify_AttackHit melee start"));
+            UE_LOG(LogTemp, Verbose, TEXT("DoHit: Melee"));
             Melee->DoHit();
+            return;
         }
 
-        else if (auto* Boss2 = Owner->FindComponentByClass<UStage2BossAttackComponent>())
+        if (auto* Boss2 = Owner->FindComponentByClass<UStage2BossAttackComponent>())
         {
-            UE_LOG(LogTemp, Log, TEXT("AnimNotify_AttackHit boss2 start"));
+            UE_LOG(LogTemp, Verbose, TEXT("DoHit: Boss2"));
             Boss2->DoHit();
+            return;
         }
 
-        else if (auto* Ranged = Owner->FindComponentByClass<URangedAttackComponent>())
+        if (auto* Ranged = Owner->FindComponentByClass<URangedAttackComponent>())
         {
-            UE_LOG(LogTemp, Log, TEXT("Ranged start"));
+            UE_LOG(LogTemp, Verbose, TEXT("DoHit: Ranged"));
             Ranged->DoHit();
+            return;
         }
-            
     }
 }

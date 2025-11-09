@@ -61,6 +61,9 @@ protected:
     UPROPERTY()
     bool bAttackInProgress = false;
 
+
+
+
     void MarkCooldown();
     bool HasServerAuthority() const;
 };
