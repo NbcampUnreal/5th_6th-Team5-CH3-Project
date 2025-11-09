@@ -25,6 +25,7 @@ void UWeaponSkillComponent::Active()
 
 void UWeaponSkillComponent::SetUp()
 {
+	UE_LOG(LogTemp, Warning, TEXT("UWeaponSkillComponent :: SetUp"));
 	SetActionMapping();
 }
 
@@ -37,6 +38,7 @@ void UWeaponSkillComponent::SetActionMapping()
 		{
 			if (WeaponComp->GetCharacterEnhancedInputComponent())
 			{
+				UE_LOG(LogTemp, Log, TEXT("SetActionMapping"));
 				WeaponComp->GetCharacterEnhancedInputComponent()->BindAction(_SkillAction, ETriggerEvent::Triggered, this, &UWeaponSkillComponent::Active);
 			}
 		}
@@ -54,23 +56,43 @@ void UWeaponSkillComponent::BeginPlay()
 void UWeaponSkillComponent::OnRegister()
 {
 	Super::OnRegister();
+
+	UE_LOG(LogTemp, Warning, TEXT("UWeaponSkillComponent :: OnRegister"));
+	//if (!IsRegistered() || !GetOwner()) return;
+
+	//UWeaponComponent* WeaponComp = Cast<UWeaponComponent>(GetAttachParent());
+
+	//if (WeaponComp)
+	//{
+	//	UE_LOG(LogTemp, Warning, TEXT("AttachParent is WeaponComp"));
+	//}
+	//else {
+	//	UE_LOG(LogTemp, Fatal, TEXT("AttachParent is not WeaponComponent"));
+	//}
+
+	//SetUp();
 }
 
 void UWeaponSkillComponent::OnAttachmentChanged()
 {
 	Super::OnAttachmentChanged();
 
-	if (!IsRegistered() || !GetOwner()) return;
+	UE_LOG(LogTemp, Warning, TEXT("UWeaponSkillComponent :: OnAttachmentChanged"));
 
-    UWeaponComponent* WeaponComp = Cast<UWeaponComponent>(GetAttachParent());
 
-    if (WeaponComp)
-    {
-		
-    }
-	else {
-		UE_LOG(LogTemp, Fatal, TEXT("AttachParent is not WeaponComponent"));
-	}
+	//if (!IsRegistered() || !GetOwner()) return;
+
+ //   UWeaponComponent* WeaponComp = Cast<UWeaponComponent>(GetAttachParent());
+
+ //   if (WeaponComp)
+ //   {
+	//	UE_LOG(LogTemp, Warning, TEXT("AttachParent is WeaponComp"));
+ //   }
+	//else {
+	//	UE_LOG(LogTemp, Fatal, TEXT("AttachParent is not WeaponComponent"));
+	//}
+
+	//SetUp();
 }
 
 void UWeaponSkillComponent::SetCoolDownTimer()
