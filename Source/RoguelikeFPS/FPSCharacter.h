@@ -20,6 +20,7 @@ class ROGUELIKEFPS_API AFPSCharacter : public ACharacter
     GENERATED_BODY()
 public:
     AFPSCharacter();
+    virtual void BeginPlay() override;
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
     UFUNCTION(BlueprintCallable)
     void AddXP(float Amount);
