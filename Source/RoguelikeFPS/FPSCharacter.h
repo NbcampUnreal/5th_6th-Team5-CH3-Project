@@ -83,8 +83,6 @@ public:
     UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
     void SetIsDashing(bool isdash);
 
-<<<<<<< Updated upstream
-=======
     // 무적 상태변수
     bool Undead = false;
     // 무적 지속 시간
@@ -93,8 +91,6 @@ public:
     void OnUndead();
     void OffUndead();
     void OnUndeadTime(float time);
-
->>>>>>> Stashed changes
 protected:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
     TObjectPtr<USpringArmComponent> SpringArmComp;
