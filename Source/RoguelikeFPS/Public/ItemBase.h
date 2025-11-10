@@ -24,6 +24,9 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
     EPartGrade PartGrade;
+    
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Part")
+    EPartType PartType = EPartType::None;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
     FText Description;

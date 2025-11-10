@@ -1,11 +1,13 @@
 #include "ItemBase.h"
 #include "ItemData.h"
+#include "FPSCharacter.h"
 
 void UItemBase::InitItemData(const FItemData& Data)
 {
 	ItemNumber = Data.ItemNumber;
 	ItemName = Data.ItemName;
 	ItemType = Data.ItemType;
+	PartType = Data.PartType;
 	PartGrade = Data.PartGrade;
 	Description = FText::FromString(Data.Description);
 	Thumbnail = Data.Thumbnail;

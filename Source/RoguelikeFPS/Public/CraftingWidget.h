@@ -9,6 +9,7 @@ class UInventory;
 class UButton;
 class UTextBlock;
 class UImage;
+class UScrollBox;
 class UDataTable;
 
 UENUM(BlueprintType)
@@ -34,10 +35,19 @@ public:
     void OnCraftOrDecomposeClicked();
 
     UFUNCTION()
-    void UpdateUI();
+    void OnRecipeButtonClicked();
+
+    UFUNCTION(BlueprintCallable)
+    void OnItemSelected(FName ItemRowName);
+
+    UFUNCTION(BlueprintCallable)
+    void OnItemSelected(FName ItemRowName);
 
     UFUNCTION(BlueprintCallable)
     void SetCraftingMode(ECraftingMode NewMode);
+
+    UFUNCTION()
+    void UpdateUI();
 
     UPROPERTY(BlueprintAssignable, Category = "Event")
     FOnCraftingCompleted OnCraftingCompleted;
@@ -68,11 +78,17 @@ protected:
     UTextBlock* ItemName;
 
     UPROPERTY(meta = (BindWidget))
-    UTextBlock* MaterialListText;
-
-    UPROPERTY(meta = (BindWidget))
     UTextBlock* CraftStatusText;
 
     UPROPERTY(meta = (BindWidget))
     UImage* ItemImage;
+
+    UPROPERTY(meta = (BindWidget))
+    UScrollBox* RecipeListBox;
+
+    UPROPERTY()
+    TMap<UButton*, FName> RecipeButtonMap;
+
+    void PopulateRecipeList();
+    void UpdateSelectedItemInfo();
 };

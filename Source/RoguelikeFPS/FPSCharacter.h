@@ -7,6 +7,8 @@
 class USpringArmComponent;
 class UCameraComponent;
 class UInventory;
+class UUpgradeSystem;
+class UPartSystem;
 struct FInputActionValue;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLevelUpSignature, APlayerController*, PlayerController);
@@ -35,9 +37,6 @@ public:
     FOnPlayerDeathSignature OnPlayerDeath;
     UPROPERTY(BlueprintAssignable, Category = "Events")
     FOnHUDStatChangedSignature OnHUDStatChanged;
-
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
-    UInventory* Inventory;//인벤토리 정보
 
     int32 GetLevel() const { return Level; }
     int32 GetHealth() const { return Health; }
@@ -92,6 +91,17 @@ public:
     void OnUndead();
     void OffUndead();
     void OnUndeadTime(float time);
+	
+	// ===== 사망 델리게이트 =====
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnPlayerDeathSignature OnPlayerDeath;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
+	UInventory* Inventory;//인벤토리 정보
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
+	UUpgradeSystem* UpgradeSystem;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Parts")
+    UPartSystem* PartSystem;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterStatus", meta = (AllowPrivateAccess = "true"))
     UWeaponComponent* CurrentWeapon;
