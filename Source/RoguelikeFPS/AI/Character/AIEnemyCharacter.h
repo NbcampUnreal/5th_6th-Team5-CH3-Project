@@ -65,7 +65,7 @@ public:
 
     // 디버그 기즈모 토글
     UPROPERTY(EditAnywhere, Category = "AI|Debug")
-    bool bDrawPerceptionDebug = true;
+    bool bDrawPerceptionDebug = false;
 
     // (선택) 라인 두께/세그먼트 조절
     UPROPERTY(EditAnywhere, Category = "AI|Debug")
