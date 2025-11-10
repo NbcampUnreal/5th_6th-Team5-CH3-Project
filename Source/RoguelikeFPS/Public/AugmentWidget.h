@@ -5,7 +5,7 @@
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 #include "AugmentWidget.generated.h"
-
+//for git commit
 // ¡ı∞≠ »Ò±Õµµ Enum
 UENUM(BlueprintType)
 enum class EAugmentRarity : uint8

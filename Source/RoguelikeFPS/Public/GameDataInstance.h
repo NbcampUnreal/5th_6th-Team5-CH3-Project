@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
 #include "GameDataInstance.generated.h"
-
+//for git commit
 UCLASS()
 class ROGUELIKEFPS_API UGameDataInstance : public UGameInstance
 {

@@ -4,7 +4,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "GameDataInstance.h"
 #include "FPSGameMode.h" // GameMode 접근을 위해 포함 (OnExitButtonClicked에서 사용)
-
+//for git commit
 bool UMainMenuWidget::Initialize()
 {
     if (!Super::Initialize())

@@ -4,7 +4,7 @@
 #include "FPSGameMode.h" 
 #include "Blueprint/UserWidget.h"
 #include "GameDataInstance.h" // GameDataInstance Æ÷ÇÔ
-
+//for git commit
 bool UGameClearWidget::Initialize()
 {
     if (!Super::Initialize())

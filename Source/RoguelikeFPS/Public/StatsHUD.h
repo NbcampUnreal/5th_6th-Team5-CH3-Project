@@ -5,7 +5,7 @@
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "StatsHUD.generated.h"
-
+//for git commit
 class AFPSCharacter; // 캐릭터 클래스 참조
 
 UCLASS()

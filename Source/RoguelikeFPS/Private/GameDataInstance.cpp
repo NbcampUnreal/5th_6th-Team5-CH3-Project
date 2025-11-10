@@ -1,6 +1,6 @@
 #include "GameDataInstance.h"
 #include "Kismet/GameplayStatics.h"
-
+//for git commit
 UGameDataInstance::UGameDataInstance()
 {
     // 기본값 설정
