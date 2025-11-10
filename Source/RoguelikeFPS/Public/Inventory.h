@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "CoreMinimal.h"
 #include "ItemBase.h"
@@ -18,6 +18,12 @@ class ROGUELIKEFPS_API UInventory : public UActorComponent
 
 public:	
 	UInventory();
+
+	//UFUNCTION()
+	//void SaveInventoryInstance();
+	//UFUNCTION()
+	//void LoadInventoryInstance();
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	UDataTable* ItemDataTable;
@@ -52,13 +58,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	UInventoryWidget* InventoryUI;
 	
-	//µ¨¸®°ÔÀÌÆ®
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®
 	UPROPERTY(BlueprintAssignable, Category = "Inventory")
 	FOnGoldChanged OnGoldChanged;
 	UPROPERTY(BlueprintAssignable, Category = "Inventory")
 	FOnInventoryUpdated OnInventoryUpdated;
 
-	//°Ë»ö
+	//ï¿½Ë»ï¿½
 	UFUNCTION(BlueprintCallable)
 	UItemBase* SearchItemName(const FName& Name) const;
 	UFUNCTION(BlueprintCallable)

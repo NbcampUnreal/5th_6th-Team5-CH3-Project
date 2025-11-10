@@ -29,41 +29,22 @@ void UItemBase::InitItemData(const FItemData& Data)
 	}
 }
 
-float UItemBase::ApplyDamage(float BaseValue) const
+void UItemBase::ApplyToWeapon(float& OutDamage, int32& OutAmmo, float& OutAttackSpeed) const
 {
 	if (ItemType != EItemType::PartItem)
 	{
-		return BaseValue;
+		return;
 	}
-	return BaseValue + (BaseValue * (BaseDamage / 100.f));
-}
-
-int32 UItemBase::ApplyAmmo(int32 BaseValue) const
-{
-	if (ItemType != EItemType::PartItem)
-	{
-		return BaseValue;
-	}
-	return BaseValue + Ammo;
-}
-
-float UItemBase::ApplyAttackSpeed(float BaseValue) const
-{
-	if (ItemType != EItemType::PartItem)
-	{
-		return BaseValue;
-	}
-	return BaseValue * (1 + BaseAttackSpeed / 100.f);
-}
-
-void UItemBase::ApplyToWeapon(float& InOutDamage, int32& InOutAmmo, float& InOutAttackSpeed) const
-{
-	if (ItemType != EItemType::PartItem) return;
-
-	InOutDamage = ApplyDamage(InOutDamage);
-	InOutAmmo = ApplyAmmo(InOutAmmo);
-	InOutAttackSpeed = ApplyAttackSpeed(InOutAttackSpeed);
+	OutDamage += (OutDamage * (BaseDamage / 100.f));
+	OutAmmo += Ammo;
+	OutAttackSpeed *= (1 + BaseAttackSpeed / 100.f);
 
 	UE_LOG(LogTemp, Warning, TEXT("[ItemBase] ApplyToWeapon -> %s | Damage: %.1f | Ammo: %d | AS: %.2f"),
-		*ItemName.ToString(), InOutDamage, InOutAmmo, InOutAttackSpeed);
+		*ItemName.ToString(), OutDamage, OutAmmo, OutAttackSpeed);
 }
+
+//if (FItemData* Row = ItemDataTable->FindRow<FItemData>(RowName, TEXT("°­È­µ¹")))
+//{
+//	UItemBase* NewItem = NewObject<UItemBase>();
+//	NewItem->InitItemData(*Row);
+//}

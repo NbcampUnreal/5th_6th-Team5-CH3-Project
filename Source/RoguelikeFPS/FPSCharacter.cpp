@@ -103,6 +103,16 @@ void AFPSCharacter::BeginPlay()
 }
 
 
+void AFPSCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	//if (Inventory)
+	//{
+	//	Inventory->LoadInventoryInstance();
+	//}
+}
+
 // INPUT BINDING
 void AFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {

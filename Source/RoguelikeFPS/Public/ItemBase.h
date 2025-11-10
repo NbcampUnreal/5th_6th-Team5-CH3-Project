@@ -56,9 +56,5 @@ public:
 public:
     void InitItemData(const FItemData& Data);
 
-    float ApplyDamage(float BaseDamage) const;
-    int32 ApplyAmmo(int32 BaseAmmo) const;
-    float ApplyAttackSpeed(float BaseAttackSpeed) const;
-
-    void ApplyToWeapon(float& InOutDamage, int32& InOutAmmo, float& InOutAttackSpeed) const;
+    void ApplyToWeapon(float& OutDamage, int32& OutAmmo, float& OutAttackSpeed) const;
 };

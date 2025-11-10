@@ -25,6 +25,54 @@ void UGunComponent::DoAttack()
 		return;
 	}
 
+	Fire();
+	
+	OnDoAttack.Broadcast();
+}
+
+void UGunComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	CurrentBulletCount = _Status.MaxBulletCount;
+}
+
+
+void UGunComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+}
+
+void UGunComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+}
+
+void UGunComponent::OnRegister()
+{
+	Super::OnRegister();
+
+	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
+	//_WeaponSpringArm->AttachToComponent(this, AttachmentRules, _CameraSocketName);
+}
+
+void UGunComponent::AttachWeapon(ACharacter* TargetCharacter)
+{
+	Super::AttachWeapon(TargetCharacter);
+
+	if (APlayerController* PlayerController = Cast<APlayerController>(_Character->GetController()))
+	{
+		if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
+		{
+			// Attack
+			EnhancedInputComponent->BindAction(_ZoomAction, ETriggerEvent::Triggered, this, &UGunComponent::ZoomIn);
+			//EnhancedInputComponent->BindAction(_ZoomAction, ETriggerEvent::, this, &UGunComponent::ZoomOut);
+		}
+	}
+}
+
+void UGunComponent::Fire()
+{
 	for (size_t count = 0; count < _Status.ProjectilesPerShot; count++)
 	{
 		Fire();
