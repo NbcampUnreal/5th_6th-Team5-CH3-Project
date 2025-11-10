@@ -56,43 +56,11 @@ void UWeaponSkillComponent::BeginPlay()
 void UWeaponSkillComponent::OnRegister()
 {
 	Super::OnRegister();
-
-	UE_LOG(LogTemp, Warning, TEXT("UWeaponSkillComponent :: OnRegister"));
-	//if (!IsRegistered() || !GetOwner()) return;
-
-	//UWeaponComponent* WeaponComp = Cast<UWeaponComponent>(GetAttachParent());
-
-	//if (WeaponComp)
-	//{
-	//	UE_LOG(LogTemp, Warning, TEXT("AttachParent is WeaponComp"));
-	//}
-	//else {
-	//	UE_LOG(LogTemp, Fatal, TEXT("AttachParent is not WeaponComponent"));
-	//}
-
-	//SetUp();
 }
 
 void UWeaponSkillComponent::OnAttachmentChanged()
 {
 	Super::OnAttachmentChanged();
-
-	UE_LOG(LogTemp, Warning, TEXT("UWeaponSkillComponent :: OnAttachmentChanged"));
-
-
-	//if (!IsRegistered() || !GetOwner()) return;
-
- //   UWeaponComponent* WeaponComp = Cast<UWeaponComponent>(GetAttachParent());
-
- //   if (WeaponComp)
- //   {
-	//	UE_LOG(LogTemp, Warning, TEXT("AttachParent is WeaponComp"));
- //   }
-	//else {
-	//	UE_LOG(LogTemp, Fatal, TEXT("AttachParent is not WeaponComponent"));
-	//}
-
-	//SetUp();
 }
 
 void UWeaponSkillComponent::SetCoolDownTimer()

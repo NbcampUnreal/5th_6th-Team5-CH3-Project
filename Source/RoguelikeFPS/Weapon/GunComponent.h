@@ -15,6 +15,8 @@
 DECLARE_MULTICAST_DELEGATE_OneParam(FProjectileSpawn, AProjectile*);
 
 class UProjectileComponent;
+class USpringArmComponent;
+class UCameraComponent;
 
 UCLASS(Blueprintable, BlueprintType, ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class ROGUELIKEFPS_API UGunComponent : public UWeaponComponent
@@ -40,6 +42,18 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data, meta = (AllowPrivateAccess = "true"))
 	int32 CurrentBulletCount = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	USpringArmComponent* _WeaponSpringArm;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	UCameraComponent* _WeaponCamera;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	FName _CameraSocketName = "CameraSocket";
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* _ZoomAction;
 
 	UPROPERTY()
 	FTimerHandle _GunTimerHandle;
@@ -83,10 +97,17 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+	virtual void OnRegister() override;
+
+	virtual void AttachWeapon(ACharacter* TargetCharacter) override;
 private:
 	FRotator CalculateSapwnRotaion();
 
 	void InitSpawnProjectile(AProjectile* proejectile);
 	void ReloadBullet();
 	void SpawnProejectile();
+
+	void ZoomIn();
+	void ZoomOut();
 };

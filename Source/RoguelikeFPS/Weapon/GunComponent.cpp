@@ -4,10 +4,19 @@
 #include "Weapon/GunComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/SCS_Node.h"
+#include "GameFramework/SpringArmComponent.h"
+#include "Camera/CameraComponent.h"
+#include "EnhancedInputComponent.h"
 
 UGunComponent::UGunComponent()
 {
 	CanAttack = true;
+	_WeaponSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("WeaponSpringArm"));
+	_WeaponSpringArm->TargetArmLength = 0.f;
+	_WeaponSpringArm->bDoCollisionTest = false;
+
+	_WeaponCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("WeaponCamera"));
+	_WeaponCamera->SetupAttachment(_WeaponSpringArm);
 }
 
 UGunComponent::~UGunComponent()
@@ -49,6 +58,29 @@ void UGunComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void UGunComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+}
+
+void UGunComponent::OnRegister()
+{
+	Super::OnRegister();
+
+	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
+	_WeaponSpringArm->AttachToComponent(this, AttachmentRules, _CameraSocketName);
+}
+
+void UGunComponent::AttachWeapon(ACharacter* TargetCharacter)
+{
+	Super::AttachWeapon(TargetCharacter);
+
+	if (APlayerController* PlayerController = Cast<APlayerController>(_Character->GetController()))
+	{
+		if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
+		{
+			// Attack
+			EnhancedInputComponent->BindAction(_ZoomAction, ETriggerEvent::Triggered, this, &UGunComponent::ZoomIn);
+			//EnhancedInputComponent->BindAction(_ZoomAction, ETriggerEvent::, this, &UGunComponent::ZoomOut);
+		}
+	}
 }
 
 void UGunComponent::Fire()
@@ -124,7 +156,7 @@ FRotator UGunComponent::CalculateSapwnRotaion()
 		if (PlayerController)
 		{
 			FRotator SpawnRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
-
+			PlayerController->PlayerCameraManager->SetFOV(100.0f);
 
 			float AccuracyChance = FMath::FRand();
 			if (AccuracyChance < _Status.Accuracy) {
@@ -189,4 +221,18 @@ void UGunComponent::SpawnProejectile()
 	else {
 		UE_LOG(LogTemp, Warning, TEXT("_ProjectileClass nullptr"));
 	}
+}
+
+void UGunComponent::ZoomIn() {
+	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("ZoomIn!"));
+	APlayerController* PC = Cast<APlayerController>(_Character->GetController());
+	if (PC && _WeaponCamera)
+	{
+		// Weapon에 카메라가 붙어 있으므로 해당 무기를 ViewTarget으로 바꿈
+		//PC->SetViewTargetWithBlend(this /* 또는 WeaponCameraActor가 있으면 그것 */, 0.15f);
+	}
+}
+
+void UGunComponent::ZoomOut() {
+
 }

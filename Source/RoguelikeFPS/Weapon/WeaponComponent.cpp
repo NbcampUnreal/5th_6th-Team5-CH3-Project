@@ -7,6 +7,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "PickUpComponent.h"
 #include "FPSPlayerController.h"
+#include "FPSCharacter.h"
 
 
 UWeaponComponent::UWeaponComponent()
@@ -32,9 +33,15 @@ void UWeaponComponent::AttachWeapon(ACharacter* TargetCharacter)
 		return;
 	}
 
+	if (TargetCharacter)
+	{
+		AFPSCharacter* fpscharacter = Cast<AFPSCharacter>(TargetCharacter);
+		fpscharacter->CurrentWeapon = this;
+	}
+
 	// Attach the weapon to the First Person Character
-	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
-	this->AttachToComponent(_Character->GetMesh(), AttachmentRules, FName(WeaponSocketName));
+	FAttachmentTransformRules AttachmentRules(EAttachmentRule::KeepRelative, true);
+	this->AttachToComponent(_Character->GetMesh(), AttachmentRules, WeaponSocketName);
 
 	// Set up action bindings
 	if (APlayerController* PlayerController = Cast<APlayerController>(_Character->GetController()))
@@ -57,14 +64,6 @@ void UWeaponComponent::AttachWeapon(ACharacter* TargetCharacter)
 		_Character->GetMesh()->SetAnimInstanceClass(_TSubAnimInstance);
 	}
 }
-
-//void UWeaponComponent::ActiveSkill()
-//{
-//	if (_SkillComponent)
-//	{
-//		_SkillComponent->Active();
-//	}
-//}
 
 UEnhancedInputComponent* UWeaponComponent::GetCharacterEnhancedInputComponent()
 {
@@ -105,30 +104,8 @@ void UWeaponComponent::BeginPlay()
 		if (PickUp)
 		{
 			PickUp->OnPickUp.AddDynamic(this, &UWeaponComponent::AttachWeapon);
-			//UE_LOG(LogTemp, Warning, TEXT("AddDynamic"));
 		}
 	}
-
-	//if (_TSubSkillComponent)
-	//{
-	//	_SkillComponent = NewObject<UWeaponSkillComponent>(GetOwner(), _TSubSkillComponent);
-	//	if (_SkillComponent)
-	//	{
-	//		_SkillComponent->RegisterComponent(); // 반드시 등록해야 월드에서 동작
-	//		_SkillComponent->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
-	//	}
-	//	else {
-	//		UE_LOG(LogTemp, Warning, TEXT("SkillComponent is null"));
-	//	}
-	//}
-	//else {
-	//	UE_LOG(LogTemp, Warning, TEXT("TSubSkillComponent is null"));
-	//}
-
-	//if (_TSubAnimInstance)
-	//{
-	//	//_AnimInstance = _TSubAnimInstance.GetDefaultObject();
-	//}
 }
 
 void UWeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -152,7 +129,11 @@ void UWeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void UWeaponComponent::OnChildAttached(USceneComponent* ChildComponent)
 {
 	UWeaponSkillComponent* Skill = Cast<UWeaponSkillComponent>(ChildComponent);
-	if (Skill && _Character) Skill->SetUp();
+	if (Skill && _Character)
+	{
+		Skill->SetUp();
+		return;
+	}
 }
 
 void UWeaponComponent::SetUpWeaponSkills()

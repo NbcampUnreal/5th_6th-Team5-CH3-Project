@@ -6,8 +6,6 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Weapon/PickUpComponent.h"
 #include "WeaponSkillComponent.h"
-//#include "Animation/AnimInstance.h"
-//#include "Animation/AnimMontage.h"
 #include "WeaponComponent.generated.h"
 
 /**
@@ -49,12 +47,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* _AttackAction;
 
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Skill, meta = (AllowPrivateAccess = "true"))
-	//TSubclassOf<UWeaponSkillComponent> _TSubSkillComponent;
-
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Skill, meta = (AllowPrivateAccess = "true"))
-	//TArray<TSubclassOf<UWeaponSkillComponent>> _TSubSkillComponent;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Mesh, meta = (AllowPrivateAccess = "true"))
 	FName WeaponSocketName;
 
@@ -70,7 +62,7 @@ public:
 	virtual void DoAttack();
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	void AttachWeapon(ACharacter* TargetCharacter); // 델리게이트용 (void)
+	virtual void AttachWeapon(ACharacter* TargetCharacter); // 델리게이트용 (void)
 
 	UEnhancedInputComponent* GetCharacterEnhancedInputComponent();
 

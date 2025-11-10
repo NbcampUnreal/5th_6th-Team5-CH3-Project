@@ -1,6 +1,7 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Weapon/WeaponComponent.h"
 #include "FPSCharacter.generated.h"
 
 class USpringArmComponent;
@@ -91,6 +92,9 @@ public:
     void OnUndead();
     void OffUndead();
     void OnUndeadTime(float time);
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterStatus", meta = (AllowPrivateAccess = "true"))
+    UWeaponComponent* CurrentWeapon;
 protected:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
     TObjectPtr<USpringArmComponent> SpringArmComp;

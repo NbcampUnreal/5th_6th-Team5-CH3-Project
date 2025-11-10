@@ -66,7 +66,6 @@ AFPSCharacter::AFPSCharacter()		// 초기 설정
 	DashSpeed = MovingSpeed * DashMultifly;
 	DashTime = 0.5f;
 
-
 	// Crouch Activation
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
 	GetCharacterMovement()->SetCrouchedHalfHeight(60.0f);
