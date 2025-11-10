@@ -1,6 +1,7 @@
 #include "FPSCharacter.h"
 #include "Inventory.h"
 #include "UpgradeSystem.h"
+#include "PartSystem.h"
 #include "CraftingSystem.h"
 #include "Engine/DataTable.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -45,6 +46,7 @@ AFPSCharacter::AFPSCharacter()		//초기 스텟 설정
 	//인벤토리 부착
 	Inventory = CreateDefaultSubobject<UInventory>(TEXT("InventoryComponent"));
 	UpgradeSystem = CreateDefaultSubobject<UUpgradeSystem>(TEXT("UpgradeSystem"));
+	PartSystem = CreateDefaultSubobject<UPartSystem>(TEXT("PartSystem"));
 
 	// Crouch 활성화
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
@@ -60,7 +62,7 @@ AFPSCharacter::AFPSCharacter()		//초기 스텟 설정
 void AFPSCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
 	//if (Inventory && UpgradeSystem)
 	//{
 	//	UpgradeSystem->TestPartUpgrade(Inventory);

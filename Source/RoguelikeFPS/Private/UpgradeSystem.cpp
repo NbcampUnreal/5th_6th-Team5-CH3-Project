@@ -79,7 +79,7 @@ bool UUpgradeSystem::UpgradeItem(UItemBase* TargetItem, UItemBase* UpgradeItem, 
 	EPartGrade OldGrade = TargetItem->PartGrade;
 	TargetItem->PartGrade = static_cast<EPartGrade>(FMath::Clamp((uint8)TargetItem->PartGrade + 1, 0, 3));
 
-	const float FixedIncrease = 0.10f; 
+	const float FixedIncrease = 0.10f;
 
 	float OldDamage = TargetItem->BaseDamage;
 	int32 OldAmmo = TargetItem->Ammo;

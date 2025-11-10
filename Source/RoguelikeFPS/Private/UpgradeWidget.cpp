@@ -124,7 +124,7 @@ void UUpgradeWidget::OnUpgradeClicked()
         return;
     }
     const bool bSuccess = UpgradeSystem->UpgradeItem(SelectedPart, UpgradeMaterial, Inventory, GoldCost);
-    
+
     if (bSuccess)
     {
         TargetItemGrade->SetText(FText::FromString(TEXT("Upgrade Success!")));
@@ -203,8 +203,8 @@ void UUpgradeWidget::UpdateUI()
 
     if (SuccessRateText && SelectedPart)
     {
-        float BaseRate = 80.0f; 
-        float GradePenalty = (float)((uint8)SelectedPart->PartGrade) * 15.0f; 
+        float BaseRate = 80.0f;
+        float GradePenalty = (float)((uint8)SelectedPart->PartGrade) * 15.0f;
         float FinalRate = FMath::Clamp(BaseRate - GradePenalty, 10.0f, 100.f);
         SuccessRateText->SetText(FText::Format(FText::FromString(TEXT("probability of success: {0}%")), FText::AsNumber(FinalRate)));
     }
