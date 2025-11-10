@@ -79,8 +79,8 @@ public:
 
 	void IncreaseHeadShotMultiplier(float value);
 	
-	void SetData(UGunDataAsset data);
-	void Assign(UGunDataAsset data);
+	void SetData(UGunDataAsset* data);
+	void Assign(UGunDataAsset* data);
 	
 	virtual void AttachWeapon(ACharacter* TargetCharacter) override;
 

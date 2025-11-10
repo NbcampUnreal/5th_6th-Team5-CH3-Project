@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
+#include "Weapon/GunStatus.h"
 #include "GunDataAsset.generated.h"
 
 /**
@@ -17,7 +18,12 @@ struct FGunData
 {
     GENERATED_BODY()
 
-    // 편집·블루프린트 노출
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data, meta = (AllowPrivateAccess = "true"))
+	FGunStatus _Status;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay, meta = (AllowPrivateAccess = "true"))
+	USkeletalMesh* _Mesh;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay, meta = (AllowPrivateAccess = "true"))
 	USoundBase* _AttackSound;
 

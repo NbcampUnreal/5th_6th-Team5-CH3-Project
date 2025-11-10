@@ -24,16 +24,16 @@ struct FGunStatus
     float AttackPoint;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
-    int32 MaxBulletCount;
+    int32 MaxBulletCount = 10;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
-    float AttackDelay = 0.0f;
+    float AttackDelay = 0.1f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
-    float ReloadTime = 0.0f;
+    float ReloadTime = 0.1f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
-    float ProjectileSpeed = 0.0f;
+    float ProjectileSpeed = 3000.0f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
     int ProjectilesPerShot = 1;

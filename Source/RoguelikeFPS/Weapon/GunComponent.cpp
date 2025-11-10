@@ -32,7 +32,7 @@ void UGunComponent::DoAttack()
 	if ((CurrentBulletCount <= 0)) {
 		if(_IsReloading) return;
 		UWorld* World = GetWorld();
-		GetWorld()->GetTimerManager().SetTimer(_ReloadTimerHandle, this, &UGunComponent::ReloadBullet, _Status.ReloadTime, false);
+		World->GetTimerManager().SetTimer(_ReloadTimerHandle, this, &UGunComponent::ReloadBullet, _Status.ReloadTime, false);
 		_IsReloading = true;
 		return;
 	}
@@ -90,9 +90,7 @@ void UGunComponent::Fire()
 	CurrentBulletCount--;
 	CanAttack = false;
 
-
-	auto* it = GetAttachParent();
-	UWorld* World = it->GetWorld();
+	UWorld* World = GetWorld();
 	World->GetTimerManager().SetTimer(_GunTimerHandle, [this]()
 		{
 			CanAttack = true;
@@ -148,17 +146,19 @@ void UGunComponent::IncreaseHeadShotMultiplier(float value)
 	if (value > 0) _Status.HeadShotMultiplier += value;
 }
 
-void UGunComponent::SetData(UGunDataAsset data)
+void UGunComponent::SetData(UGunDataAsset* data)
 {
-	data.GunData.WeaponSocketName = WeaponSocketName;
-	data.GunData._AttackAction = _AttackAction;
-	data.GunData._AttackAnimation = _AttackAnimation;
-	data.GunData._AttackMappingContext = _AttackMappingContext;
-	data.GunData._AttackSound = _AttackSound;
-	data.GunData._ProjectileClass = _ProjectileClass;
-	data.GunData._TSubAnimInstance = _TSubAnimInstance;
+	data->GunData._Status = _Status;
+	data->GunData.WeaponSocketName = WeaponSocketName;
+	data->GunData._AttackAction = _AttackAction;
+	data->GunData._AttackAnimation = _AttackAnimation;
+	data->GunData._AttackMappingContext = _AttackMappingContext;
+	data->GunData._AttackSound = _AttackSound;
+	data->GunData._ProjectileClass = _ProjectileClass;
+	data->GunData._TSubAnimInstance = _TSubAnimInstance;
+	data->GunData._Mesh = this->SkeletalMesh;
 
-	// ÇöÀç Á÷¼Ó ÀÚ½Äµé Áß UWeaponSkillComponent¸¸ °ñ¶ó¼­ º¹»ç
+	// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ú½Äµï¿½ ï¿½ï¿½ UWeaponSkillComponentï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	const TArray<USceneComponent*>& Children = GetAttachChildren();
 	for (USceneComponent* Child : Children)
 	{
@@ -167,28 +167,30 @@ void UGunComponent::SetData(UGunDataAsset data)
 			UClass* SkillClass = Skill->GetClass();
 			if (SkillClass && SkillClass->IsChildOf(UWeaponSkillComponent::StaticClass()))
 			{
-				data.Skills.Add(SkillClass);
+				data->Skills.Add(SkillClass);
 			}
 		}
 	}
 }
 
-void UGunComponent::Assign(UGunDataAsset data)
+void UGunComponent::Assign(UGunDataAsset* data)
 {
-	WeaponSocketName = data.GunData.WeaponSocketName;
-	_AttackAction = data.GunData._AttackAction;
-	_AttackAnimation = data.GunData._AttackAnimation;
-	_AttackMappingContext = data.GunData._AttackMappingContext;
-	_AttackSound = data.GunData._AttackSound;
-	_TSubAnimInstance = data.GunData._TSubAnimInstance;
+	_Status = data->GunData._Status;
+	WeaponSocketName = data->GunData.WeaponSocketName;
+	_AttackAction = data->GunData._AttackAction;
+	_AttackAnimation = data->GunData._AttackAnimation;
+	_AttackMappingContext = data->GunData._AttackMappingContext;
+	_AttackSound = data->GunData._AttackSound;
+	_ProjectileClass = data->GunData._ProjectileClass;
+	_TSubAnimInstance = data->GunData._TSubAnimInstance;
+	this->SkeletalMesh = data->GunData._Mesh;
 
-	for (TSubclassOf<UWeaponSkillComponent> SkillClass : data.Skills)
+	for (TSubclassOf<UWeaponSkillComponent> SkillClass : data->Skills)
 	{
 		if (!SkillClass) continue;
-		UWeaponSkillComponent* NewSkill = NewObject<UWeaponSkillComponent>(_Character, SkillClass);
-		NewSkill->SetupAttachment(_Character->GetMesh());
+		UWeaponSkillComponent* NewSkill = NewObject<UWeaponSkillComponent>(this, SkillClass);
+		NewSkill->SetupAttachment(this);
 		NewSkill->RegisterComponent();
-		NewSkill->SetUp();
 	}
 }
 

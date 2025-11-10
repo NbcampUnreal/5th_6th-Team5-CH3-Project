@@ -57,26 +57,11 @@ void UGameDataInstance::RoadStatus(AFPSCharacter* Character)
 
 
     UE_LOG(LogTemp, Warning, TEXT("Load Level = %d"), level);
-    //총 컴포넌트 데이터 로드
-    //if (guncomp)
-    //{
-    //    guncomp->AttachWeapon(Character);
-    //}
-    //else
-    //{
-    //    UE_LOG(LogTemp, Log, TEXT("guncomp is NULL"));
-        if (SelectedWeaponIndex == 1)
-        {
-            AActor* Proj = GetWorld()->SpawnActor<AActor>(PistolBP, Character->GetTransform());
-        }
-        if (SelectedWeaponIndex == 2)
-        {
-             //GetActorRotation()
-            AActor* Proj = GetWorld()->SpawnActor<AActor>(RifleBP, FVector(Character->GetActorLocation().X, Character->GetActorLocation().Y, Character->GetActorLocation().Z - 150.f), Character->GetActorRotation());
-        }
-    //}
-    
 
+    UGunComponent* NewGun = NewObject<UGunComponent>(Character);
+    NewGun->Assign(GunData);
+    NewGun->RegisterComponent();
+    NewGun->AttachWeapon(Character);
 
     //인벤토리 데이터 로드
 
@@ -99,7 +84,11 @@ void UGameDataInstance::SaveStatus(AFPSCharacter* Character)
     UE_LOG(LogTemp, Warning, TEXT("Save Level = %d"), level);
 
     //총 컴포넌트 데이터 저장
-    //guncomp = Cast<UGunComponent>(Character->GetComponentByClass<UGunComponent>());
+    guncomp = Cast<UGunComponent>(Character->GetComponentByClass<UGunComponent>());
+    if (guncomp)
+    {
+        guncomp->SetData(GunData);
+    }
 
     //인벤토리 데이터 저장
 }

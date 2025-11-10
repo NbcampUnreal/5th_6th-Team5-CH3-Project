@@ -7,6 +7,7 @@
 class AFPSCharacter;
 class UGunComponent;
 class UInventory;
+class UGunDataAsset;
 
 UCLASS()
 class ROGUELIKEFPS_API UGameDataInstance : public UGameInstance
@@ -70,6 +71,9 @@ public:
 
     UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "PlayerData")
     TSubclassOf<AActor> RifleBP;
+
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "PlayerData")
+    TObjectPtr<UGunDataAsset> GunData;
 
 
     UFUNCTION()
