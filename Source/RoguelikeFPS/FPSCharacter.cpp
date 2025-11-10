@@ -107,10 +107,10 @@ void AFPSCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//if (Inventory)
-	//{
-	//	Inventory->LoadInventoryInstance();
-	//}
+	if (Inventory)
+	{
+		Inventory->LoadInventoryInstance();
+	}
 }
 
 // INPUT BINDING

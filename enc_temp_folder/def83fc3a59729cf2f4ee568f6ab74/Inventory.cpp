@@ -5,6 +5,7 @@
 #include "Engine/DataTable.h"
 #include "Kismet/GameplayStatics.h"
 
+
 UInventory::UInventory()
 {
 	PrimaryComponentTick.bCanEverTick = false;
@@ -192,41 +193,41 @@ void UInventory::SetGold(int32 NewGold)
 	OnGoldChanged.Broadcast(Gold);
 }
 
-void UInventory::SaveInventoryInstance()
-{
-	UGameDataInstance* MyInstance = Cast<UGameDataInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
-
-	if (MyInstance)
-	{
-		MyInstance->InventoryItemName.Empty();
-		for (UItemBase* Item : InventoryItems)
-		{
-			if (Item)
-			{
-				MyInstance->InventoryItemName.Add(Item->ItemName);
-			}
-		}
-		MyInstance->SaveGold = Gold;
-	}
-}
-
-void UInventory::LoadInventoryInstance()
-{
-	UGameDataInstance* MyInstance = Cast<UGameDataInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
-
-	if (MyInstance && ItemDataTable)
-	{
-		InventoryItems.Empty();
-		for (const FName ItemName : MyInstance->InventoryItemName)
-		{
-			FItemData* Row = ItemDataTable->FindRow<FItemData>(ItemName, TEXT(""));
-			if (Row)
-			{
-				UItemBase* NewItem = NewObject<UItemBase>(this, UItemBase::StaticClass());
-				NewItem->InitItemData(*Row);
-				AddItem(NewItem, Row->Amount, Row->ItemName);
-			}
-		}
-		SetGold(MyInstance->SaveGold);
-	}
-}
+//void UInventory::SaveInventoryInstance()
+//{
+//	UGameDataInstance* MyInstance = Cast<UGameDataInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+//
+//	if (MyInstance)
+//	{
+//		MyInstance->InventoryItemName.Empty();
+//		for (UItemBase* Item : InventoryItems)
+//		{
+//			if (Item)
+//			{
+//				MyInstance->InventoryItemName.Add(Item->ItemName);
+//			}
+//		}
+//		MyInstance->SaveGold = Gold;
+//	}
+//}
+//
+//void UInventory::LoadInventoryInstance()
+//{
+//	UGameDataInstance* MyInstance = Cast<UGameDataInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+//
+//	if (MyInstance && ItemDataTable)
+//	{
+//		InventoryItems.Empty();
+//		for (const FName ItemName : MyInstance->InventoryItemName)
+//		{
+//			FItemData* Row = ItemDataTable->FindRow<FItemData>(ItemName, TEXT(""));
+//			if (Row)
+//			{
+//				UItemBase* NewItem = NewObject<UItemBase>(this, UItemBase::StaticClass());
+//				NewItem->InitItemData(*Row);
+//				AddItem(NewItem, Row->Amount, Row->ItemName);
+//			}
+//		}
+//		SetGold(MyInstance->SaveGold);
+//	}
+//}

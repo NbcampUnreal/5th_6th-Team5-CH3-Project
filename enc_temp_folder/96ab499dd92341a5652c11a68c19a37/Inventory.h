@@ -19,10 +19,10 @@ class ROGUELIKEFPS_API UInventory : public UActorComponent
 public:	
 	UInventory();
 
-	UFUNCTION()
-	void SaveInventoryInstance();
-	UFUNCTION()
-	void LoadInventoryInstance();
+	//UFUNCTION()
+	//void SaveInventoryInstance();
+	//UFUNCTION()
+	//void LoadInventoryInstance();
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
@@ -55,16 +55,38 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ShowInventory() const;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "InventoryGold")
+	int32 Goods1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "InventoryGold")
+	int32 Goods2;
+
+	UFUNCTION(BlueprintCallable)
+	int32 GetGoods1() { return Goods1; }
+
+	UFUNCTION(BlueprintCallable)
+	int32 GetGoods2() { return Goods2; }
+
+	UFUNCTION(BlueprintCallable)
+	void SetGoods1(int32 input) { 
+		Goods1 = input; 
+		UE_LOG(LogTemp, Log, TEXT("Goods1 : %d"), Goods1);
+	}
+
+	UFUNCTION(BlueprintCallable)
+	void SetGoods2(int32 input) { 
+		Goods2 = input; 
+		UE_LOG(LogTemp, Log, TEXT("Goods2 : %d"), Goods2);
+	}
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	UInventoryWidget* InventoryUI;
 	
-	//��������Ʈ
 	UPROPERTY(BlueprintAssignable, Category = "Inventory")
 	FOnGoldChanged OnGoldChanged;
 	UPROPERTY(BlueprintAssignable, Category = "Inventory")
 	FOnInventoryUpdated OnInventoryUpdated;
 
-	//�˻�
 	UFUNCTION(BlueprintCallable)
 	UItemBase* SearchItemName(const FName& Name) const;
 	UFUNCTION(BlueprintCallable)
