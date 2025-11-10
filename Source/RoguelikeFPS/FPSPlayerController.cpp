@@ -1,4 +1,4 @@
-#include "FPSPlayerController.h"
+ï»¿#include "FPSPlayerController.h"
 #include "FPSCharacter.h"
 #include "Inventory.h"
 #include "InventoryWidget.h"
@@ -11,6 +11,10 @@
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
 #include "Blueprint/UserWidget.h"
+#include "Blueprint/WidgetBlueprintLibrary.h"
+#include "Kismet/GameplayStatics.h"
+#include "GameDataInstance.h"
+#include "AugmentWidget.h"
 //#include "TitleWidget.h"
 #include "StatsHUD.h"
 
@@ -27,12 +31,12 @@ AFPSPlayerController::AFPSPlayerController()
 	IA_InventoryOnOff(nullptr),
 	InventoryWidget(nullptr),
 	ShopWidget(nullptr)
-	//,TitleWidgetClass(nullptr) // Title Ãß°¡
+	//,TitleWidgetClass(nullptr) // Title ì¶”ê°€
 
 {
 }
 
-// IMC È°¼ºÈ­
+// IMC í™œì„±í™”
 void AFPSPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -64,7 +68,7 @@ void AFPSPlayerController::BeginPlay()
 		}
 	}
 	
-	// // 2. HUD À§Á¬ »ı¼º ¹× µ¨¸®°ÔÀÌÆ® ¹ÙÀÎµù
+	// // 2. HUD ìœ„ì ¯ ìƒì„± ë° ë¸ë¦¬ê²Œì´íŠ¸ ë°”ì¸ë”©
 	// if (StatsHUDClass)
 	// {
 		// UUserWidget* StatsHUD = CreateWidget<UUserWidget>(this, StatsHUDClass);
@@ -73,16 +77,16 @@ void AFPSPlayerController::BeginPlay()
 		// {
 			// StatsHUD->AddToViewport();
 			// HUDWidgetInstance = StatsHUD;
-			// // ¸¶¿ì½º Ä¿¼­ ¼³Á¤ (°ÔÀÓ Áß¿¡´Â ÀÏ¹İÀûÀ¸·Î ¼û±è)
+			// // ë§ˆìš°ìŠ¤ ì»¤ì„œ ì„¤ì • (ê²Œì„ ì¤‘ì—ëŠ” ì¼ë°˜ì ìœ¼ë¡œ ìˆ¨ê¹€)
 			// bShowMouseCursor = false;
 			// FInputModeGameOnly InputMode;
 			// SetInputMode(InputMode);
 
-			// // 3. Ä³¸¯ÅÍ ÂüÁ¶ È¹µæ ¹× UStatsHUD¿¡ À§Á¬ ¼³Á¤
+			// // 3. ìºë¦­í„° ì°¸ì¡° íšë“ ë° UStatsHUDì— ìœ„ì ¯ ì„¤ì •
 			// if (AFPSCharacter* MyCharacter = Cast<AFPSCharacter>(GetCharacter()))
 			// {
-				// // UStatsHUD·Î Ä³½ºÆÃÇÏ¿© Ä³¸¯ÅÍ¸¦ ¼³Á¤ÇÕ´Ï´Ù.
-				// // UStatsHUD´Â SetOwningCharacter¿¡¼­ Ä³¸¯ÅÍÀÇ µ¨¸®°ÔÀÌÆ®¸¦ Á÷Á¢ ¹ÙÀÎµùÇÕ´Ï´Ù.
+				// // UStatsHUDë¡œ ìºìŠ¤íŒ…í•˜ì—¬ ìºë¦­í„°ë¥¼ ì„¤ì •í•©ë‹ˆë‹¤.
+				// // UStatsHUDëŠ” SetOwningCharacterì—ì„œ ìºë¦­í„°ì˜ ë¸ë¦¬ê²Œì´íŠ¸ë¥¼ ì§ì ‘ ë°”ì¸ë”©í•©ë‹ˆë‹¤.
 				// if (UStatsHUD* StatsHUDInstance = Cast<UStatsHUD>(HUDWidgetInstance))
 				// {
 					// StatsHUDInstance->SetOwningCharacter(MyCharacter);
@@ -142,7 +146,7 @@ void AFPSPlayerController::BeginPlay()
 
 	SetUpInputBinding();
 }
-	////title Ãß°¡
+	////title ì¶”ê°€
 	//if (titlewidgetclass)
 	//{
 	//	uuserwidget* titlewidget = createwidget<uuserwidget>(this, titlewidgetclass);
@@ -150,7 +154,7 @@ void AFPSPlayerController::BeginPlay()
 	//	{
 	//		titlewidget->addtoviewport();
 
-	//		// ¸¶¿ì½º Ä¿¼­ º¸ÀÌ±â
+	//		// ë§ˆìš°ìŠ¤ ì»¤ì„œ ë³´ì´ê¸°
 	//		bshowmousecursor = true;
 
 	//		finputmodeuionly inputmode;
@@ -269,4 +273,26 @@ void AFPSPlayerController::CraftingToggle()
 		bShowMouseCursor = true;
 		SetInputMode(FInputModeGameAndUI().SetWidgetToFocus(CraftingMenuWidget->TakeWidget()));
 	}
+}
+
+void AFPSPlayerController::ShowAugmentSelection(const TArray<FAugmentData>& Options)
+{
+	if (!AugmentWidgetClass) return;
+
+	if (!AugmentUI)
+		AugmentUI = CreateWidget<UAugmentWidget>(this, AugmentWidgetClass);
+
+	if (!AugmentUI) return;
+
+	// ë°ì´í„° ì£¼ì… (InitializeëŠ” CreateWidget ì•ˆì—ì„œ ì´ë¯¸ ëë‚©ë‹ˆë‹¤)
+	AFPSCharacter* Me = Cast<AFPSCharacter>(GetPawn());
+	AugmentUI->Setup(Me, Options);
+
+	// ë„ìš°ê¸°
+	AugmentUI->AddToViewport(100);
+
+	// ì…ë ¥ ì „í™˜ & ì»¤ì„œ
+	bShowMouseCursor = true;
+	UWidgetBlueprintLibrary::SetInputMode_UIOnlyEx(this, AugmentUI, EMouseLockMode::DoNotLock);
+	if (Me) Me->DisableInput(this); // ìœ„ì ¯ Close/Confirmì—ì„œ EnableInput ë³µêµ¬
 }

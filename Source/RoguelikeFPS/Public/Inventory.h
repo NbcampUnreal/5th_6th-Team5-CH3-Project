@@ -88,5 +88,11 @@ public:
 	UItemBase* SearchItemName(const FName& Name) const;
 	UFUNCTION(BlueprintCallable)
 	UItemBase* SearchItemNumber(int32 ItemNumber) const;
+
+
+	UFUNCTION()
+	void SaveInventoryInstance();
+	UFUNCTION()
+	void LoadInventoryInstance();
 	
 };

@@ -28,7 +28,11 @@ void ADropItem::BeginPlay()
 		inven = MyOwner->GetComponentByClass<UInventory>();
 		UE_LOG(LogTemp, Log, TEXT("inventory setting!"));
 	}
-	UE_LOG(LogTemp, Log, TEXT("inventory setting failed"));
+
+
+	static const FString ContextString(TEXT("ItemSpawnContext"));
+	ItemDataTable->GetAllRows<FItemData>(ContextString, AllRows);
+
 }
 
 // Called every frame
@@ -56,44 +60,78 @@ void ADropItem::DropStone()
 	//	NewItem->InitItemData(*Row);
 	//}
 
-	//UItemBase* TestItem = NewObject<UItemBase>(inven);
-	//FItemData testest;
+	UItemBase* TestItem = NewObject<UItemBase>(inven);
+	FItemData testest;
 
-	//testest.ItemName = "강화돌";
-	//testest.Amount = 1;
-	//testest.ItemType = EItemType::MaterialItem;
-	//testest.PartGrade = EPartGrade::Normal;
-	//testest.PartType = EPartType::Muzzle;
-	//testest.Thumbnail = UKismetRenderingLibrary::ImportFileAsTexture2D(this, TEXT("/All/EngineData/Engine/EditorMaterials/Anchor.png"));
-	//testest.BuyPrice = 0;
-	//testest.SellPrice = 0;
+	testest.ItemName = "강화돌";
+	testest.Amount = 1;
+	testest.ItemType = EItemType::MaterialItem;
+	testest.PartGrade = EPartGrade::Normal;
+	testest.PartType = EPartType::Muzzle;
+	testest.Thumbnail = UKismetRenderingLibrary::ImportFileAsTexture2D(this, TEXT("/All/EngineData/Engine/EditorMaterials/Anchor.png"));
+	testest.BuyPrice = 0;
+	testest.SellPrice = 0;
 
-	//TestItem->InitItemData(testest);
-
-	//inven->AddItem(TestItem, TestItem->Amount, FName("강화돌"));
+	TestItem->InitItemData(testest);
+	inven->AddItem(TestItem, TestItem->Amount, FName("강화돌"));
 }
 
 void ADropItem::DropParts()
 {
 	if (!inven) return;
 
-	UItemBase* TestItem = NewObject<UItemBase>(inven);
-	FItemData testest;
+	for (const FItemData* Row : AllRows)
+	{
+		if (Row->ItemName == "Muzzle")
+		{
+			UItemBase* TestItem = NewObject<UItemBase>(inven);
+			FItemData testest;
+			testest.ItemName = Row->ItemName;
+			testest.Amount = Row->Amount;
+			testest.ItemType = Row->ItemType;
+			testest.PartGrade = Row->PartGrade;
+			testest.PartType = Row->PartType;
+			testest.Thumbnail = Row->Thumbnail;
+			testest.BuyPrice = Row->BuyPrice;
+			testest.SellPrice = Row->SellPrice;
+			testest.MinDamage = Row->MinDamage;
+			testest.MaxDamage = Row->MaxDamage;
+			testest.BaseAttackSpeed = Row->BaseAttackSpeed;
 
-	testest.ItemName = "Muzzle";
-	testest.Amount = 1;
-	testest.ItemType = EItemType::PartItem;
-	testest.PartGrade = EPartGrade::Normal;
-	testest.PartType = EPartType::Muzzle;
-	testest.Thumbnail = UKismetRenderingLibrary::ImportFileAsTexture2D(this, TEXT("/All/EngineData/Engine/EditorMaterials/Anchor.png"));
-	testest.BuyPrice = 0;
-	testest.SellPrice = 0;
-	testest.MinDamage = 100;
-	testest.MaxDamage = 200;
-	testest.BaseAttackSpeed = 100;
+			TestItem->InitItemData(testest);
+			inven->AddItem(TestItem, TestItem->Amount, FName("Drop TEST"));
+		}
 
-	TestItem->InitItemData(testest);
-	inven->AddItem(TestItem, TestItem->Amount, FName("Muzzle"));
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+	//UItemBase* TestItem = NewObject<UItemBase>(inven);
+	//FItemData testest;
+
+	//testest.ItemName = "Muzzle";
+	//testest.Amount = 1;
+	//testest.ItemType = EItemType::PartItem;
+	//testest.PartGrade = EPartGrade::Normal;
+	//testest.PartType = EPartType::Muzzle;
+	//testest.Thumbnail = UKismetRenderingLibrary::ImportFileAsTexture2D(this, TEXT("/All/EngineData/Engine/EditorMaterials/Anchor.png"));
+	//testest.BuyPrice = 0;
+	//testest.SellPrice = 0;
+	//testest.MinDamage = 100;
+	//testest.MaxDamage = 200;
+	//testest.BaseAttackSpeed = 100;
+
+	//TestItem->InitItemData(testest);
+	//inven->AddItem(TestItem, TestItem->Amount, FName("Muzzle"));
 
 
 

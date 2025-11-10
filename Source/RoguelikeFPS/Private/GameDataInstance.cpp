@@ -1,5 +1,4 @@
-﻿
-#include "GameDataInstance.h"
+﻿#include "GameDataInstance.h"
 #include "Engine/World.h"
 #include "Engine/GameInstance.h"
 #include "Kismet/GameplayStatics.h"
@@ -42,7 +41,7 @@ void UGameDataInstance::ResetGameStatsToLevelOne()
     CurrentStageIndex = 1;  //게임 오버/클리어 후 재시작을 위해 CurrentStageIndex 리셋
 }
 
-void UGameDataInstance::RoadStatus(AFPSCharacter* Character)
+void UGameDataInstance::LoadStatus(AFPSCharacter* Character)
 {
     //캐릭터 스탯 로드
     Character->SetLevel(level);
@@ -58,28 +57,29 @@ void UGameDataInstance::RoadStatus(AFPSCharacter* Character)
 
 
     UE_LOG(LogTemp, Warning, TEXT("Load Level = %d"), level);
-    //총 컴포넌트 데이터 로드
-    //if (guncomp)
-    //{
-    //    guncomp->AttachWeapon(Character);
-    //}
-    //else
-    //{
-    //    UE_LOG(LogTemp, Log, TEXT("guncomp is NULL"));
-        if (SelectedWeaponIndex == 1)
-        {
-            AActor* Proj = GetWorld()->SpawnActor<AActor>(PistolBP, Character->GetTransform());
-        }
-        if (SelectedWeaponIndex == 2)
-        {
-             //GetActorRotation()
-            AActor* Proj = GetWorld()->SpawnActor<AActor>(RifleBP, FVector(Character->GetActorLocation().X, Character->GetActorLocation().Y, Character->GetActorLocation().Z - 150.f), Character->GetActorRotation());
-        }
-    //}
+
+    if (SelectedWeaponIndex == 1)
+    {
+        AActor* Proj = GetWorld()->SpawnActor<AActor>(PistolBP, FVector(Character->GetActorLocation().X, Character->GetActorLocation().Y, Character->GetActorLocation().Z - 150.f), Character->GetActorRotation());
+    }
+    if (SelectedWeaponIndex == 2)
+    {
+        AActor* Proj = GetWorld()->SpawnActor<AActor>(RifleBP, FVector(Character->GetActorLocation().X, Character->GetActorLocation().Y, Character->GetActorLocation().Z - 150.f), Character->GetActorRotation());
+    }
+    if (SelectedWeaponIndex == 3)
+    {
+        AActor* Proj = GetWorld()->SpawnActor<AActor>(ShotGunBP, FVector(Character->GetActorLocation().X, Character->GetActorLocation().Y, Character->GetActorLocation().Z - 150.f), Character->GetActorRotation());
+    }
+    if (SelectedWeaponIndex == 4)
+    {
+        AActor* Proj = GetWorld()->SpawnActor<AActor>(RailGunBP, FVector(Character->GetActorLocation().X, Character->GetActorLocation().Y, Character->GetActorLocation().Z - 150.f), Character->GetActorRotation());
+    }
     
-
-
     //인벤토리 데이터 로드
+    //if (invencomp)
+    //{
+    //    Character->Inventory = Cast<UInventory>(invencomp);
+    //}
 
 }
 
@@ -103,6 +103,7 @@ void UGameDataInstance::SaveStatus(AFPSCharacter* Character)
     //guncomp = Cast<UGunComponent>(Character->GetComponentByClass<UGunComponent>());
 
     //인벤토리 데이터 저장
+    //invencomp = Cast<UInventory>(Character->GetComponentByClass<UInventory>());
 }
 
 

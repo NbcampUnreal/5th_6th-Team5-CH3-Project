@@ -56,8 +56,11 @@ public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "PlayerData")
     UGunComponent* guncomp;
 
-    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "PlayerData")
-    UInventory* invencomp;
+    UPROPERTY()
+    TArray<FName> InventoryItemName;
+
+    UPROPERTY()
+    int32 SaveGold;
 
     UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "PlayerData")
     UGunComponent* initpistolcomp;
@@ -71,9 +74,15 @@ public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "PlayerData")
     TSubclassOf<AActor> RifleBP;
 
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "PlayerData")
+    TSubclassOf<AActor> RailGunBP;
+
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "PlayerData")
+    TSubclassOf<AActor> ShotGunBP;
+
 
     UFUNCTION()
-    void RoadStatus(AFPSCharacter* Character);
+    void LoadStatus(AFPSCharacter* Character);
 
     UFUNCTION()
     void SaveStatus(AFPSCharacter* Character);

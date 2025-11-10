@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
@@ -12,7 +12,9 @@ class UUpgradeMenuWidget;
 class UCraftingWidget;
 class UCraftingMenuWidget;
 class UShopWidget;
-//class UTitleWidget;	//Å¸ÀÌÆ² Å×½ºÆ®
+class UAugmentWidget;
+struct FAugmentData;
+//class UTitleWidget;	//íƒ€ì´í‹€ í…ŒìŠ¤íŠ¸
 
 UCLASS()
 class ROGUELIKEFPS_API AFPSPlayerController : public APlayerController
@@ -48,7 +50,7 @@ public:
 	TObjectPtr<UInputAction> IA_CraftingOnOff;
 
 
-	//ÀÎº¥Åä¸®/»óÁ¡ À§Á¬
+	//ì¸ë²¤í† ë¦¬/ìƒì  ìœ„ì ¯
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	TSubclassOf<UInventoryWidget> InventoryWidgetClass;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
@@ -66,8 +68,16 @@ public:
 	UPROPERTY()
 	UCraftingMenuWidget* CraftingMenuWidget;
 
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UAugmentWidget> AugmentWidgetClass;
+
+	UPROPERTY()
+	UAugmentWidget* AugmentUI = nullptr;
+
+	void ShowAugmentSelection(const TArray<FAugmentData>& Options);
+
 	UFUNCTION(BlueprintCallable)
-	void InventoryToggle();	//¿­±â/´İ±â
+	void InventoryToggle();	//ì—´ê¸°/ë‹«ê¸°
 	UFUNCTION(BlueprintCallable)
 	void UpgradeToggle();
 	UFUNCTION(BlueprintCallable)
@@ -75,7 +85,7 @@ public:
 
 	void SetUpInputBinding();
 
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")	//Title Å×½ºÆ®
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")	//Title í…ŒìŠ¤íŠ¸
 	//TSubclassOf<UTitleWidget> TitleWidgetClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")

@@ -60,7 +60,14 @@ public:
     UFUNCTION(BlueprintCallable, Category = "AI|Movement")
     float GetChaseSpeed();    // 추적 속도(있다면)
 
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Teleport")
+    AActor* TeleportSpawnLocation;
 
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Teleport")
+    TSubclassOf<AActor> TeleportSpawnActor;
+
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Teleport")
+    FName NextLevelName = TEXT("LevelName");
 
 
     // 디버그 기즈모 토글

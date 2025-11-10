@@ -1,28 +1,25 @@
 ﻿#include "StatsHUD.h"
 #include "FPSCharacter.h"
 #include "Weapon/GunComponent.h"
+#include "Inventory.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
-
 void UStatsHUD::SetOwningCharacter(AFPSCharacter* NewCharacter)
 {
     OwningCharacter = NewCharacter;
-
     if (OwningCharacter)
     {
         // GunComponent 찾기
         GunComponent = Cast<UGunComponent>(OwningCharacter->GetComponentByClass(UGunComponent::StaticClass()));
-
         // 델리게이트 바인딩
         OwningCharacter->OnHUDStatChanged.AddDynamic(this, &UStatsHUD::OnCharacterStatChanged);
         OwningCharacter->OnPlayerDeath.AddDynamic(this, &UStatsHUD::OnCharacterDied);
-
         // 초기화
         UpdateHealthDisplay();
         UpdateShieldDisplay();
         UpdateEXPDisplay();
         UpdateLevelDisplay();
-        UpdateWeaponDisplay();
+        //UpdateWeaponDisplay();
         UpdateGoldDisplay();
         UpdateDashIndicator();
         UpdateSkillCooldownDisplay();
@@ -30,9 +27,8 @@ void UStatsHUD::SetOwningCharacter(AFPSCharacter* NewCharacter)
 }
 void UStatsHUD::HideHUD()
 {
-        SetVisibility(ESlateVisibility::Hidden);
+    SetVisibility(ESlateVisibility::Hidden);
 }
-
 void UStatsHUD::ShowHUD()
 {
     SetVisibility(ESlateVisibility::Visible);
@@ -40,7 +36,6 @@ void UStatsHUD::ShowHUD()
 void UStatsHUD::NativeConstruct()
 {
     Super::NativeConstruct();
-
     if (!OwningCharacter)
     {
         if (APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0))
@@ -52,18 +47,15 @@ void UStatsHUD::NativeConstruct()
         }
     }
 }
-
 void UStatsHUD::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
     Super::NativeTick(MyGeometry, InDeltaTime);
-
     if (OwningCharacter)
     {
         UpdateDashIndicator();           // 실시간 대시 상태
         UpdateSkillCooldownDisplay();    // 실시간 쿨타임
     }
 }
-
 // UI 업데이트 (모두 Getter 사용)
 void UStatsHUD::UpdateHealthDisplay()
 {
@@ -75,7 +67,6 @@ void UStatsHUD::UpdateHealthDisplay()
         ProgressBar_Health->SetPercent(Percent);
     }
 }
-
 void UStatsHUD::UpdateShieldDisplay()
 {
     if (OwningCharacter && ProgressBar_Shield)
@@ -86,7 +77,6 @@ void UStatsHUD::UpdateShieldDisplay()
         ProgressBar_Shield->SetPercent(Percent);
     }
 }
-
 void UStatsHUD::UpdateEXPDisplay()
 {
     if (OwningCharacter && ProgressBar_EXP)
@@ -97,7 +87,6 @@ void UStatsHUD::UpdateEXPDisplay()
         ProgressBar_EXP->SetPercent(Percent);
     }
 }
-
 void UStatsHUD::UpdateLevelDisplay()
 {
     if (OwningCharacter && Text_Level)
@@ -108,41 +97,38 @@ void UStatsHUD::UpdateLevelDisplay()
         ));
     }
 }
-
-void UStatsHUD::UpdateWeaponDisplay()
-{
-    if (!OwningCharacter) return;
-
-    FName WeaponName = OwningCharacter->GetCurrentWeaponName();
-
-    if (Text_WeaponName)
-    {
-        Text_WeaponName->SetText(FText::FromName(WeaponName));
-    }
-
-    if (Text_Ammo && GunComponent)
-    {
-        int32 Current = GunComponent->GetBulletCount();
-        int32 Max = GunComponent->GetMaxBulletCount();
-        Text_Ammo->SetText(FText::Format(
-            NSLOCTEXT("HUD", "Ammo", "{0}/{1}"),
-            FText::AsNumber(Current),
-            FText::AsNumber(Max)
-        ));
-    }
-}
-
+//void UStatsHUD::UpdateWeaponDisplay()
+//{
+//    if (!OwningCharacter) return;
+//
+//    FName WeaponName = OwningCharacter->GetCurrentWeaponName();
+//
+//    if (Text_WeaponName)
+//    {
+//        Text_WeaponName->SetText(FText::FromName(WeaponName));
+//    }
+//
+//    if (Text_Ammo && GunComponent)
+//    {
+//        int32 Current = GunComponent->GetBulletCount();
+//        int32 Max = GunComponent->GetMaxBulletCount();
+//        Text_Ammo->SetText(FText::Format(
+//            NSLOCTEXT("HUD", "Ammo", "{0}/{1}"),
+//            FText::AsNumber(Current),
+//            FText::AsNumber(Max)
+//        ));
+//    }
+//}
 void UStatsHUD::UpdateGoldDisplay()
 {
     if (OwningCharacter && Text_Gold)
     {
-        //Text_Gold->SetText(FText::Format(
-        //    NSLOCTEXT("HUD", "Gold", "{0} G"),
-        //    FText::AsNumber(OwningCharacter->Inventory->getGold())
-        //));
+        Text_Gold->SetText(FText::Format(
+            NSLOCTEXT("HUD", "Gold", "{0} G"),
+            FText::AsNumber(OwningCharacter->Inventory->GetGold())
+        ));
     }
 }
-
 void UStatsHUD::UpdateDashIndicator()
 {
     if (OwningCharacter && DashIndicator)
@@ -152,11 +138,9 @@ void UStatsHUD::UpdateDashIndicator()
         // DashIndicator->SetBrushTintColor(bDashing ? FSlateColor(FLinearColor::Red) : FSlateColor(FLinearColor::White));
     }
 }
-
 void UStatsHUD::UpdateSkillCooldownDisplay()
 {
     if (!OwningCharacter) return;
-
     // Skill1
     if (Skill1_CD)
     {
@@ -164,7 +148,6 @@ void UStatsHUD::UpdateSkillCooldownDisplay()
         Skill1_CD->SetText(CD > 0.1f ? FText::AsNumber(FMath::CeilToFloat(CD)) : FText::GetEmpty());
         Skill1_CD->SetVisibility(CD > 0.1f ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
     }
-
     // Skill2 ~ Skill4 (동일 로직)
 #if 1
     if (Skill2_CD)
@@ -173,13 +156,11 @@ void UStatsHUD::UpdateSkillCooldownDisplay()
         Skill2_CD->SetText(CD > 0.1f ? FText::AsNumber(FMath::CeilToFloat(CD)) : FText::GetEmpty());
         Skill2_CD->SetVisibility(CD > 0.1f ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
     }
-
     // Skill3, Skill4 (필요 시 추가)
     // if (Skill3_CD) { ... }
     // if (Skill4_CD) { ... }
 #endif
 }
-
 // 델리게이트
 void UStatsHUD::OnCharacterStatChanged(FName StatName)
 {
@@ -191,14 +172,13 @@ void UStatsHUD::OnCharacterStatChanged(FName StatName)
         UpdateEXPDisplay();
     else if (StatName == TEXT("Level"))
         UpdateLevelDisplay();
-    else if (StatName == TEXT("Weapon") || StatName == TEXT("Ammo"))
-        UpdateWeaponDisplay();
+    //else if (StatName == TEXT("Weapon") || StatName == TEXT("Ammo"))
+    //    UpdateWeaponDisplay();
     else if (StatName == TEXT("Gold"))
         UpdateGoldDisplay();
     else if (StatName == TEXT("Dash"))
         UpdateDashIndicator();
 }
-
 void UStatsHUD::OnCharacterDied(AController* KillerController)
 {
     // HUD 숨기기 또는 GameOver 처리

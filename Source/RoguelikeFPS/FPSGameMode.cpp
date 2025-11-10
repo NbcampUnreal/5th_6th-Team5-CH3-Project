@@ -167,20 +167,93 @@ void AFPSGameMode::HandlePlayerLevelUp(APlayerController* PlayerController)
 {
     if (!PlayerController || !AugmentWidgetClass) return;
 
+    // 1) 후보 3개 추출
+    TArray<FAugmentData> Options;
+    PickRandomAugments(3, Options); // 아래 유틸 추가 예시 참고
+
+    // 2) 위젯 생성
     AugmentWidgetInstance = CreateWidget<UAugmentWidget>(PlayerController, AugmentWidgetClass);
-    if (AugmentWidgetInstance)
-    {
-        AugmentWidgetInstance->AddToViewport(1000);
-        FInputModeUIOnly InputMode;
-        InputMode.SetWidgetToFocus(AugmentWidgetInstance->TakeWidget());
-        PlayerController->SetInputMode(InputMode);
-        PlayerController->bShowMouseCursor = true;
-        if (UStatsHUD* HUD = GetHUDInstance(PlayerController))
+    if (!AugmentWidgetInstance) return;
+
+    // 3) Setup 주입 (소유 캐릭터 + 데이터)
+    AFPSCharacter* Me = Cast<AFPSCharacter>(PlayerController->GetPawn());
+    AugmentWidgetInstance->Setup(Me, Options);
+
+    // 4) 띄우기 + 입력 전환
+    AugmentWidgetInstance->AddToViewport(1000);
+    FInputModeUIOnly InputMode;
+    InputMode.SetWidgetToFocus(AugmentWidgetInstance->TakeWidget());
+    InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+    PlayerController->SetInputMode(InputMode);
+    PlayerController->bShowMouseCursor = true;
+
+    // 5) 캐릭터 입력 잠금 및 HUD 숨김
+    if (Me) Me->DisableInput(PlayerController);
+    if (UStatsHUD* HUD = GetHUDInstance(PlayerController)) HUD->HideHUD();
+}
+
+void AFPSGameMode::PickRandomAugments(int32 Count, TArray<FAugmentData>& Out)
+{
+    Out.Reset();
+    if (!AugmentDataTable) return;
+
+    static const FString Ctx(TEXT("PickAugments"));
+    TArray<FAugmentData*> Rows;
+    AugmentDataTable->GetAllRows<FAugmentData>(Ctx, Rows);
+    if (Rows.IsEmpty()) return;
+
+    auto GetWeight = [this](EAugmentRarity Rarity) -> float
         {
-            HUD->HideHUD();
+            if (const float* W = RarityWeights.Find(Rarity)) return *W;
+            return 0.f;
+        };
+
+    TSet<int32> Used;
+
+    for (int32 pick = 0; pick < Count && pick < Rows.Num(); ++pick)
+    {
+        struct FCandidate { int32 Index; float Weight; };
+        TArray<FCandidate> Cands;
+        Cands.Reserve(Rows.Num());
+
+        float Total = 0.f;
+
+        for (int32 i = 0; i < Rows.Num(); ++i)
+        {
+            if (Used.Contains(i)) continue;
+            const FAugmentData* Row = Rows[i];
+            if (!Row) continue;
+
+            // placeholder/무효 행 스킵 (필요 시 조건 조정)
+            if (Row->AugmentID.IsNone() || Row->Category == EAugmentCategory::None)
+                continue;
+
+            const float W = GetWeight(Row->Rarity);
+            if (W <= 0.f) continue;
+
+            Cands.Add({ i, W });
+            Total += W;
         }
+
+        if (Cands.IsEmpty() || Total <= 0.f) break;
+
+        // 상한 미포함
+        const float R = FMath::FRand() * Total;
+
+        float Acc = 0.f;
+        int32 PickIdx = Cands[0].Index; // fallback: 첫 후보
+        for (const FCandidate& C : Cands)
+        {
+            Acc += C.Weight;
+            if (R < Acc) { PickIdx = C.Index; break; }
+        }
+
+        Used.Add(PickIdx);
+        Out.Add(*Rows[PickIdx]); // 값 복사
     }
 }
+
+
 
 void AFPSGameMode::CloseCurrentUIAndResumeGame(bool bResumeGameInput)
 {

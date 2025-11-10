@@ -17,6 +17,7 @@ enum class EDropItemType : uint8
 };
 
 class UInventory;
+struct FItemData;
 
 UCLASS()
 class ROGUELIKEFPS_API ADropItem : public AActor
@@ -46,6 +47,8 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "InventoryGold")
 	int32 ADDAmount;
+
+	TArray<FItemData*> AllRows;
 
 	UFUNCTION(BlueprintCallable)
 	int32 GetADDAmount() { return ADDAmount; }

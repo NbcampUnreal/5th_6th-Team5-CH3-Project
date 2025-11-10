@@ -11,6 +11,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "DropItem.h"
 
+#include "TeleportVolume.h"
+
 #include "GameFramework/DamageType.h"
 #include "Components/CapsuleComponent.h"
 
@@ -207,6 +209,17 @@ void AAIEnemyCharacter::OnDeath()
         }
         //AActor* Proj = GetWorld()->SpawnActor<AActor>(DropItemClass, GetActorLocation(), GetActorRotation());
         DropItem();
+
+        if (auto* Boss2 = FindComponentByClass<UStage2BossAttackComponent>())
+        {
+            AActor* Teleport = GetWorld()->SpawnActor<AActor>(TeleportSpawnActor, TeleportSpawnLocation->GetActorLocation(), TeleportSpawnLocation->GetActorRotation());
+            auto* it = Cast<ATeleportVolume>(Teleport);
+            it->NextLevelName = NextLevelName;
+        }
+        
+
+
+
         StateMachine->ChangeState(EEnemyState::Dead);
     }
 }

@@ -96,7 +96,9 @@ void AFPSCharacter::BeginPlay()
 	
 	UGameDataInstance* instance = Cast<UGameDataInstance>(GetGameInstance());
 	
-	instance->RoadStatus(this);
+	instance->LoadStatus(this);
+
+	Inventory->LoadInventoryInstance();
 
 }
 
@@ -111,7 +113,7 @@ void AFPSCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	if (!instance)UE_LOG(LogTemp, Log, TEXT("instance is NULL"));
 
 	instance->SaveStatus(Character);
-
+	Inventory->SaveInventoryInstance();
 
 	Super::EndPlay(EndPlayReason);
 }
@@ -459,63 +461,66 @@ float AFPSCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	return ActualDamage;
 }
 
-void AFPSCharacter::ApplyAugment(FName AugmentName)
+void AFPSCharacter::ApplyAugment(FName AugmentKey /*AugmentID 혹은 RowName*/)
 {
-	UE_LOG(LogTemp, Warning, TEXT("ApplyAugment called with: %s"), *AugmentName.ToString());
-	AFPSGameMode* GameMode = Cast<AFPSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
-	if (!GameMode || !GameMode->AugmentDataTable)
+	UE_LOG(LogTemp, Warning, TEXT("ApplyAugment called with: %s"), *AugmentKey.ToString());
+
+	AFPSGameMode* GM = Cast<AFPSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+	if (!GM || !GM->AugmentDataTable) { UE_LOG(LogTemp, Error, TEXT("DT not found")); return; }
+
+	if (AppliedAugments.Contains(AugmentKey))
 	{
-		UE_LOG(LogTemp, Error, TEXT("증강 데이터 테이블을 찾을 수 없습니다!"));
+		UE_LOG(LogTemp, Warning, TEXT("이미 적용됨: %s"), *AugmentKey.ToString());
 		return;
 	}
-	if (AppliedAugments.Contains(AugmentName))
+
+	// 1) RowName 직조회 시도
+	FAugmentData* Data = GM->AugmentDataTable->FindRow<FAugmentData>(AugmentKey, TEXT("ApplyAugment"));
+	// 2) 실패하면 AugmentID로 선형 탐색
+	if (!Data)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("증강 %s 이미 적용됨!"), *AugmentName.ToString());
-		return;
+		static const FString Ctx(TEXT("ApplyAugmentScan"));
+		TArray<FAugmentData*> Rows;
+		GM->AugmentDataTable->GetAllRows<FAugmentData>(Ctx, Rows);
+		for (FAugmentData* R : Rows)
+		{
+			if (R && R->AugmentID == AugmentKey) { Data = R; break; }
+		}
 	}
-	FAugmentData* AugmentData = GameMode->AugmentDataTable->FindRow<FAugmentData>(AugmentName, TEXT(""));
-	if (AugmentData)
+
+	if (!Data) { UE_LOG(LogTemp, Error, TEXT("증강 %s 을(를) 찾지 못함"), *AugmentKey.ToString()); return; }
+
+	// 수치 적용
+	if (Data->HealthBonus != 0)
 	{
-		if (AugmentData->HealthBonus != 0)
-		{
-			SetMaxHealth(GetMaxHealth() + AugmentData->HealthBonus);
-			SetHealth(GetHealth() + AugmentData->HealthBonus);
-			UpdateHUDStats(TEXT("Health"));
-		}
-		if (AugmentData->AttackBonus != 0)
-		{
-			SetAttack(GetAttack() + AugmentData->AttackBonus);
-			UpdateHUDStats(TEXT("Attack"));
-		}
-		if (AugmentData->DefenseBonus != 0)
-		{
-			SetDefence(GetDefence() + AugmentData->DefenseBonus);
-			UpdateHUDStats(TEXT("Defence"));
-		}
-		if (AugmentData->ShieldBonus != 0)
-		{
-			SetShield(GetShield() + AugmentData->ShieldBonus);
-			UpdateHUDStats(TEXT("Shield"));
-		}
-		if (AugmentData->AttackSpeedMultiplier != 1.0f)
-		{
-			SetAttackSpeed(GetAttackSpeed() * AugmentData->AttackSpeedMultiplier);
-			UpdateHUDStats(TEXT("AttackSpeed"));
-		}
-		if (AugmentData->MovingSpeedMultiplier != 1.0f)
-		{
-			SetMovingSpeed(GetMovingSpeed() * AugmentData->MovingSpeedMultiplier);
-			GetCharacterMovement()->MaxWalkSpeed = GetMovingSpeed();
-			UpdateHUDStats(TEXT("MovingSpeed"));
-		}
-		AppliedAugments.Add(AugmentName);
-		UE_LOG(LogTemp, Log, TEXT("증강 적용됨: %s"), *AugmentName.ToString());
+		SetMaxHealth(GetMaxHealth() + Data->HealthBonus);
+		SetHealth(FMath::Clamp(GetHealth() + Data->HealthBonus, 0.f, (float)GetMaxHealth()));
+		UpdateHUDStats(TEXT("Health"));
 	}
-	else
+	if (Data->AttackBonus != 0) { SetAttack(GetAttack() + Data->AttackBonus); UpdateHUDStats(TEXT("Attack")); }
+	if (Data->DefenseBonus != 0) { SetDefence(GetDefence() + Data->DefenseBonus); UpdateHUDStats(TEXT("Defence")); }
+	if (Data->ShieldBonus != 0) { SetShield(GetShield() + Data->ShieldBonus); UpdateHUDStats(TEXT("Shield")); }
+
+	// 곱계수는 기본값 보호
+	const float AtkMul = (Data->AttackSpeedMultiplier <= 0.f) ? 1.f : Data->AttackSpeedMultiplier;
+	const float MoveMul = (Data->MovingSpeedMultiplier <= 0.f) ? 1.f : Data->MovingSpeedMultiplier;
+
+	if (!FMath::IsNearlyEqual(AtkMul, 1.f))
 	{
-		UE_LOG(LogTemp, Error, TEXT("증강 %s 데이터 테이블에서 찾을 수 없음!"), *AugmentName.ToString());
+		SetAttackSpeed(GetAttackSpeed() * AtkMul);
+		UpdateHUDStats(TEXT("AttackSpeed"));
 	}
+	if (!FMath::IsNearlyEqual(MoveMul, 1.f))
+	{
+		SetMovingSpeed(GetMovingSpeed() * MoveMul);
+		if (auto* Move = GetCharacterMovement()) Move->MaxWalkSpeed = GetMovingSpeed();
+		UpdateHUDStats(TEXT("MovingSpeed"));
+	}
+
+	AppliedAugments.Add(AugmentKey);
+	UE_LOG(LogTemp, Log, TEXT("증강 적용됨: %s"), *AugmentKey.ToString());
 }
+
 
 void AFPSCharacter::AddXP(float Amount)
 {

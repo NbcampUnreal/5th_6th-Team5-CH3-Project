@@ -29,6 +29,7 @@ public:
     UFUNCTION(BlueprintCallable) void OnMainMenuStartClicked();
     UFUNCTION(BlueprintCallable) void OnMainMenuBackClicked();
     UFUNCTION(BlueprintCallable) void HandlePlayerLevelUp(APlayerController* PlayerController);
+    UFUNCTION(BlueprintCallable) void PickRandomAugments(int32 Count, TArray<FAugmentData>& Out);
     UFUNCTION(BlueprintCallable) void CloseCurrentUIAndResumeGame(bool bResumeGameInput = true);
     UFUNCTION(BlueprintCallable) void HandlePlayerDeath(AController* KillerController);
     UFUNCTION(BlueprintCallable) void HandleGameClear();
@@ -41,6 +42,9 @@ protected:
     UPROPERTY() TObjectPtr<UStatsHUD> StatsHUDInstance;
     UStatsHUD* GetHUDInstance(APlayerController* PC);
     void CreateTitleWidget(APlayerController* PC);
+
+    // 레벨업 시 증강 선택 팝업
+    void ShowAugmentSelection(AFPSCharacter* Character);
 
 public:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")

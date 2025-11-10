@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
@@ -22,7 +22,7 @@ public:
     UPROPERTY(EditAnywhere, Category = "Teleport")
     float DelayBeforeTeleport = 5.0f;
 
-    UPROPERTY(EditAnywhere, Category = "Teleport", meta = (ToolTip = "´ÙÀ½À¸·Î ÀÌµ¿ÇÒ ¸ÊÀÇ ·¹º§ ÀÌ¸§"))
+    UPROPERTY(EditAnywhere, Category = "Teleport", meta = (ToolTip = "ë‹¤ìŒìœ¼ë¡œ ì´ë™í•  ë§µì˜ ë ˆë²¨ ì´ë¦„"))
     FName NextLevelName = TEXT("NextMap");
 
     UFUNCTION()
@@ -34,12 +34,12 @@ public:
         const FHitResult& SweepResult);
 
 private:
-    // Å¸ÀÌ¸Ó¿¡¼­ ÂüÁ¶ÇÒ ´ë»ó ÀúÀå
+    // íƒ€ì´ë¨¸ì—ì„œ ì°¸ì¡°í•  ëŒ€ìƒ ì €ì¥
     TWeakObjectPtr<AActor> PendingTeleportActor;
 
-    // Å¸ÀÌ¸Ó ÇÚµé·¯
+    // íƒ€ì´ë¨¸ í•¸ë“¤ëŸ¬
     FTimerHandle TeleportTimerHandle;
 
-    // Å¸ÀÌ¸Ó¿¡¼­ È£ÃâÇÒ ÇÔ¼ö
+    // íƒ€ì´ë¨¸ì—ì„œ í˜¸ì¶œí•  í•¨ìˆ˜
     void TeleportPendingActor();
 };
