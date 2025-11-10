@@ -64,7 +64,7 @@ void AFPSPlayerController::BeginPlay()
 		}
 	}
 	
-	// // 2. HUD À§Á¬ »ý¼º ¹× µ¨¸®°ÔÀÌÆ® ¹ÙÀÎµù
+	// // 2. HUD ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½Îµï¿½
 	// if (StatsHUDClass)
 	// {
 		// UUserWidget* StatsHUD = CreateWidget<UUserWidget>(this, StatsHUDClass);
@@ -73,16 +73,16 @@ void AFPSPlayerController::BeginPlay()
 		// {
 			// StatsHUD->AddToViewport();
 			// HUDWidgetInstance = StatsHUD;
-			// // ¸¶¿ì½º Ä¿¼­ ¼³Á¤ (°ÔÀÓ Áß¿¡´Â ÀÏ¹ÝÀûÀ¸·Î ¼û±è)
+			// // ï¿½ï¿½ï¿½ì½º Ä¿ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ï¿½ ï¿½ß¿ï¿½ï¿½ï¿½ ï¿½Ï¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½)
 			// bShowMouseCursor = false;
 			// FInputModeGameOnly InputMode;
 			// SetInputMode(InputMode);
 
-			// // 3. Ä³¸¯ÅÍ ÂüÁ¶ È¹µæ ¹× UStatsHUD¿¡ À§Á¬ ¼³Á¤
+			// // 3. Ä³ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ È¹ï¿½ï¿½ ï¿½ï¿½ UStatsHUDï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 			// if (AFPSCharacter* MyCharacter = Cast<AFPSCharacter>(GetCharacter()))
 			// {
-				// // UStatsHUD·Î Ä³½ºÆÃÇÏ¿© Ä³¸¯ÅÍ¸¦ ¼³Á¤ÇÕ´Ï´Ù.
-				// // UStatsHUD´Â SetOwningCharacter¿¡¼­ Ä³¸¯ÅÍÀÇ µ¨¸®°ÔÀÌÆ®¸¦ Á÷Á¢ ¹ÙÀÎµùÇÕ´Ï´Ù.
+				// // UStatsHUDï¿½ï¿½ Ä³ï¿½ï¿½ï¿½ï¿½ï¿½Ï¿ï¿½ Ä³ï¿½ï¿½ï¿½Í¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Õ´Ï´ï¿½.
+				// // UStatsHUDï¿½ï¿½ SetOwningCharacterï¿½ï¿½ï¿½ï¿½ Ä³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Îµï¿½ï¿½Õ´Ï´ï¿½.
 				// if (UStatsHUD* StatsHUDInstance = Cast<UStatsHUD>(HUDWidgetInstance))
 				// {
 					// StatsHUDInstance->SetOwningCharacter(MyCharacter);

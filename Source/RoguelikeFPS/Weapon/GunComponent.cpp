@@ -11,12 +11,12 @@
 UGunComponent::UGunComponent()
 {
 	CanAttack = true;
-	_WeaponSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("WeaponSpringArm"));
-	_WeaponSpringArm->TargetArmLength = 0.f;
-	_WeaponSpringArm->bDoCollisionTest = false;
+	//_WeaponSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("WeaponSpringArm"));
+	//_WeaponSpringArm->TargetArmLength = 0.f;
+	//_WeaponSpringArm->bDoCollisionTest = false;
 
-	_WeaponCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("WeaponCamera"));
-	_WeaponCamera->SetupAttachment(_WeaponSpringArm);
+	//_WeaponCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("WeaponCamera"));
+	//_WeaponCamera->SetupAttachment(_WeaponSpringArm);
 }
 
 UGunComponent::~UGunComponent()
@@ -31,8 +31,8 @@ void UGunComponent::DoAttack()
 
 	if ((CurrentBulletCount <= 0)) {
 		if(_IsReloading) return;
-		UWorld* const World = GetWorld();
-		World->GetTimerManager().SetTimer(_ReloadTimerHandle, this, &UGunComponent::ReloadBullet, _Status.ReloadTime, false);
+		UWorld* World = GetWorld();
+		GetWorld()->GetTimerManager().SetTimer(_ReloadTimerHandle, this, &UGunComponent::ReloadBullet, _Status.ReloadTime, false);
 		_IsReloading = true;
 		return;
 	}
@@ -65,22 +65,26 @@ void UGunComponent::OnRegister()
 	Super::OnRegister();
 
 	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
-	_WeaponSpringArm->AttachToComponent(this, AttachmentRules, _CameraSocketName);
+
+	if (IsRegistered())
+	{
+		//_WeaponSpringArm->AttachToComponent(this, AttachmentRules, _CameraSocketName);
+	}
 }
 
 void UGunComponent::AttachWeapon(ACharacter* TargetCharacter)
 {
 	Super::AttachWeapon(TargetCharacter);
 
-	if (APlayerController* PlayerController = Cast<APlayerController>(_Character->GetController()))
-	{
-		if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
-		{
-			// Attack
-			EnhancedInputComponent->BindAction(_ZoomAction, ETriggerEvent::Triggered, this, &UGunComponent::ZoomIn);
-			//EnhancedInputComponent->BindAction(_ZoomAction, ETriggerEvent::, this, &UGunComponent::ZoomOut);
-		}
-	}
+	//if (APlayerController* PlayerController = Cast<APlayerController>(_Character->GetController()))
+	//{
+	//	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
+	//	{
+	//		// Attack
+	//		EnhancedInputComponent->BindAction(_ZoomAction, ETriggerEvent::Triggered, this, &UGunComponent::ZoomIn);
+	//		//EnhancedInputComponent->BindAction(_ZoomAction, ETriggerEvent::, this, &UGunComponent::ZoomOut);
+	//	}
+	//}
 }
 
 void UGunComponent::Fire()
@@ -146,6 +150,50 @@ void UGunComponent::SetAttackPoint(float attackpoint)
 void UGunComponent::IncreaseHeadShotMultiplier(float value)
 {
 	if (value > 0) _Status.HeadShotMultiplier += value;
+}
+
+void UGunComponent::SetData(UGunDataAsset data)
+{
+	data.GunData.WeaponSocketName = WeaponSocketName;
+	data.GunData._AttackAction = _AttackAction;
+	data.GunData._AttackAnimation = _AttackAnimation;
+	data.GunData._AttackMappingContext = _AttackMappingContext;
+	data.GunData._AttackSound = _AttackSound;
+	data.GunData._ProjectileClass = _ProjectileClass;
+	data.GunData._TSubAnimInstance = _TSubAnimInstance;
+
+	// 현재 직속 자식들 중 UWeaponSkillComponent만 골라서 복사
+	const TArray<USceneComponent*>& Children = GetAttachChildren();
+	for (USceneComponent* Child : Children)
+	{
+		if (UWeaponSkillComponent* Skill = Cast<UWeaponSkillComponent>(Child))
+		{
+			UClass* SkillClass = Skill->GetClass();
+			if (SkillClass && SkillClass->IsChildOf(UWeaponSkillComponent::StaticClass()))
+			{
+				data.Skills.Add(SkillClass);
+			}
+		}
+	}
+}
+
+void UGunComponent::Assign(UGunDataAsset data)
+{
+	WeaponSocketName = data.GunData.WeaponSocketName;
+	_AttackAction = data.GunData._AttackAction;
+	_AttackAnimation = data.GunData._AttackAnimation;
+	_AttackMappingContext = data.GunData._AttackMappingContext;
+	_AttackSound = data.GunData._AttackSound;
+	_TSubAnimInstance = data.GunData._TSubAnimInstance;
+
+	for (TSubclassOf<UWeaponSkillComponent> SkillClass : data.Skills)
+	{
+		if (!SkillClass) continue;
+		UWeaponSkillComponent* NewSkill = NewObject<UWeaponSkillComponent>(_Character, SkillClass);
+		NewSkill->SetupAttachment(_Character->GetMesh());
+		NewSkill->RegisterComponent();
+		NewSkill->SetUp();
+	}
 }
 
 FRotator UGunComponent::CalculateSapwnRotaion()
@@ -224,15 +272,46 @@ void UGunComponent::SpawnProejectile()
 }
 
 void UGunComponent::ZoomIn() {
-	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("ZoomIn!"));
-	APlayerController* PC = Cast<APlayerController>(_Character->GetController());
-	if (PC && _WeaponCamera)
-	{
-		// Weapon에 카메라가 붙어 있으므로 해당 무기를 ViewTarget으로 바꿈
-		//PC->SetViewTargetWithBlend(this /* 또는 WeaponCameraActor가 있으면 그것 */, 0.15f);
+	if (!_Character) {
+		if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, TEXT("_Character is null"));
+		return;
 	}
+
+	UCameraComponent* CameraComp = _Character->FindComponentByClass<UCameraComponent>();
+	APlayerController* PC = Cast<APlayerController>(_Character->GetController());
+
+	if (CameraComp) {
+		FString Msg = FString::Printf(TEXT("CameraComp found: %s, FOV(before)=%f"), *CameraComp->GetName(), CameraComp->FieldOfView);
+		if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, Msg);
+		CameraComp->SetFieldOfView(60.f);
+		FString Msg2 = FString::Printf(TEXT("CameraComp FOV(after)=%f"), CameraComp->FieldOfView);
+		if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, Msg2);
+	}
+	else {
+		if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, TEXT("CameraComp is null"));
+	}
+
+	//if (PC && PC->PlayerCameraManager) {
+	//	FRotator View;
+	//	FVector T;
+	//	PC->PlayerCameraManager->GetCameraViewPoint(T, View); // 엔진 버전에 따라 함수명 다를 수 있음
+	//	FString Msg3 = FString::Printf(TEXT("PlayerCameraManager POV FOV=%f, Location=%s"), *View.ToString(), *View.Location.ToString());
+	//	if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, Msg3);
+	//}
 }
 
 void UGunComponent::ZoomOut() {
+	if (!_Character) return;
 
+	// Character가 ACharacter 파생인지 확인
+	ACharacter* Char = Cast<ACharacter>(_Character);
+	if (!Char) return;
+
+	// Character에 붙어있는 카메라 컴포넌트 탐색
+	UCameraComponent* CameraComp = Char->FindComponentByClass<UCameraComponent>();
+	if (CameraComp)
+	{
+		// 예: FOV 변경
+		
+	}
 }

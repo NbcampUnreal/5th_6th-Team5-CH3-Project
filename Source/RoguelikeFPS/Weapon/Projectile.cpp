@@ -106,7 +106,7 @@ void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimi
 	if (OtherComp->IsA(UWeaponComponent::StaticClass())) return;
 	if (!IsValid(GetInstigator())) { return; }
 	if (GetInstigator() == OtherActor) return;
-
+	
 
 	if (IsHeadBone(Hit.BoneName))
 	{
@@ -126,6 +126,7 @@ void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimi
 
 	const FVector ShotDir = (OtherActor->GetActorLocation() - GetActorLocation()).GetSafeNormal();
 	UGameplayStatics::ApplyPointDamage(OtherActor, _Damage, ShotDir, Hit, AttackerController, this, UDamageType::StaticClass());
+	GEngine->AddOnScreenDebugMessage(3, 1.0f, FColor::Red, FString::Printf(TEXT("_Damage : %f"), _Damage));
 	OnDamagedEnemy.Broadcast(Victim);
 	Destroy();
 }

@@ -216,7 +216,6 @@ void AFPSCharacter::Move(const FInputActionValue& value)
 void AFPSCharacter::Look(const FInputActionValue& value)
 {
 	FVector2D LookInput = value.Get<FVector2D>();
-
 	AddControllerYawInput(LookInput.X);
 	AddControllerPitchInput(LookInput.Y);
 }

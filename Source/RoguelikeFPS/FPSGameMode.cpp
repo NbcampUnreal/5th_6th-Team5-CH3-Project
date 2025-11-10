@@ -54,6 +54,18 @@ void AFPSGameMode::PostLogin(APlayerController* NewPlayer)
     Super::PostLogin(NewPlayer);
     if (!NewPlayer || !NewPlayer->GetPawn()) return;
     if (AFPSCharacter* FPSChar = Cast<AFPSCharacter>(NewPlayer->GetPawn()))
+    // 플레이어 로그인 후 초기화
+    UE_LOG(LogTemp, Log, TEXT("Player logged in: %s"), *NewPlayer->GetName());
+
+    DefaultPawnClass.Get();
+    DefaultPawnClass.GetDefaultObject();
+    //DefaultPawnClass.
+}
+
+void AFPSGameMode::HandlePlayerLevelUp(APlayerController* PlayerController)
+{
+    // 플레이어 레벨업 처리
+    if (PlayerController && AugmentWidgetClass)
     {
         FPSChar->OnLevelUp.AddDynamic(this, &AFPSGameMode::HandlePlayerLevelUp);
         FPSChar->OnPlayerDeath.AddDynamic(this, &AFPSGameMode::HandlePlayerDeath);

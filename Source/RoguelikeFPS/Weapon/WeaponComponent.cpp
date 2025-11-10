@@ -128,6 +128,8 @@ void UWeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void UWeaponComponent::OnChildAttached(USceneComponent* ChildComponent)
 {
+	Super::OnChildAttached(ChildComponent);
+
 	UWeaponSkillComponent* Skill = Cast<UWeaponSkillComponent>(ChildComponent);
 	if (Skill && _Character)
 	{

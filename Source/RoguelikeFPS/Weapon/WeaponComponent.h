@@ -50,9 +50,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Mesh, meta = (AllowPrivateAccess = "true"))
 	FName WeaponSocketName;
 
-	UPROPERTY()
-	UWeaponSkillComponent* _SkillComponent;
-
 private:
 	
 public:

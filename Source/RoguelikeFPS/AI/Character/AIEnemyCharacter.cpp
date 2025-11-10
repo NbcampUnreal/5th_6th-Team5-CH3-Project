@@ -327,7 +327,8 @@ float AAIEnemyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Dama
 
     const float Applied = Super::TakeDamage(FinalDamage, DamageEvent, EventInstigator, DamageCauser); 
     // HP 처리 
-    HP = FMath::Clamp(HP - Applied, 0.f, MAXHP); 
+    HP -= FMath::Clamp(Applied * (100 / (100 + DEF)), 0.f, MAXHP);
+    UE_LOG(LogTemp, Log, TEXT("HP : %f, Applied : %f"), HP, Applied);
     if (HP <= 0.f) 
     { 
         OnDeath(); 

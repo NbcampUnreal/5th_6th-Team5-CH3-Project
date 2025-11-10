@@ -6,6 +6,7 @@
 #include "Weapon/WeaponComponent.h"
 #include "GunStatus.h"
 #include "Projectile.h"
+#include "Weapon/GunDataAsset.h"
 #include "GunComponent.generated.h"
 
 /**
@@ -43,18 +44,6 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data, meta = (AllowPrivateAccess = "true"))
 	int32 CurrentBulletCount = 0;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	USpringArmComponent* _WeaponSpringArm;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	UCameraComponent* _WeaponCamera;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	FName _CameraSocketName = "CameraSocket";
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	class UInputAction* _ZoomAction;
-
 	UPROPERTY()
 	FTimerHandle _GunTimerHandle;
 
@@ -89,6 +78,9 @@ public:
 	void SetAttackPoint(float attackpoint);
 
 	void IncreaseHeadShotMultiplier(float value);
+
+	void SetData(UGunDataAsset data);
+	void Assign(UGunDataAsset data);
 	
 
 protected:
