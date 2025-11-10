@@ -19,7 +19,7 @@ void UStatsHUD::SetOwningCharacter(AFPSCharacter * NewCharacter)
         GameDataInstance = UGameDataInstance::GetGameDataInstance(GetWorld());
         if (GameDataInstance)
         {
-            GameDataInstance->OnWeaponSelected.AddDynamic(this, &UStatsHUD::OnWeaponSelectedChanged);
+           // GameDataInstance->OnWeaponSelected.AddDynamic(this, &UStatsHUD::OnWeaponSelectedChanged);
         }
         // 초기화
         UpdateAllDisplays();
@@ -50,7 +50,7 @@ void UStatsHUD::NativeConstruct()
 }
 void UStatsHUD::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
-    Super::NativeTick(Manometry, InDeltaTime);
+    Super::NativeTick(MyGeometry, InDeltaTime);
     if (OwningCharacter)
     {
         UpdateDashIndicator();           // 실시간 대시 상태
@@ -122,10 +122,10 @@ void UStatsHUD::UpdateGoldDisplay()
 {
     if (OwningCharacter && Text_Gold)
     {
-        Text_Gold->SetText(FText::Format(
+        /*Text_Gold->SetText(FText::Format(
             NSLOCTEXT("HUD", "Gold", "{0} G"),
             FText::AsNumber(OwningCharacter->GetGoldAmount())
-        ));
+        ));*/
     }
 }
 void UStatsHUD::UpdateDashIndicator()

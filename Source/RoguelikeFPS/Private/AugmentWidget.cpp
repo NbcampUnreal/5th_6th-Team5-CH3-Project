@@ -59,7 +59,7 @@ void UAugmentWidget::ApplyAugment(int32 Index)
     if (GameInstance)
     {
         // 예: GameInstance->LastAppliedAugment = Augment.AugmentID;
-        GameInstance->SaveGameData();
+        //GameInstance->SaveGameData();
     }
     // GameMode에 UI 종료 요청
     if (AFPSGameMode* GameMode = Cast<AFPSGameMode>(UGameplayStatics::GetGameMode(GetWorld())))

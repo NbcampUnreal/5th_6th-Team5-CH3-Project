@@ -68,4 +68,5 @@ protected:
     UFUNCTION() void OnCharacterStatChanged(FName StatName);
     UFUNCTION() void OnCharacterDied(AController* KillerController);
     UFUNCTION() void OnWeaponSelectedChanged(int32 NewIndex);
+    void UpdateAllDisplays();
 };
