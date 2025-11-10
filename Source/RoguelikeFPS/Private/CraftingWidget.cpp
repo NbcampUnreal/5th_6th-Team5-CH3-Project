@@ -180,9 +180,41 @@ void UCraftingWidget::OnCraftOrDecomposeClicked()
     UpdateUI();
 }
 
-void UCraftingWidget::OnItemSelected(FName ItemRowName)
+void UCraftingWidget::UpdateSelectedItemInfo()
 {
-    SelectedItemName = ItemRowName;
-    UE_LOG(LogTemp, Warning, TEXT("[CraftingWidget] Selected item: %s"), *SelectedItemName.ToString());
-    UpdateUI();
+    if (!ItemDataTable)
+    {
+        return;
+    }
+
+    const FString Context(TEXT("UpdateSelectedItemInfo"));
+    FItemData* ItemInfo = ItemDataTable->FindRow<FItemData>(SelectedItemName, Context);
+
+    if (!ItemInfo)
+    {
+        if (ItemName)
+        {
+            ItemName->SetText(FText::FromString(TEXT("Select an item")));
+        }
+        if (ItemImage)
+        {
+            ItemImage->SetBrushFromTexture(nullptr);
+        }
+        return;
+    }
+
+    if (ItemName)
+    {
+        ItemName->SetText(FText::FromName(ItemInfo->ItemName));
+    }
+
+    if (ItemImage && ItemInfo->Thumbnail)
+    {
+        ItemImage->SetBrushFromTexture(ItemInfo->Thumbnail);
+    }
+}
+
+void UCraftingWidget::UpdateUI()
+{
+    UpdateSelectedItemInfo();
 }

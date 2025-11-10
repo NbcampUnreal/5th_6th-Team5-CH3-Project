@@ -23,7 +23,7 @@ class ROGUELIKEFPS_API AFPSPlayerController : public APlayerController
 public:
 	AFPSPlayerController();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	TObjectPtr<UInputMappingContext> InputMappingContext;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	TObjectPtr<UInputAction> MoveAction;
@@ -86,6 +86,12 @@ public:
 
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")	//Title Å×½ºÆ®
 	//TSubclassOf<UTitleWidget> TitleWidgetClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	TSubclassOf<UUserWidget> StatsHUDClass;
+
+	UPROPERTY()
+	TObjectPtr<UUserWidget> HUDWidgetInstance;
 
 protected:
 	virtual void BeginPlay() override;

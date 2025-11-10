@@ -8,8 +8,8 @@
 UCLASS()
 class ROGUELIKEFPS_API UItemBase : public UObject
 {
-	GENERATED_BODY()
-	
+    GENERATED_BODY()
+
 public:
 
     // 공통 데이터
@@ -24,7 +24,7 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
     EPartGrade PartGrade;
-    
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Part")
     EPartType PartType = EPartType::None;
 

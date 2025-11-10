@@ -52,7 +52,7 @@ void UPartSystem::EquipPart(UItemBase* Item, UInventory* Inventory)
     case EPartType::Stock:
         EquippedParts.Stock = Item;
         break;
-    case EPartType::HandGrip: 
+    case EPartType::HandGrip:
         UE_LOG(LogTemp, Log, TEXT("[PartSystem] HandGrip part equipped (not yet supported)."));
         break;
     default:
@@ -136,7 +136,7 @@ void UPartSystem::RecalculateStats()
 
     ApplyEquippedParts();
 
-    OwnerCharacter->SetAttack(FMath::RoundToInt(FinalDamage));
+    OwnerCharacter->SetAttack(FMath::RoundToInt(BaseDamage + 10));
     OwnerCharacter->SetAttackSpeed(FMath::RoundToInt(FinalAttackSpeed));
 
     if (GunComp)
