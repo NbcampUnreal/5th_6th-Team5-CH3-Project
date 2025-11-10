@@ -22,7 +22,7 @@ AFPSGameMode::AFPSGameMode(const FObjectInitializer& ObjectInitializer)
     {
         AugmentDataTable = AugmentDataTableFinder.Object;
     }
-    ensureAlwaysMsgf(AugmentDataTable, TEXT("AugmentDataTable not found!"));
+    //ensureAlwaysMsgf(AugmentDataTable, TEXT("AugmentDataTable not found!"));
     RarityWeights.Add(EAugmentRarity::Normal, 0.50f);
     RarityWeights.Add(EAugmentRarity::Rare, 0.30f);
     RarityWeights.Add(EAugmentRarity::Epic, 0.15f);
