@@ -79,7 +79,7 @@ bool UUpgradeSystem::UpgradeItem(UItemBase* TargetItem, UItemBase* UpgradeItem, 
 	EPartGrade OldGrade = TargetItem->PartGrade;
 	TargetItem->PartGrade = static_cast<EPartGrade>(FMath::Clamp((uint8)TargetItem->PartGrade + 1, 0, 3));
 
-	const float FixedIncrease = 0.10f; 
+	const float FixedIncrease = 0.10f;
 
 	float OldDamage = TargetItem->BaseDamage;
 	int32 OldAmmo = TargetItem->Ammo;
@@ -92,7 +92,6 @@ bool UUpgradeSystem::UpgradeItem(UItemBase* TargetItem, UItemBase* UpgradeItem, 
 	AFPSCharacter* OwnerChar = Cast<AFPSCharacter>(Inventory->GetOwner());
 	if (OwnerChar)
 	{
-		// 🔹 캐릭터 스탯 강화 (공격력, 공격속도)
 		int32 OldAttack = OwnerChar->GetAttack();
 		int32 OldAttackSpeed = OwnerChar->GetAttackSpeed();
 
@@ -105,7 +104,6 @@ bool UUpgradeSystem::UpgradeItem(UItemBase* TargetItem, UItemBase* UpgradeItem, 
 			OldAttack, OwnerChar->GetAttack(),
 			OldAttackSpeed, OwnerChar->GetAttackSpeed());
 
-		// 🔹 총기 컴포넌트는 탄창 용량만 증가
 		if (UGunComponent* GunComp = OwnerChar->FindComponentByClass<UGunComponent>())
 		{
 			int32 OldMaxBullet = GunComp->GetMaxBulletCount();

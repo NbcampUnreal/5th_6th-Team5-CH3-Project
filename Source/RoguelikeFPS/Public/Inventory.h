@@ -77,7 +77,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	UInventoryWidget* InventoryUI;
 	
-	//µ¨¸®°ÔÀÌÆ®
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®
 	UPROPERTY(BlueprintAssignable, Category = "Inventory")
 	FOnGoldChanged OnGoldChanged;
 	UPROPERTY(BlueprintAssignable, Category = "Inventory")

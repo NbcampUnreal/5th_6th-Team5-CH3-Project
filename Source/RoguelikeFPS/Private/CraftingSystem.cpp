@@ -43,42 +43,43 @@ bool UCraftingSystem::RemoveItem(UInventory* PlayerInventory, const FName& ItemN
 
 bool UCraftingSystem::AddItem(UInventory* PlayerInventory, UDataTable* ItemDataTable, const FName& ItemName, int32 Amount)
 {
-    if (!PlayerInventory || !ItemDataTable || Amount <= 0)
+    if (!PlayerInventory || !ItemDataTable || ItemName == NAME_None || Amount <= 0)
+    {
         return false;
-
-    const FString Context(TEXT("AddItem"));
+    }
+    const FString Context(TEXT("AddItemFromCraft"));
     FItemData* ItemInfo = ItemDataTable->FindRow<FItemData>(ItemName, Context);
     if (!ItemInfo)
     {
-        UE_LOG(LogTemp, Warning, TEXT("[CraftingSystem] Invalid Item Row: %s"), *ItemName.ToString());
+        UE_LOG(LogTemp, Warning, TEXT("[CraftingSystem] Cannot find item row: %s"), *ItemName.ToString());
         return false;
     }
 
-    // 이미 있는 아이템이면 합산
-    for (UItemBase* Existing : PlayerInventory->InventoryItems)
+    UItemBase* ExistingItem = PlayerInventory->SearchItemName(ItemName);
+    if (ExistingItem)
     {
-        if (Existing && Existing->ItemName == ItemName)
-        {
-            Existing->Amount += Amount;
-            return true;
-        }
+        ExistingItem->Amount += Amount;
+        PlayerInventory->OnInventoryUpdated.Broadcast();
+        return true;
     }
 
-    // 새로 추가
-    UItemBase* NewItem = NewObject<UItemBase>(this);
+    UItemBase* NewItem = NewObject<UItemBase>(PlayerInventory);
     if (NewItem)
     {
         NewItem->InitItemData(*ItemInfo);
         NewItem->Amount = Amount;
         PlayerInventory->InventoryItems.Add(NewItem);
+
+        PlayerInventory->OnInventoryUpdated.Broadcast();
+        UE_LOG(LogTemp, Log, TEXT("[CraftingSystem] Created new crafted item: %s (x%d)"), *ItemName.ToString(), Amount);
         return true;
     }
 
     return false;
 }
 
-///////////////////////////////////////////////////////////
 // 제작
+
 ///////////////////////////////////////////////////////////
 
 bool UCraftingSystem::CraftItem(UInventory* PlayerInventory, UDataTable* ItemDataTable, const FName& TargetItemName)
@@ -104,7 +105,6 @@ bool UCraftingSystem::CraftItem(UInventory* PlayerInventory, UDataTable* ItemDat
         return false;
     }
 
-    // 재료 보유 확인
     for (const auto& Pair : ItemInfo->CraftingItems)
     {
         int32 Have = GetItemCount(PlayerInventory, Pair.Key);
@@ -116,18 +116,17 @@ bool UCraftingSystem::CraftItem(UInventory* PlayerInventory, UDataTable* ItemDat
         }
     }
 
-    // 재료 차감
     for (const auto& Pair : ItemInfo->CraftingItems)
     {
         RemoveItem(PlayerInventory, Pair.Key, Pair.Value);
     }
 
-    // 결과 아이템 지급
     AddItem(PlayerInventory, ItemDataTable, TargetItemName, 1);
 
     UE_LOG(LogTemp, Log, TEXT("[CraftingSystem] Crafted new item: %s"), *TargetItemName.ToString());
     return true;
 }
+// 분해
 
 ///////////////////////////////////////////////////////////
 // 분해
@@ -156,7 +155,6 @@ bool UCraftingSystem::DecomposeItem(UInventory* PlayerInventory, UDataTable* Ite
         return false;
     }
 
-    // 대상 아이템 존재 확인
     int32 Count = GetItemCount(PlayerInventory, TargetItemName);
     if (Count <= 0)
     {
@@ -164,10 +162,8 @@ bool UCraftingSystem::DecomposeItem(UInventory* PlayerInventory, UDataTable* Ite
         return false;
     }
 
-    // 분해 대상 제거
     RemoveItem(PlayerInventory, TargetItemName, 1);
 
-    // 재료 환원
     for (const auto& Pair : ItemInfo->DestroyItems)
     {
         AddItem(PlayerInventory, ItemDataTable, Pair.Key, Pair.Value);

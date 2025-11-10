@@ -3,10 +3,12 @@
 #include "GameFramework/Character.h"
 #include "Weapon/WeaponComponent.h"
 #include "FPSCharacter.generated.h"
-
+//git
 class USpringArmComponent;
 class UCameraComponent;
 class UInventory;
+class UUpgradeSystem;
+class UPartSystem;
 struct FInputActionValue;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLevelUpSignature, APlayerController*, PlayerController);
@@ -36,9 +38,6 @@ public:
     UPROPERTY(BlueprintAssignable, Category = "Events")
     FOnHUDStatChangedSignature OnHUDStatChanged;
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
-    UInventory* Inventory;//인벤토리 정보
-
     int32 GetLevel() const { return Level; }
     int32 GetHealth() const { return Health; }
     int32 GetMaxHealth() const { return MaxHealth; }
@@ -49,8 +48,8 @@ public:
     int32 GetMovingSpeed() const { return MovingSpeed; }
     int32 GetDashSpeed() const { return DashSpeed; }
     int32 GetStamina() const { return Stamina; }
-    int32 GetExperience() const { return Experience; }
-    int32 GetMaxExperience() const { return MaxExperience; }
+    float GetExperience() const { return Experience; }
+    float GetMaxExperience() const { return MaxExperience; }
     FName GetCurrentWeaponName() const { return CurrentWeaponName; }
     int32 GetCurrentAmmo() const { return CurrentAmmo; }
     int32 GetMaxAmmo() const { return MaxAmmo; }
@@ -78,7 +77,7 @@ public:
     UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
     void SetStamina(int32 stamina);
     UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
-    void SetExperience(int32 experience);
+    void SetExperience(float experience);
     UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
     void SetMaxExperience(int32 maxExperience);
     UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
@@ -92,6 +91,13 @@ public:
     void OnUndead();
     void OffUndead();
     void OnUndeadTime(float time);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
+	UInventory* Inventory;//인벤토리 정보
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
+	UUpgradeSystem* UpgradeSystem;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Parts")
+    UPartSystem* PartSystem;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterStatus", meta = (AllowPrivateAccess = "true"))
     UWeaponComponent* CurrentWeapon;
@@ -118,9 +124,9 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
     int32 Stamina;
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
-    int32 Experience;
+    float Experience;
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
-    int32 MaxExperience;
+    float MaxExperience;
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
     bool bIsAlive;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterStatus")
@@ -130,8 +136,6 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterStatus")
     int32 MaxAmmo = 300;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterStatus")
-    float CurrentExperience = 0.0f;
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Skills")
     float Skill1CooldownRemaining = 0.0f;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Skills")
     float Skill2CooldownRemaining = 0.0f;

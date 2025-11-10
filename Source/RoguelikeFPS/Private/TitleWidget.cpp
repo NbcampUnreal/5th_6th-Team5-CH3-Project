@@ -5,60 +5,51 @@
 #include "TimerManager.h"
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/PlayerController.h"
-
+#include "MainMenuController.h"
+#include "FPSGameMode.h"
+//for git commit
 bool UTitleWidget::Initialize()
 {
     if (!Super::Initialize()) return false;
-
-    if (StartButton)
-        StartButton->OnClicked.AddDynamic(this, &UTitleWidget::OnGameStartClicked);
-
-    if (OptionButton)
-        OptionButton->OnClicked.AddDynamic(this, &UTitleWidget::OnOptionClicked);
-
-    if (ExitButton)
-        ExitButton->OnClicked.AddDynamic(this, &UTitleWidget::OnExitClicked);
-
+    // 버튼 이벤트 바인딩
+    if (StartButton) StartButton->OnClicked.AddDynamic(this, &UTitleWidget::OnGameStartClicked);
+    if (OptionButton) OptionButton->OnClicked.AddDynamic(this, &UTitleWidget::OnOptionClicked);
+    if (ExitButton) ExitButton->OnClicked.AddDynamic(this, &UTitleWidget::OnExitClicked);
     return true;
 }
 
 void UTitleWidget::NativeConstruct()
 {
     Super::NativeConstruct();
-
-    // 혹시 모를 커서 활성화
-    APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-    if (PC)
-    {
-        PC->bShowMouseCursor = true;
-        PC->SetInputMode(FInputModeUIOnly());
-    }
+    // 입력 모드는 MainMenuController에서 관리
 }
 
 void UTitleWidget::OnGameStartClicked()
 {
-    // GameMode에 이벤트 전달
-    AFPSGameMode* FPSGameMode = Cast<AFPSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
-    if (FPSGameMode)
+    // 메인 메뉴로 전환 (MainMenuController 위임)
+    if (AMainMenuController* MC = Cast<AMainMenuController>(UGameplayStatics::GetPlayerController(GetWorld(), 0)))
     {
-        // GameMode의 OnTitleStartClicked 호출 (Title 제거 및 MainMenu 띄우기 담당)
-        FPSGameMode->OnTitleStartClicked();
+        MC->ShowWeaponSelectMenu();
     }
     else
     {
-        // GameMode를 찾을 수 없으면, 직접 MainMenu를 띄우는 로직 실행 (Fallback)
-        RemoveFromParent();
+        UE_LOG(LogTemp, Warning, TEXT("MainMenuController not found, fallback to MainMenuWidget"));
+        // 폴백: 메인 메뉴 직접 생성
         if (MainMenuWidgetClass)
         {
-            APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-            UMainMenuWidget* MainMenu = CreateWidget<UMainMenuWidget>(PC, MainMenuWidgetClass);
-
-            if (MainMenu)
+            UMainMenuWidget* MainMenuWidget = CreateWidget<UMainMenuWidget>(GetWorld(), MainMenuWidgetClass);
+            if (MainMenuWidget)
             {
-                MainMenu->AddToViewport();
-                PC->bShowMouseCursor = true;
-                FInputModeUIOnly InputMode;
-                PC->SetInputMode(InputMode);
+                MainMenuWidget->AddToViewport();
+                APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+                if (PC)
+                {
+                    FInputModeUIOnly InputMode;
+                    InputMode.SetWidgetToFocus(MainMenuWidget->TakeWidget());
+                    PC->SetInputMode(InputMode);
+                    PC->bShowMouseCursor = true;
+                }
+                RemoveFromParent();
             }
         }
     }
@@ -66,15 +57,14 @@ void UTitleWidget::OnGameStartClicked()
 
 void UTitleWidget::OnOptionClicked()
 {
-    if (GEngine)
-        GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, TEXT("Option Menu Placeholder"));
+    // 옵션 메뉴 플레이스홀더
+    if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, TEXT("Option Menu Placeholder"));
 }
 
 void UTitleWidget::OnExitClicked()
 {
+    // 게임 종료
     UWorld* World = GetWorld();
     if (!World) return;
-
-    APlayerController* PlayerController = UGameplayStatics::GetPlayerController(World, 0);
-    UKismetSystemLibrary::QuitGame(World, PlayerController, EQuitPreference::Quit, true);
+    UKismetSystemLibrary::QuitGame(World, UGameplayStatics::GetPlayerController(World, 0), EQuitPreference::Quit, true);
 }

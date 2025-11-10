@@ -10,9 +10,9 @@ UENUM(BlueprintType)
 
 enum class EDropItemType : uint8
 {
-	Goods1 UMETA(DisplayName = "Goods1"),
-	Goods2 UMETA(DisplayName = "Goods2"),
-	DropItem UMETA(DisplayName = "DropItem"),
+	Gold UMETA(DisplayName = "Gold"),
+	Stone UMETA(DisplayName = "Stone"),
+	Parts UMETA(DisplayName = "Parts"),
 	EXP UMETA(DisplayName = "EXP"),
 };
 
@@ -39,22 +39,27 @@ public:
 	UInventory* inven;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "InventoryGold")
-	EDropItemType GoodsType = EDropItemType::Goods1;
+	EDropItemType GoodsType = EDropItemType::Gold;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "InventoryGold")
 	int32 ADDAmount;
 
+	UFUNCTION(BlueprintCallable)
+	int32 GetADDAmount() { return ADDAmount; }
 
 	UFUNCTION(BlueprintCallable)
-	void DropGoods1(int32 amount);
+	void SetADDAmount(int32 amount) { ADDAmount = amount; }
 
 	UFUNCTION(BlueprintCallable)
-	void DropGoods2(int32 amount);
+	void DropGold();
 
 	UFUNCTION(BlueprintCallable)
-	void DropTestItem();
+	void DropStone();
 
 	UFUNCTION(BlueprintCallable)
-	void Droptest(int32 amount);
+	void DropParts();
+
+	UFUNCTION(BlueprintCallable)
+	void Drop();
 
 };

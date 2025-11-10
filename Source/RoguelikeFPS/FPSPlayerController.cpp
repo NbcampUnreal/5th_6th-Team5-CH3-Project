@@ -1,4 +1,4 @@
-#include "FPSPlayerController.h"
+ï»¿#include "FPSPlayerController.h"
 #include "FPSCharacter.h"
 #include "Inventory.h"
 #include "InventoryWidget.h"
@@ -6,6 +6,8 @@
 #include "UpgradeSystem.h"
 #include "CraftingSystem.h"
 #include "CraftingMenuWidget.h"
+#include "PartSystem.h"
+#include "PartMenuWidget.h"
 #include "Shop.h"
 #include "RoguelikeFPS/InventoryWidget/ShopWidget.h"
 #include "EnhancedInputSubsystems.h"
@@ -27,12 +29,12 @@ AFPSPlayerController::AFPSPlayerController()
 	IA_InventoryOnOff(nullptr),
 	InventoryWidget(nullptr),
 	ShopWidget(nullptr)
-	//,TitleWidgetClass(nullptr) // Title Ãß°¡
+	//,TitleWidgetClass(nullptr) // Title ì¶”ê°€
 
 {
 }
 
-// IMC È°¼ºÈ­
+// IMC í™œì„±í™”
 void AFPSPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -139,10 +141,30 @@ void AFPSPlayerController::BeginPlay()
 	{
 		UE_LOG(LogTemp, Error, TEXT("CraftingMenuWidgetClass is not set in PlayerController!"));
 	}
+	if (PartMenuWidgetClass)
+	{
+		PartMenuWidget = CreateWidget<UPartMenuWidget>(this, PartMenuWidgetClass);
+		if (PartMenuWidget)
+		{
+			PartMenuWidget->AddToViewport();
+			PartMenuWidget->SetVisibility(ESlateVisibility::Hidden);
+
+			if (APawn* MyPawn = GetPawn())
+			{
+				UInventory* Inven = MyPawn->FindComponentByClass<UInventory>();
+				UPartSystem* PartSys = MyPawn->FindComponentByClass<UPartSystem>(); // âœ… ìˆ˜ì •ë¨!
+				PartMenuWidget->InitMenu(Inven, PartSys);
+			}
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("PartMenuWidgetClass is not set in PlayerController!"));
+	}
 
 	SetUpInputBinding();
 }
-	////title Ãß°¡
+	////title ì¶”ê°€
 	//if (titlewidgetclass)
 	//{
 	//	uuserwidget* titlewidget = createwidget<uuserwidget>(this, titlewidgetclass);
@@ -150,7 +172,7 @@ void AFPSPlayerController::BeginPlay()
 	//	{
 	//		titlewidget->addtoviewport();
 
-	//		// ¸¶¿ì½º Ä¿¼­ º¸ÀÌ±â
+	//		// ë§ˆìš°ìŠ¤ ì»¤ì„œ ë³´ì´ê¸°
 	//		bshowmousecursor = true;
 
 	//		finputmodeuionly inputmode;
@@ -205,6 +227,19 @@ void AFPSPlayerController::SetUpInputBinding()
 				ETriggerEvent::Triggered,
 				this,
 				&AFPSPlayerController::CraftingToggle
+			);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Upgrade InputAction is nullptr!"));
+		}
+		if (IA_PartOnOff)
+		{
+			EnhancedInput->BindAction(
+				IA_PartOnOff,
+				ETriggerEvent::Triggered,
+				this,
+				&AFPSPlayerController::PartToggle
 			);
 		}
 		else
@@ -268,5 +303,26 @@ void AFPSPlayerController::CraftingToggle()
 		CraftingMenuWidget->SetVisibility(ESlateVisibility::Visible);
 		bShowMouseCursor = true;
 		SetInputMode(FInputModeGameAndUI().SetWidgetToFocus(CraftingMenuWidget->TakeWidget()));
+	}
+}
+void AFPSPlayerController::PartToggle()
+{
+	if (!PartMenuWidget)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("PartMenuWidget is nullptr!"));
+		return;
+	}
+
+	if (PartMenuWidget->IsVisible())
+	{
+		PartMenuWidget->SetVisibility(ESlateVisibility::Hidden);
+		bShowMouseCursor = false;
+		SetInputMode(FInputModeGameOnly());
+	}
+	else
+	{
+		PartMenuWidget->SetVisibility(ESlateVisibility::Visible);
+		bShowMouseCursor = true;
+		SetInputMode(FInputModeGameAndUI().SetWidgetToFocus(PartMenuWidget->TakeWidget()));
 	}
 }
