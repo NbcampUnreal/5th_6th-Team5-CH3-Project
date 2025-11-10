@@ -1,9 +1,11 @@
-﻿#pragma once
+#pragma once
+
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
 #include "EnhancedInputComponent.h"
 #include "Weapon/WeaponComponent.h"
+
 #include "FPSCharacter.generated.h"
 
 class USpringArmComponent;
@@ -32,6 +34,7 @@ public:
     void ApplyAugment(FName AugmentName);
     UFUNCTION(BlueprintCallable)
     void UpdateHUDStats(FName StatName);
+
     //UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
     //void GainGold(int32 Amount);
 
@@ -106,6 +109,63 @@ public:
     void OnUndead();
     void OffUndead();
     void OnUndeadTime(float time);
+
+
+    int32 GetLevel() const { return Level; }
+    int32 GetHealth() const { return Health; }
+    int32 GetMaxHealth() const { return MaxHealth; }
+    int32 GetAttack() const { return Attack; }
+    int32 GetDefence() const { return Defence; }
+    int32 GetShield() const { return Shield; }
+    int32 GetAttackSpeed() const { return AttackSpeed; }
+    int32 GetMovingSpeed() const { return MovingSpeed; }
+    int32 GetDashSpeed() const { return DashSpeed; }
+    int32 GetStamina() const { return Stamina; }
+    int32 GetExperience() const { return Experience; }
+    int32 GetMaxExperience() const { return MaxExperience; }
+    FName GetCurrentWeaponName() const { return CurrentWeaponName; }
+    int32 GetCurrentAmmo() const { return CurrentAmmo; }
+    int32 GetMaxAmmo() const { return MaxAmmo; }
+    float GetSkill1CooldownRemaining() const { return Skill1CooldownRemaining; }
+    float GetSkill2CooldownRemaining() const { return Skill2CooldownRemaining; }
+    int32 GetGoldAmount() const { return GoldAmount; }
+    bool GetIsDash() const { return bIsDashing; }
+
+    UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
+    void SetLevel(int32 level);
+    UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
+    void SetHealth(int32 health);
+    UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
+    void SetMaxHealth(int32 maxHealth);
+    UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
+    void SetAttack(int32 attack);
+    UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
+    void SetDefence(int32 defence);
+    UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
+    void SetShield(int32 shield);
+    UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
+    void SetAttackSpeed(int32 attackSpeed);
+    UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
+    void SetMovingSpeed(int32 movingSpeed);
+    UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
+    void SetStamina(int32 stamina);
+    UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
+    void SetExperience(int32 experience);
+    UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
+    void SetMaxExperience(int32 maxExperience);
+    UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
+    void SetIsDashing(bool isdash);
+
+    // ���� ���º���
+    bool Undead = false;
+    // ���� ���� �ð�
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Undead")
+    float UndeadTime = 3.0f;
+    FTimerHandle UndeadTimeHandle;
+    // ���� �Լ�
+    void OnUndead();
+    void OffUndead();
+    void OnUndeadTime();
 
 protected:
 
@@ -212,8 +272,6 @@ protected:
     void Reload(const FInputActionValue& value);
     void LevelUp();
     void OnDeath(AController* KillerController);
-
-
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Augment")
     TArray<FName> AppliedAugments;

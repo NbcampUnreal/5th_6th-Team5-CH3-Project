@@ -19,10 +19,10 @@ class ROGUELIKEFPS_API UInventory : public UActorComponent
 public:	
 	UInventory();
 
-	UFUNCTION()
-	void SaveInventoryInstance();
-	UFUNCTION()
-	void LoadInventoryInstance();
+	//UFUNCTION()
+	//void SaveInventoryInstance();
+	//UFUNCTION()
+	//void LoadInventoryInstance();
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
@@ -79,26 +79,17 @@ public:
 		UE_LOG(LogTemp, Log, TEXT("Goods2 : %d"), Goods2);
 	}
 
-	//검색
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	UInventoryWidget* InventoryUI;
 	
-	//��������Ʈ
 	UPROPERTY(BlueprintAssignable, Category = "Inventory")
 	FOnGoldChanged OnGoldChanged;
 	UPROPERTY(BlueprintAssignable, Category = "Inventory")
 	FOnInventoryUpdated OnInventoryUpdated;
 
-	//�˻�
 	UFUNCTION(BlueprintCallable)
 	UItemBase* SearchItemName(const FName& Name) const;
 	UFUNCTION(BlueprintCallable)
 	UItemBase* SearchItemNumber(int32 ItemNumber) const;
-
-
-	UFUNCTION()
-	void SaveInventoryInstance();
-	UFUNCTION()
-	void LoadInventoryInstance();
 	
 };

@@ -155,6 +155,7 @@ void UCraftingWidget::UpdateSelectedItemInfo()
     }
     const FString Context(TEXT("UpdateSelectedItemInfo"));
     FItemData* ItemInfo = ItemDataTable->FindRow<FItemData>(SelectedItemName, Context);
+
     if (!ItemInfo)
     {
         if (ItemName)
@@ -167,10 +168,12 @@ void UCraftingWidget::UpdateSelectedItemInfo()
         }
         return;
     }
+
     if (ItemName)
     {
         ItemName->SetText(FText::FromName(ItemInfo->ItemName));
     }
+
     if (ItemImage && ItemInfo->Thumbnail)
     {
         ItemImage->SetBrushFromTexture(ItemInfo->Thumbnail);

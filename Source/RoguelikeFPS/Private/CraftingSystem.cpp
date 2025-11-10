@@ -78,10 +78,6 @@ bool UCraftingSystem::AddItem(UInventory* PlayerInventory, UDataTable* ItemDataT
     return false;
 }
 
-// 제작
-
-///////////////////////////////////////////////////////////
-
 bool UCraftingSystem::CraftItem(UInventory* PlayerInventory, UDataTable* ItemDataTable, const FName& TargetItemName)
 {
     if (!PlayerInventory || !ItemDataTable)
@@ -126,11 +122,7 @@ bool UCraftingSystem::CraftItem(UInventory* PlayerInventory, UDataTable* ItemDat
     UE_LOG(LogTemp, Log, TEXT("[CraftingSystem] Crafted new item: %s"), *TargetItemName.ToString());
     return true;
 }
-// 분해
 
-///////////////////////////////////////////////////////////
-// 분해
-///////////////////////////////////////////////////////////
 
 bool UCraftingSystem::DecomposeItem(UInventory* PlayerInventory, UDataTable* ItemDataTable, const FName& TargetItemName)
 {

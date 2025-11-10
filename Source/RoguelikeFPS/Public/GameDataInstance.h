@@ -20,6 +20,15 @@ public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "PlayerData")
     int32 SelectedWeaponIndex;
 
+    //인벤토리 정보
+    UPROPERTY()
+    TArray<FName> InventoryItemName;
+    UPROPERTY()
+    int32 SaveGold;
+
+
+
+    // 플레이어 데이터
     UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "PlayerData")
     bool bIsReadyToStart;
 

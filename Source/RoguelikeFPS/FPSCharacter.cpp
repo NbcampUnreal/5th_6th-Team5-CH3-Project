@@ -15,11 +15,13 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 
+
 // GETTER 구현 (모두 헤더에 인라인으로 선언되어 있으므로 이 파일에 구현이 없습니다.)
 // int32 AFPSCharacter::GetLevel() { return Level; }
 // ... 등
 
 // SETTER IMPLEMENTATIONS (헤더에 인라인으로 선언되어 있으므로 이 파일에 구현이 없습니다.)
+
 void AFPSCharacter::SetLevel(int32 level) { Level = level; }
 void AFPSCharacter::SetHealth(int32 health) { Health = health; }
 void AFPSCharacter::SetMaxHealth(int32 maxHealth) { MaxHealth = maxHealth; }
@@ -31,11 +33,13 @@ void AFPSCharacter::SetMovingSpeed(int32 movingSpeed) { MovingSpeed = movingSpee
 void AFPSCharacter::SetStamina(int32 stamina) { Stamina = stamina; }
 void AFPSCharacter::SetExperience(float experience) { Experience = experience; }
 void AFPSCharacter::SetMaxExperience(float maxExperience) { MaxExperience = maxExperience; }
+
 void AFPSCharacter::SetIsDashing(bool isdash) { bIsDashing = isdash; }
 
 
 // CONSTRUCTOR
 AFPSCharacter::AFPSCharacter()		// 초기 설정
+
 	: Level(1),
 	Health(100),
 	MaxHealth(100),
@@ -48,6 +52,7 @@ AFPSCharacter::AFPSCharacter()		// 초기 설정
 	MaxExperience(100),
 	bIsAlive(true),
 	Shield(100) // Shield 초기값 설정
+
 {
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -84,6 +89,7 @@ AFPSCharacter::AFPSCharacter()		// 초기 설정
 	ReloadTime = 1.5f;
 
 	//(임시)
+
 	static ConstructorHelpers::FObjectFinder<UInputAction> LevelUpTestFinder(TEXT("/Game/Input/Actions/IA_LevelUPTest"));
 	if (LevelUpTestFinder.Succeeded())
 	{
@@ -116,6 +122,7 @@ void AFPSCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Inventory->SaveInventoryInstance();
 
 	Super::EndPlay(EndPlayReason);
+
 }
 
 // INPUT BINDING
@@ -377,6 +384,7 @@ void AFPSCharacter::StopReload()
 void AFPSCharacter::LevelUp()
 {	
 	if (!bIsAlive) //사망 상태일 때
+
 	{
 		UE_LOG(LogTemp, Warning, TEXT("사망 상태: 레벨업 불가"));
 		return;
@@ -416,12 +424,6 @@ void AFPSCharacter::OnDeath(AController* KillerController)
 	OnPlayerDeath.Broadcast(KillerController);
 }
 
-//void AFPSCharacter::RoadStatus()
-//{
-//
-//}
-
-// 무적상태 함수
 void AFPSCharacter::OnUndead()
 {
 	Undead = true;
@@ -446,6 +448,7 @@ void AFPSCharacter::OnUndeadTime(float time)
 }
 
 // 무적상태가 아닐 때 데미지를 적용
+
 float AFPSCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
 	AController* EventInstigator, AActor* DamageCauser)
 {
@@ -463,63 +466,64 @@ float AFPSCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 
 void AFPSCharacter::ApplyAugment(FName AugmentKey /*AugmentID 혹은 RowName*/)
 {
-	UE_LOG(LogTemp, Warning, TEXT("ApplyAugment called with: %s"), *AugmentKey.ToString());
+    UE_LOG(LogTemp, Warning, TEXT("ApplyAugment called with: %s"), *AugmentKey.ToString());
 
-	AFPSGameMode* GM = Cast<AFPSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
-	if (!GM || !GM->AugmentDataTable) { UE_LOG(LogTemp, Error, TEXT("DT not found")); return; }
+    AFPSGameMode* GM = Cast<AFPSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+    if (!GM || !GM->AugmentDataTable) { UE_LOG(LogTemp, Error, TEXT("DT not found")); return; }
 
-	if (AppliedAugments.Contains(AugmentKey))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("이미 적용됨: %s"), *AugmentKey.ToString());
-		return;
-	}
+    if (AppliedAugments.Contains(AugmentKey))
+    {
+        UE_LOG(LogTemp, Warning, TEXT("이미 적용됨: %s"), *AugmentKey.ToString());
+        return;
+    }
 
-	// 1) RowName 직조회 시도
-	FAugmentData* Data = GM->AugmentDataTable->FindRow<FAugmentData>(AugmentKey, TEXT("ApplyAugment"));
-	// 2) 실패하면 AugmentID로 선형 탐색
-	if (!Data)
-	{
-		static const FString Ctx(TEXT("ApplyAugmentScan"));
-		TArray<FAugmentData*> Rows;
-		GM->AugmentDataTable->GetAllRows<FAugmentData>(Ctx, Rows);
-		for (FAugmentData* R : Rows)
-		{
-			if (R && R->AugmentID == AugmentKey) { Data = R; break; }
-		}
-	}
+    // 1) RowName 직조회 시도
+    FAugmentData* Data = GM->AugmentDataTable->FindRow<FAugmentData>(AugmentKey, TEXT("ApplyAugment"));
+    // 2) 실패하면 AugmentID로 선형 탐색
+    if (!Data)
+    {
+        static const FString Ctx(TEXT("ApplyAugmentScan"));
+        TArray<FAugmentData*> Rows;
+        GM->AugmentDataTable->GetAllRows<FAugmentData>(Ctx, Rows);
+        for (FAugmentData* R : Rows)
+        {
+            if (R && R->AugmentID == AugmentKey) { Data = R; break; }
+        }
+    }
 
-	if (!Data) { UE_LOG(LogTemp, Error, TEXT("증강 %s 을(를) 찾지 못함"), *AugmentKey.ToString()); return; }
+    if (!Data) { UE_LOG(LogTemp, Error, TEXT("증강 %s 을(를) 찾지 못함"), *AugmentKey.ToString()); return; }
 
-	// 수치 적용
-	if (Data->HealthBonus != 0)
-	{
-		SetMaxHealth(GetMaxHealth() + Data->HealthBonus);
-		SetHealth(FMath::Clamp(GetHealth() + Data->HealthBonus, 0.f, (float)GetMaxHealth()));
-		UpdateHUDStats(TEXT("Health"));
-	}
-	if (Data->AttackBonus != 0) { SetAttack(GetAttack() + Data->AttackBonus); UpdateHUDStats(TEXT("Attack")); }
-	if (Data->DefenseBonus != 0) { SetDefence(GetDefence() + Data->DefenseBonus); UpdateHUDStats(TEXT("Defence")); }
-	if (Data->ShieldBonus != 0) { SetShield(GetShield() + Data->ShieldBonus); UpdateHUDStats(TEXT("Shield")); }
+    // 수치 적용
+    if (Data->HealthBonus != 0)
+    {
+        SetMaxHealth(GetMaxHealth() + Data->HealthBonus);
+        SetHealth(FMath::Clamp(GetHealth() + Data->HealthBonus, 0.f, (float)GetMaxHealth()));
+        UpdateHUDStats(TEXT("Health"));
+    }
+    if (Data->AttackBonus != 0) { SetAttack(GetAttack() + Data->AttackBonus); UpdateHUDStats(TEXT("Attack")); }
+    if (Data->DefenseBonus != 0){ SetDefence(GetDefence() + Data->DefenseBonus); UpdateHUDStats(TEXT("Defence")); }
+    if (Data->ShieldBonus != 0) { SetShield(GetShield() + Data->ShieldBonus); UpdateHUDStats(TEXT("Shield")); }
 
-	// 곱계수는 기본값 보호
-	const float AtkMul = (Data->AttackSpeedMultiplier <= 0.f) ? 1.f : Data->AttackSpeedMultiplier;
-	const float MoveMul = (Data->MovingSpeedMultiplier <= 0.f) ? 1.f : Data->MovingSpeedMultiplier;
+    // 곱계수는 기본값 보호
+    const float AtkMul = (Data->AttackSpeedMultiplier <= 0.f) ? 1.f : Data->AttackSpeedMultiplier;
+    const float MoveMul = (Data->MovingSpeedMultiplier <= 0.f) ? 1.f : Data->MovingSpeedMultiplier;
 
-	if (!FMath::IsNearlyEqual(AtkMul, 1.f))
-	{
-		SetAttackSpeed(GetAttackSpeed() * AtkMul);
-		UpdateHUDStats(TEXT("AttackSpeed"));
-	}
-	if (!FMath::IsNearlyEqual(MoveMul, 1.f))
-	{
-		SetMovingSpeed(GetMovingSpeed() * MoveMul);
-		if (auto* Move = GetCharacterMovement()) Move->MaxWalkSpeed = GetMovingSpeed();
-		UpdateHUDStats(TEXT("MovingSpeed"));
-	}
+    if (!FMath::IsNearlyEqual(AtkMul, 1.f))
+    {
+        SetAttackSpeed(GetAttackSpeed() * AtkMul);
+        UpdateHUDStats(TEXT("AttackSpeed"));
+    }
+    if (!FMath::IsNearlyEqual(MoveMul, 1.f))
+    {
+        SetMovingSpeed(GetMovingSpeed() * MoveMul);
+        if (auto* Move = GetCharacterMovement()) Move->MaxWalkSpeed = GetMovingSpeed();
+        UpdateHUDStats(TEXT("MovingSpeed"));
+    }
 
-	AppliedAugments.Add(AugmentKey);
-	UE_LOG(LogTemp, Log, TEXT("증강 적용됨: %s"), *AugmentKey.ToString());
+    AppliedAugments.Add(AugmentKey);
+    UE_LOG(LogTemp, Log, TEXT("증강 적용됨: %s"), *AugmentKey.ToString());
 }
+
 
 
 void AFPSCharacter::AddXP(float Amount)
@@ -537,10 +541,12 @@ void AFPSCharacter::AddXP(float Amount)
 //	UpdateHUDStats(TEXT("Gold"));
 //}
 
+
 void AFPSCharacter::UpdateHUDStats(FName StatName)
 {
 	if (AFPSPlayerController* PC = Cast<AFPSPlayerController>(GetController()))
 	{	
+
 		if (UStatsHUD* StatsHUD = Cast<UStatsHUD>(PC->HUDWidgetInstance))
 		{
 			if (StatName == TEXT("Level"))
@@ -604,7 +610,6 @@ void AFPSCharacter::UpdateHUDStats(FName StatName)
 					StatsHUD->ProcessEvent(StatsHUD->FindFunction(FunctionName), &Skill2CooldownRemaining);
 				}
 			}
-			// 기존 스탯 업데이트
 			OnHUDStatChanged.Broadcast(StatName);
 		}
 	}
@@ -615,6 +620,7 @@ void AFPSCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime); // Tick을 사용하려면 생성자에서 PrimaryActorTick.bCanEverTick = true; 로 변경해야 함
 
 	// 예시: 쿨다운 감소 로직 등
+
 	if (Skill1CooldownRemaining > 0.0f)
 	{
 		Skill1CooldownRemaining -= DeltaTime;

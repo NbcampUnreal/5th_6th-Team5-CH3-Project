@@ -43,6 +43,10 @@ public:
     UFUNCTION(BlueprintCallable)
     void RecalculateStats();
 
+    float DefaultDamage;
+    float DefaultAttackSpeed;
+    int32 DefaultAmmo;
+
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Part")
     FEquippedParts EquippedParts;
 
@@ -67,6 +71,7 @@ public:
     UFUNCTION(BlueprintCallable)
     void SetPendingPart(UItemBase* Item);
 
-private:
+protected:
+
     void ApplyEquippedParts();
 };

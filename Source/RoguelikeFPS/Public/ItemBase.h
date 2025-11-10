@@ -8,8 +8,8 @@
 UCLASS()
 class ROGUELIKEFPS_API UItemBase : public UObject
 {
-	GENERATED_BODY()
-	
+    GENERATED_BODY()
+
 public:
 
     // 공통 데이터
@@ -24,7 +24,7 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
     EPartGrade PartGrade;
-    
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Part")
     EPartType PartType = EPartType::None;
 
@@ -56,9 +56,5 @@ public:
 public:
     void InitItemData(const FItemData& Data);
 
-    float ApplyDamage(float BaseDamage) const;
-    int32 ApplyAmmo(int32 BaseAmmo) const;
-    float ApplyAttackSpeed(float BaseAttackSpeed) const;
-
-    void ApplyToWeapon(float& InOutDamage, int32& InOutAmmo, float& InOutAttackSpeed) const;
+    void ApplyToWeapon(float& OutDamage, int32& OutAmmo, float& OutAttackSpeed) const;
 };

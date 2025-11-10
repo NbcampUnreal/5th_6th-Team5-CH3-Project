@@ -17,11 +17,13 @@ void UPartSystem::BeginPlay()
     if (OwnerCharacter)
     {
         LinkedInventory = OwnerCharacter->Inventory;
-        UE_LOG(LogTemp, Log, TEXT("[PartSystem] Attached to Character: %s"), *OwnerCharacter->GetName());
-    }
-    else
-    {
-        UE_LOG(LogTemp, Warning, TEXT("[PartSystem] OwnerCharacter not found!"));
+        DefaultDamage = OwnerCharacter->GetAttack();
+        DefaultAttackSpeed = static_cast<float>(OwnerCharacter->GetAttackSpeed());
+
+        if(UGunComponent* GunComp = OwnerCharacter->FindComponentByClass<UGunComponent>())
+        {
+            DefaultAmmo = GunComp->GetMaxBulletCount();
+        }
     }
 }
 
@@ -29,13 +31,11 @@ void UPartSystem::EquipPart(UItemBase* Item, UInventory* Inventory)
 {
     if (!Item || !Inventory || !OwnerCharacter)
     {
-        UE_LOG(LogTemp, Warning, TEXT("[PartSystem] Invalid parameters for EquipPart."));
         return;
     }
 
     if (Item->ItemType != EItemType::PartItem)
     {
-        UE_LOG(LogTemp, Warning, TEXT("[PartSystem] %s is not a Part Item."), *Item->ItemName.ToString());
         return;
     }
 
@@ -53,10 +53,9 @@ void UPartSystem::EquipPart(UItemBase* Item, UInventory* Inventory)
         EquippedParts.Stock = Item;
         break;
     case EPartType::HandGrip: 
-        UE_LOG(LogTemp, Log, TEXT("[PartSystem] HandGrip part equipped (not yet supported)."));
         break;
     default:
-        UE_LOG(LogTemp, Warning, TEXT("[PartSystem] Unknown PartType for %s"), *Item->ItemName.ToString());
+        UE_LOG(LogTemp, Warning, TEXT("Unknown PartType for %s"), *Item->ItemName.ToString());
         return;
     }
 
@@ -71,8 +70,9 @@ void UPartSystem::EquipPart(UItemBase* Item, UInventory* Inventory)
 void UPartSystem::UnequipPart(EPartType PartType, UInventory* Inventory)
 {
     if (!Inventory || !OwnerCharacter)
+    {
         return;
-
+    }
     UItemBase* UnequippedItem = nullptr;
 
     switch (PartType)
@@ -90,73 +90,62 @@ void UPartSystem::UnequipPart(EPartType PartType, UInventory* Inventory)
         EquippedParts.Stock = nullptr;
         break;
     default:
-        UE_LOG(LogTemp, Warning, TEXT("[PartSystem] Unknown PartType in UnequipPart."));
         return;
     }
 
     if (UnequippedItem)
     {
         Inventory->AddItem(UnequippedItem, 1, UnequippedItem->ItemName);
-        UE_LOG(LogTemp, Log, TEXT("[PartSystem] Unequipped %s (Returned to Inventory)"), *UnequippedItem->ItemName.ToString());
+        UE_LOG(LogTemp, Log, TEXT("Unequipped %s "), *UnequippedItem->ItemName.ToString());
     }
 
     RecalculateStats();
-}
-void UPartSystem::SetPendingPart(UItemBase* Item)
-{
-    PendingEquipItem = Item;
-
-    if (Item)
-    {
-        UE_LOG(LogTemp, Log, TEXT("[PartSystem] Pending equip item set: %s"), *Item->ItemName.ToString());
-    }
 }
 
 void UPartSystem::RecalculateStats()
 {
     if (!OwnerCharacter)
     {
-        UE_LOG(LogTemp, Warning, TEXT("[PartSystem] No OwnerCharacter found."));
         return;
     }
 
-    float BaseDamage = OwnerCharacter->GetAttack();
-    float BaseAttackSpeed = static_cast<float>(OwnerCharacter->GetAttackSpeed());
-    int32 BaseAmmo = 0;
-
-    UGunComponent* GunComp = OwnerCharacter->FindComponentByClass<UGunComponent>();
-    if (GunComp)
-    {
-        BaseAmmo = GunComp->GetMaxBulletCount();
-    }
-
-    FinalDamage = BaseDamage;
-    FinalAttackSpeed = BaseAttackSpeed;
-    FinalAmmo = BaseAmmo;
+    FinalDamage = DefaultDamage;
+    FinalAttackSpeed = DefaultAttackSpeed;
+    FinalAmmo = DefaultAmmo;
 
     ApplyEquippedParts();
 
     OwnerCharacter->SetAttack(FMath::RoundToInt(FinalDamage));
     OwnerCharacter->SetAttackSpeed(FMath::RoundToInt(FinalAttackSpeed));
 
-    if (GunComp)
+    if (UGunComponent* GunComp = OwnerCharacter->FindComponentByClass<UGunComponent>())
     {
         GunComp->SetBulletCount(FinalAmmo);
-        UE_LOG(LogTemp, Log, TEXT("[PartSystem] Updated GunComponent Ammo ¡æ %d"), FinalAmmo);
     }
-
-    UE_LOG(LogTemp, Log, TEXT("[PartSystem] Final Stats Updated ¡æ Damage: %.1f | AttackSpeed: %.2f | Ammo: %d"),
+    UE_LOG(LogTemp, Log, TEXT("Final Stats Updated ¡æ Damage: %.1f | AttackSpeed: %.2f | Ammo: %d"),
         FinalDamage, FinalAttackSpeed, FinalAmmo);
 }
 
 void UPartSystem::ApplyEquippedParts()
 {
     if (EquippedParts.Muzzle)
+    {
         EquippedParts.Muzzle->ApplyToWeapon(FinalDamage, FinalAmmo, FinalAttackSpeed);
+    }
 
     if (EquippedParts.Magazin)
+    {
         EquippedParts.Magazin->ApplyToWeapon(FinalDamage, FinalAmmo, FinalAttackSpeed);
+    }
 
     if (EquippedParts.Stock)
+    {
         EquippedParts.Stock->ApplyToWeapon(FinalDamage, FinalAmmo, FinalAttackSpeed);
+    }
+
+}
+
+void UPartSystem::SetPendingPart(UItemBase* Item)
+{
+    PendingEquipItem = Item;
 }
