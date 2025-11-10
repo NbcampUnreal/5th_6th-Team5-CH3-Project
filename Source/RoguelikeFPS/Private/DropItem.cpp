@@ -37,40 +37,48 @@ void ADropItem::Tick(float DeltaTime)
 
 }
 
-void ADropItem::DropGoods1()
+void ADropItem::DropGold()
 {
-	int32 goods1 = inven->GetGoods1();
-	inven->SetGoods1(goods1 + ADDAmount);
+	int32 gold = inven->GetGold();
+	inven->SetGold(gold + ADDAmount);
 }
 
-void ADropItem::DropGoods2()
+void ADropItem::DropStone()
 {
-	int32 goods2 = inven->GetGoods2();
-	inven->SetGoods2(goods2 + ADDAmount);
-}
+	if (!inven) return;
 
-void ADropItem::DropTestItem()
-{
 	UItemBase* TestItem = NewObject<UItemBase>(inven);
-	TestItem->ItemName = "ItemName";
-	TestItem->Amount = ADDAmount;
-	inven->AddItem(TestItem, TestItem->Amount, FName("NONE"));
+	TestItem->ItemName = "강화돌";
+	TestItem->Amount = 1;
+	inven->AddItem(TestItem, TestItem->Amount, FName("강화돌"));
 }
 
-void ADropItem::Droptest()
+void ADropItem::DropParts()
+{
+	//if (!inven) return;
+
+	//UItemBase* TestItem = NewObject<UItemBase>(inven);
+	//TestItem->ItemName = "Muzzle_0";
+	//TestItem->Amount = 1;
+	//TestItem->ItemType = EItemType::PartItem;
+	//TestItem->PartGrade = EPartGrade::Normal;
+	//inven->AddItem(TestItem, TestItem->Amount, FName("Muzzle"));
+}
+
+void ADropItem::Drop()
 {
 	switch (GoodsType)
 	{
-	case EDropItemType::Goods1:
-		DropGoods1();
+	case EDropItemType::Gold:
+		DropGold();
 		break;
 
-	case EDropItemType::Goods2:
-		DropGoods2();
+	case EDropItemType::Stone:
+		DropStone();
 		break;
 
-	case EDropItemType::DropItem:
-		DropTestItem();
+	case EDropItemType::Parts:
+		DropParts();
 		break;
 	}
 }

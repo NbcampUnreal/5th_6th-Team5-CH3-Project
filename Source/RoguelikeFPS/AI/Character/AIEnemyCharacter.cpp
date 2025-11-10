@@ -265,6 +265,7 @@ void AAIEnemyCharacter::DropItem()
 
                 for (int i = 0; i < Row->ItemAmount; ++i)
                 {
+                    // 드랍 위치 사망한 캐릭터 주변으로 생성
                     const float randX = FMath::FRandRange(-50.0f, 50.f);
                     const float randY = FMath::FRandRange(-50.0f, 50.f);
                     AActor* Proj = GetWorld()->SpawnActor<AActor>(Row->ItemClass, FVector(GetActorLocation().X + randX, GetActorLocation().Y + randY, GetActorLocation().Z), GetActorRotation());
@@ -296,35 +297,7 @@ float AAIEnemyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Dama
     FVector HitLocation = ShooterPawn->GetActorLocation();
 
     UE_LOG(LogTemp, Log, TEXT("TakeDamage HITLOCATION : %f, %f, %f"), HitLocation.X, HitLocation.Y, HitLocation.Z);
-    //// 포인트 데미지(부위 판정)인 경우만 헤드샷 배율 적용 
-    //if (DamageEvent.GetTypeID() == FPointDamageEvent::ClassID) 
-    //{ 
-    //    const FPointDamageEvent* PDE = static_cast<const FPointDamageEvent*>(&DamageEvent); 
-    //    if (PDE)
-    //    {
-    //        const FName HitBone = PDE->HitInfo.BoneName;
 
-    //        if (HitBone != NAME_None)
-    //        {
-    //            UE_LOG(LogTemp, Warning, TEXT("[DEBUG] Hit bone: %s"), *HitBone.ToString());
-    //        }
-    //        else
-    //        {
-    //            UE_LOG(LogTemp, Warning, TEXT("[DEBUG] Hit bone: (None)"));
-    //        }
-
-    //        if (IsHeadBone(HitBone))
-    //        {
-    //            FinalDamage *= HeadshotMultiplier;
-    //            UE_LOG(LogTemp, Error, TEXT("[HEADSHOT] %s  x%.2f"), *HitBone.ToString(), HeadshotMultiplier);
-    //        }
-    //    }
-    //    if (PDE && IsHeadBone(PDE->HitInfo.BoneName)) 
-    //    { 
-    //        FinalDamage *= HeadshotMultiplier; 
-    //        UE_LOG(LogTemp, Log, TEXT("HEADSHOT %s x%.2f"), *PDE->HitInfo.BoneName.ToString(), HeadshotMultiplier); 
-    //    } 
-    //} // Super가 블루프린트 이벤트/데미지 라우팅을 처리하니 반드시 호출 
     if (AAIEnemyController* AICon = Cast<AAIEnemyController>(GetController()))
     {
         AICon->OnDamagedBy(
@@ -338,7 +311,8 @@ float AAIEnemyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Dama
 
     const float Applied = Super::TakeDamage(FinalDamage, DamageEvent, EventInstigator, DamageCauser); 
     // HP 처리 
-    HP = FMath::Clamp(HP - Applied, 0.f, MAXHP); 
+
+    HP = FMath::Clamp(Applied * (100 / (100 + DEF)), 0.f, MAXHP);
     if (HP <= 0.f) 
     { 
         OnDeath(); 
