@@ -1,4 +1,5 @@
-﻿#include "GameDataInstance.h"
+﻿
+#include "GameDataInstance.h"
 #include "Engine/World.h"
 #include "Engine/GameInstance.h"
 #include "Kismet/GameplayStatics.h"
