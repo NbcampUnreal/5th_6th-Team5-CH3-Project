@@ -27,7 +27,7 @@ void AFPSCharacter::SetShield(int32 shield) { Shield = shield; }
 void AFPSCharacter::SetAttackSpeed(int32 attackSpeed) { AttackSpeed = attackSpeed; }
 void AFPSCharacter::SetMovingSpeed(int32 movingSpeed) { MovingSpeed = movingSpeed; }
 void AFPSCharacter::SetStamina(int32 stamina) { Stamina = stamina; }
-void AFPSCharacter::SetExperience(int32 experience) { Experience = experience; }
+void AFPSCharacter::SetExperience(float experience) { Experience = experience; }
 void AFPSCharacter::SetMaxExperience(int32 maxExperience) { MaxExperience = maxExperience; }
 void AFPSCharacter::SetIsDashing(bool isdash) { bIsDashing = isdash; }
 
@@ -81,16 +81,6 @@ AFPSCharacter::AFPSCharacter()		// 초기 설정
 
 	// Reload Time
 	ReloadTime = 1.5f;
-}
-
-void AFPSCharacter::BeginPlay()
-{
-	Super::BeginPlay();
-	
-	//if (Inventory && UpgradeSystem)
-	//{
-	//	UpgradeSystem->TestPartUpgrade(Inventory);
-	//}
 }
 
 // INPUT BINDING

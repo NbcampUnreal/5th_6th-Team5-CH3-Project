@@ -91,10 +91,6 @@ public:
     void OnUndead();
     void OffUndead();
     void OnUndeadTime(float time);
-	
-	// ===== 사망 델리게이트 =====
-	UPROPERTY(BlueprintAssignable, Category = "Events")
-	FOnPlayerDeathSignature OnPlayerDeath;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
 	UInventory* Inventory;//인벤토리 정보

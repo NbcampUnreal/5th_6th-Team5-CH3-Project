@@ -41,9 +41,6 @@ public:
     void OnItemSelected(FName ItemRowName);
 
     UFUNCTION(BlueprintCallable)
-    void OnItemSelected(FName ItemRowName);
-
-    UFUNCTION(BlueprintCallable)
     void SetCraftingMode(ECraftingMode NewMode);
 
     UFUNCTION()

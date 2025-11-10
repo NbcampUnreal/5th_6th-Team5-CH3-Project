@@ -42,14 +42,4 @@ void UDeathWidget::OnExitClicked()
         GameData->ResetGameStatsToLevelOne();
         UGameplayStatics::OpenLevel(World, GameData->MainMenuLevelName);
     }
-	
-    // 메인 메뉴로 (L_MainMenu)
-    if (OwningController)
-    {
-        UGameplayStatics::OpenLevel(OwningController, TEXT("L_MainMenu"));
-    }
-    else
-    {
-        UGameplayStatics::OpenLevel(World, TEXT("L_MainMenu"));
-    }
 }

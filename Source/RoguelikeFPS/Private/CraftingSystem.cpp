@@ -125,6 +125,7 @@ bool UCraftingSystem::CraftItem(UInventory* PlayerInventory, UDataTable* ItemDat
 
     UE_LOG(LogTemp, Log, TEXT("[CraftingSystem] Crafted new item: %s"), *TargetItemName.ToString());
     return true;
+}
 // ºÐÇØ
 
 ///////////////////////////////////////////////////////////
