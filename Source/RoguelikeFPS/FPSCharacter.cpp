@@ -12,10 +12,6 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Inventory.h"
 
-// GETTER 구현 (모두 헤더에 인라인으로 선언되어 있으므로 이 파일에 구현이 없습니다.)
-// int32 AFPSCharacter::GetLevel() { return Level; }
-// ... 등
-
 // SETTER IMPLEMENTATIONS (헤더에 인라인으로 선언되어 있으므로 이 파일에 구현이 없습니다.)
 void AFPSCharacter::SetLevel(int32 level) { Level = level; }
 void AFPSCharacter::SetHealth(int32 health) { Health = health; }
@@ -30,7 +26,6 @@ void AFPSCharacter::SetExperience(int32 experience) { Experience = experience; }
 void AFPSCharacter::SetMaxExperience(int32 maxExperience) { MaxExperience = maxExperience; }
 void AFPSCharacter::SetIsDashing(bool isdash) { bIsDashing = isdash; }
 
-
 // CONSTRUCTOR
 AFPSCharacter::AFPSCharacter()		// 초기 설정
 	: Level(1),
@@ -41,8 +36,8 @@ AFPSCharacter::AFPSCharacter()		// 초기 설정
 	AttackSpeed(5),
 	MovingSpeed(600),
 	Stamina(500),
-	Experience(0),
-	MaxExperience(100),
+	Experience(0.0f),
+	MaxExperience(100.0f),
 	bIsAlive(true),
 	Shield(100) // Shield 초기값 설정
 {
@@ -344,7 +339,7 @@ void AFPSCharacter::LevelUp()
 		Health += 20;
 		Attack += 3;
 		Defence += 3;
-		Experience = 0;
+		Experience = 0.0f;
 		MaxExperience *= 1.2f; // 다음 레벨 요구 경험치 증가
 		UpdateHUDStats(TEXT("Health"));
 		UpdateHUDStats(TEXT("Attack"));
@@ -464,7 +459,7 @@ void AFPSCharacter::ApplyAugment(FName AugmentName)
 void AFPSCharacter::AddXP(float Amount)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Gained XP: %f"), Amount);
-	CurrentExperience += Amount;
+	Experience += Amount;
 	UpdateHUDStats(TEXT("Experience"));
 	LevelUp();
 }
