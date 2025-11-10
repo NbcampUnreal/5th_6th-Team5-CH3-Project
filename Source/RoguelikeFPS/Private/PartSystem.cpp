@@ -136,7 +136,7 @@ void UPartSystem::RecalculateStats()
 
     ApplyEquippedParts();
 
-    OwnerCharacter->SetAttack(FMath::RoundToInt(BaseDamage + 10));
+    OwnerCharacter->SetAttack(FMath::RoundToInt(FinalDamage));
     OwnerCharacter->SetAttackSpeed(FMath::RoundToInt(FinalAttackSpeed));
 
     if (GunComp)
