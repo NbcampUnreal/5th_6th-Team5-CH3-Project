@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+癤�// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Weapon/GunComponent.h"
@@ -63,13 +63,6 @@ void UGunComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 void UGunComponent::OnRegister()
 {
 	Super::OnRegister();
-
-	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
-
-	if (IsRegistered())
-	{
-		//_WeaponSpringArm->AttachToComponent(this, AttachmentRules, _CameraSocketName);
-	}
 }
 
 void UGunComponent::AttachWeapon(ACharacter* TargetCharacter)
@@ -97,7 +90,9 @@ void UGunComponent::Fire()
 	CurrentBulletCount--;
 	CanAttack = false;
 
-	UWorld* const World = GetWorld();
+
+	auto* it = GetAttachParent();
+	UWorld* World = it->GetWorld();
 	World->GetTimerManager().SetTimer(_GunTimerHandle, [this]()
 		{
 			CanAttack = true;
@@ -105,6 +100,7 @@ void UGunComponent::Fire()
 
 	// Try and play the sound if specified b 
 	if (_AttackSound != nullptr) {
+
 		UGameplayStatics::PlaySoundAtLocation(this, _AttackSound, _Character->GetActorLocation());
 	}
 
@@ -272,46 +268,9 @@ void UGunComponent::SpawnProejectile()
 }
 
 void UGunComponent::ZoomIn() {
-	if (!_Character) {
-		if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, TEXT("_Character is null"));
-		return;
-	}
 
-	UCameraComponent* CameraComp = _Character->FindComponentByClass<UCameraComponent>();
-	APlayerController* PC = Cast<APlayerController>(_Character->GetController());
-
-	if (CameraComp) {
-		FString Msg = FString::Printf(TEXT("CameraComp found: %s, FOV(before)=%f"), *CameraComp->GetName(), CameraComp->FieldOfView);
-		if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, Msg);
-		CameraComp->SetFieldOfView(60.f);
-		FString Msg2 = FString::Printf(TEXT("CameraComp FOV(after)=%f"), CameraComp->FieldOfView);
-		if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, Msg2);
-	}
-	else {
-		if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, TEXT("CameraComp is null"));
-	}
-
-	//if (PC && PC->PlayerCameraManager) {
-	//	FRotator View;
-	//	FVector T;
-	//	PC->PlayerCameraManager->GetCameraViewPoint(T, View); // 엔진 버전에 따라 함수명 다를 수 있음
-	//	FString Msg3 = FString::Printf(TEXT("PlayerCameraManager POV FOV=%f, Location=%s"), *View.ToString(), *View.Location.ToString());
-	//	if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, Msg3);
-	//}
 }
 
 void UGunComponent::ZoomOut() {
-	if (!_Character) return;
 
-	// Character가 ACharacter 파생인지 확인
-	ACharacter* Char = Cast<ACharacter>(_Character);
-	if (!Char) return;
-
-	// Character에 붙어있는 카메라 컴포넌트 탐색
-	UCameraComponent* CameraComp = Char->FindComponentByClass<UCameraComponent>();
-	if (CameraComp)
-	{
-		// 예: FOV 변경
-		
-	}
 }

@@ -12,7 +12,6 @@ class UUpgradeMenuWidget;
 class UCraftingWidget;
 class UCraftingMenuWidget;
 class UShopWidget;
-class UPartMenuWidget;
 //class UTitleWidget;	//타이틀 테스트
 
 UCLASS()
@@ -47,8 +46,6 @@ public:
 	TObjectPtr<UInputAction> IA_UpgradeOnOff;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	TObjectPtr<UInputAction> IA_CraftingOnOff;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	TObjectPtr<UInputAction> IA_PartOnOff;
 
 
 	//인벤토리/상점 위젯
@@ -68,10 +65,6 @@ public:
 	TSubclassOf<UCraftingMenuWidget> CraftingMenuWidgetClass;
 	UPROPERTY()
 	UCraftingMenuWidget* CraftingMenuWidget;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
-	TSubclassOf<UPartMenuWidget> PartMenuWidgetClass;
-	UPROPERTY()
-	UPartMenuWidget* PartMenuWidget;
 
 	UFUNCTION(BlueprintCallable)
 	void InventoryToggle();	//열기/닫기
@@ -79,8 +72,6 @@ public:
 	void UpgradeToggle();
 	UFUNCTION(BlueprintCallable)
 	void CraftingToggle();
-	UFUNCTION(BlueprintCallable)
-	void PartToggle();
 
 	void SetUpInputBinding();
 

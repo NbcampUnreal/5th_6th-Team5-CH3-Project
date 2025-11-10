@@ -1,12 +1,13 @@
-#pragma once
+Ôªø#pragma once
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "FPSCharacter.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
+#include "GameDataInstance.h"
+//#include "Templates/ObjectPtr.h"  // ÌïÑÏàò ÌòÑÏû¨ Î¨¥Í∏∞ Îç∞Ïù¥ÌÑ∞ ÏóÜÏñ¥ÏÑú ÏÉùÍ∏∞Îäî Î¨∏Ï†ú
 #include "AugmentWidget.generated.h"
-//for git commit
-// ¡ı∞≠ »Ò±Õµµ Enum
+// Ï¶ùÍ∞ï Ìù¨Í∑ÄÎèÑ Enum
 UENUM(BlueprintType)
 enum class EAugmentRarity : uint8
 {
@@ -15,7 +16,6 @@ enum class EAugmentRarity : uint8
     Epic UMETA(DisplayName = "Epic"),
     Legendary UMETA(DisplayName = "Legendary")
 };
-
 UENUM(BlueprintType)
 enum class EAugmentCategory : uint8
 {
@@ -24,36 +24,23 @@ enum class EAugmentCategory : uint8
     Defense UMETA(DisplayName = "Defense"),
     None UMETA(DisplayName = "None")
 };
-
-// ¡ı∞≠ µ•¿Ã≈Õ ±∏¡∂√º
+// Ï¶ùÍ∞ï Îç∞Ïù¥ÌÑ∞ Íµ¨Ï°∞Ï≤¥
 USTRUCT(BlueprintType)
 struct FAugmentData : public FTableRowBase
 {
     GENERATED_BODY()
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Augment")
-    FName AugmentID; // ¡ı∞≠ ∞Ì¿Ø ID
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Augment")
-    FText DisplayName; // UIø° «•Ω√µ… ¿Ã∏ß
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Augment")
-    FText Description; // UIø° «•Ω√µ… º≥∏Ì
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Augment")
-    EAugmentCategory Category; // ¡ı∞≠ π¸¡÷
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Augment")
-    EAugmentRarity Rarity; // ¡ı∞≠ »Ò±Õµµ
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Augment")
-    int32 HealthBonus; // √º∑¬ ∫∏≥ Ω∫
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Augment")
-    int32 AttackBonus; // ∞¯∞›∑¬ ∫∏≥ Ω∫
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Augment")
-    int32 DefenseBonus; // πÊæÓ∑¬ ∫∏≥ Ω∫
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Augment")
-    int32 ShieldBonus; // ΩØµÂ ∫∏≥ Ω∫
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Augment")
-    float AttackSpeedMultiplier; // ∞¯∞› º”µµ πËºˆ (øπ: 1.1 = 10% ¡ı∞°)
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Augment")
-    float MovingSpeedMultiplier; // ¿Ãµø º”µµ πËºˆ (øπ: 1.2 = 20% ¡ı∞°)
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Augment") FName AugmentID;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Augment") FText DisplayName;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Augment") FText Description;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Augment") EAugmentCategory Category;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Augment") EAugmentRarity Rarity;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Augment") int32 HealthBonus;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Augment") int32 AttackBonus;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Augment") int32 DefenseBonus;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Augment") int32 ShieldBonus;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Augment") float AttackSpeedMultiplier;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Augment") float MovingSpeedMultiplier;
 };
-
 UCLASS()
 class ROGUELIKEFPS_API UAugmentWidget : public UUserWidget
 {
@@ -62,35 +49,27 @@ public:
     virtual bool Initialize() override;
     UFUNCTION(BlueprintCallable, Category = "Augment")
     void Setup(AFPSCharacter* InCharacter, const TArray<FAugmentData>& InAugments);
-
 protected:
-    UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UButton> AugmentButton1;
-    UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UButton> AugmentButton2;
-    UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UButton> AugmentButton3;
-    UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UTextBlock> AugmentName1;
-    UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UTextBlock> AugmentName2;
-    UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UTextBlock> AugmentName3;
-    UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UTextBlock> AugmentDesc1;
-    UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UTextBlock> AugmentDesc2;
-    UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UTextBlock> AugmentDesc3;
-
+    UPROPERTY(meta = (BindWidget)) TObjectPtr<UButton> AugmentButton1;
+    UPROPERTY(meta = (BindWidget)) TObjectPtr<UButton> AugmentButton2;
+    UPROPERTY(meta = (BindWidget)) TObjectPtr<UButton> AugmentButton3;
+    UPROPERTY(meta = (BindWidget)) TObjectPtr<UButton> ConfirmButton;
+    UPROPERTY(meta = (BindWidget)) TObjectPtr<UTextBlock> AugmentName1;
+    UPROPERTY(meta = (BindWidget)) TObjectPtr<UTextBlock> AugmentName2;
+    UPROPERTY(meta = (BindWidget)) TObjectPtr<UTextBlock> AugmentName3;
+    UPROPERTY(meta = (BindWidget)) TObjectPtr<UTextBlock> AugmentDesc1;
+    UPROPERTY(meta = (BindWidget)) TObjectPtr<UTextBlock> AugmentDesc2;
+    UPROPERTY(meta = (BindWidget)) TObjectPtr<UTextBlock> AugmentDesc3;
 private:
-    UFUNCTION()
-    void OnAugment1Clicked();
-    UFUNCTION()
-    void OnAugment2Clicked();
-    UFUNCTION()
-    void OnAugment3Clicked();
-    void ApplyAugment(int32 AugmentIndex);
+    UFUNCTION() void OnAugment1Clicked() { SelectAugment(0); }
+    UFUNCTION() void OnAugment2Clicked() { SelectAugment(1); }
+    UFUNCTION() void OnAugment3Clicked() { SelectAugment(2); }
+    UFUNCTION() void OnConfirmClicked();
+    void SelectAugment(int32 Index);
+    void ApplyAugment(int32 Index);
+    void UpdateConfirmButton();
     TWeakObjectPtr<AFPSCharacter> OwningCharacter;
     TArray<FAugmentData> AvailableAugments;
+    int32 SelectedAugmentIndex = -1;
+    UPROPERTY() TObjectPtr<UGameDataInstance> GameInstance;
 };

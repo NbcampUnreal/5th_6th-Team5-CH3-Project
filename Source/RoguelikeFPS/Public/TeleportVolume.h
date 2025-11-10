@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "TeleportVolume.generated.h"
-//for git commit
+
 UCLASS()
 class ROGUELIKEFPS_API ATeleportVolume : public AActor
 {

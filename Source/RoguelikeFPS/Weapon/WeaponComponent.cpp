@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Weapon/WeaponComponent.h"
@@ -129,7 +129,6 @@ void UWeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void UWeaponComponent::OnChildAttached(USceneComponent* ChildComponent)
 {
 	Super::OnChildAttached(ChildComponent);
-
 	UWeaponSkillComponent* Skill = Cast<UWeaponSkillComponent>(ChildComponent);
 	if (Skill && _Character)
 	{

@@ -5,6 +5,7 @@
 #include "ItemBase.h"
 #include "ItemData.h"
 #include "Inventory.h"
+#include "Kismet/KismetRenderingLibrary.h"
 
 
 // Sets default values
@@ -47,22 +48,55 @@ void ADropItem::DropStone()
 {
 	if (!inven) return;
 
-	UItemBase* TestItem = NewObject<UItemBase>(inven);
-	TestItem->ItemName = "강화돌";
-	TestItem->Amount = 1;
-	inven->AddItem(TestItem, TestItem->Amount, FName("강화돌"));
+
+	//FName RowName = TEXT("강화돌");
+	//if (FItemData* Row = ItemDataTable->FindRow<FItemData>(RowName, TEXT("강화돌")))
+	//{
+	//	UItemBase* NewItem = NewObject<UItemBase>();
+	//	NewItem->InitItemData(*Row);
+	//}
+
+	//UItemBase* TestItem = NewObject<UItemBase>(inven);
+	//FItemData testest;
+
+	//testest.ItemName = "강화돌";
+	//testest.Amount = 1;
+	//testest.ItemType = EItemType::MaterialItem;
+	//testest.PartGrade = EPartGrade::Normal;
+	//testest.PartType = EPartType::Muzzle;
+	//testest.Thumbnail = UKismetRenderingLibrary::ImportFileAsTexture2D(this, TEXT("/All/EngineData/Engine/EditorMaterials/Anchor.png"));
+	//testest.BuyPrice = 0;
+	//testest.SellPrice = 0;
+
+	//TestItem->InitItemData(testest);
+
+	//inven->AddItem(TestItem, TestItem->Amount, FName("강화돌"));
 }
 
 void ADropItem::DropParts()
 {
-	//if (!inven) return;
+	if (!inven) return;
 
-	//UItemBase* TestItem = NewObject<UItemBase>(inven);
-	//TestItem->ItemName = "Muzzle_0";
-	//TestItem->Amount = 1;
-	//TestItem->ItemType = EItemType::PartItem;
-	//TestItem->PartGrade = EPartGrade::Normal;
-	//inven->AddItem(TestItem, TestItem->Amount, FName("Muzzle"));
+	UItemBase* TestItem = NewObject<UItemBase>(inven);
+	FItemData testest;
+
+	testest.ItemName = "Muzzle";
+	testest.Amount = 1;
+	testest.ItemType = EItemType::PartItem;
+	testest.PartGrade = EPartGrade::Normal;
+	testest.PartType = EPartType::Muzzle;
+	testest.Thumbnail = UKismetRenderingLibrary::ImportFileAsTexture2D(this, TEXT("/All/EngineData/Engine/EditorMaterials/Anchor.png"));
+	testest.BuyPrice = 0;
+	testest.SellPrice = 0;
+	testest.MinDamage = 100;
+	testest.MaxDamage = 200;
+	testest.BaseAttackSpeed = 100;
+
+	TestItem->InitItemData(testest);
+	inven->AddItem(TestItem, TestItem->Amount, FName("Muzzle"));
+
+
+
 }
 
 void ADropItem::Drop()

@@ -1,50 +1,42 @@
 #include "GameClearWidget.h"
-#include "Components/Button.h"
+#include "GameDataInstance.h"
+#include <StatsHUD.h>
 #include "Kismet/GameplayStatics.h"
-#include "FPSGameMode.h" 
-#include "Blueprint/UserWidget.h"
-#include "GameDataInstance.h" // GameDataInstance 포함
-//for git commit
-bool UGameClearWidget::Initialize()
+#include "Kismet/KismetSystemLibrary.h"
+
+
+void UGameClearWidget::NativeConstruct()
 {
-    if (!Super::Initialize())
-        return false;
+    Super::NativeConstruct();
 
-    if (ExitButton)
-        ExitButton->OnClicked.AddDynamic(this, &UGameClearWidget::OnExitButtonClicked);
-
-    return true;
-}
-
-void UGameClearWidget::SetupGameModeLink(AFPSGameMode* OwningGameMode)
-{
-    OwningGameModePtr = OwningGameMode;
-}
-
-
-void UGameClearWidget::OnExitButtonClicked()
-{
-    UWorld* World = GetWorld();
-    APlayerController* PC = UGameplayStatics::GetPlayerController(World, 0);
-    UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(World);
-
-    if (GameInstance)
+    // GameDataInstance 가져오기
+    UGameDataInstance* GameData = UGameDataInstance::GetGameDataInstance(this);
+    if (!GameData)
     {
-        if (UGameDataInstance* GameDataInstance = Cast<UGameDataInstance>(GameInstance))
-        {
-            // 클리어 후 다음 플레이를 위해 게임 데이터 초기화 (권장)
-            GameDataInstance->ResetGameStatsToLevelOne();
-        }
+        UE_LOG(LogTemp, Error, TEXT("GameDataInstance is null in GameClearWidget!"));
+        return;
     }
 
-    // 메인 메뉴 레벨로 이동
-    FName MenuLevelName = TEXT("L_MainMenu"); // 기본값
-    if (GameInstance && Cast<UGameDataInstance>(GameInstance))
+    // GameOverButton 바인딩
+    if (GameOverButton)
     {
-        MenuLevelName = Cast<UGameDataInstance>(GameInstance)->MainMenuLevelName;
+        GameOverButton->OnClicked.AddDynamic(this, &UGameClearWidget::OnGameOverClicked);
+    }
+}
+
+void UGameClearWidget::OnGameOverClicked()
+{
+    // 1. GameDataInstance 가져오기
+    UGameDataInstance* GameData = UGameDataInstance::GetGameDataInstance(this);
+    if (!GameData)
+    {
+        UE_LOG(LogTemp, Error, TEXT("GameDataInstance is null!"));
+        return;
     }
 
-    // UI 제거 및 레벨 전환
+    // 2. 메인 메뉴로 이동
+    UGameplayStatics::OpenLevel(this, GameData->MainMenuLevelName);
+
+    // 3. 위젯 제거 (자동으로 HUD 복구)
     RemoveFromParent();
-    UGameplayStatics::OpenLevel(World, MenuLevelName);
 }

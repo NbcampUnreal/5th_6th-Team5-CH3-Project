@@ -41,6 +41,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "InventoryGold")
 	EDropItemType GoodsType = EDropItemType::Gold;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	UDataTable* ItemDataTable;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "InventoryGold")
 	int32 ADDAmount;
 

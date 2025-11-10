@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -78,10 +78,11 @@ public:
 	void SetAttackPoint(float attackpoint);
 
 	void IncreaseHeadShotMultiplier(float value);
-
+	
 	void SetData(UGunDataAsset data);
 	void Assign(UGunDataAsset data);
 	
+	virtual void AttachWeapon(ACharacter* TargetCharacter) override;
 
 protected:
 	virtual void BeginPlay() override;
@@ -92,7 +93,7 @@ protected:
 
 	virtual void OnRegister() override;
 
-	virtual void AttachWeapon(ACharacter* TargetCharacter) override;
+	
 private:
 	FRotator CalculateSapwnRotaion();
 

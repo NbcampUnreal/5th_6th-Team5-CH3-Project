@@ -1,11 +1,11 @@
-#include "TeleportVolume.h"
+ï»¿#include "TeleportVolume.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "TimerManager.h"
 #include "FPSCharacter.h"
 #include "Engine/World.h"
 #include "Engine/Engine.h"
-//for git commit
+
 ATeleportVolume::ATeleportVolume()
 {
     TeleportTrigger = CreateDefaultSubobject<UBoxComponent>(TEXT("TeleportTrigger"));
@@ -32,10 +32,10 @@ void ATeleportVolume::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor
         {
             GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, TEXT("LEVELEXP"));
             Character->AddXP(50.0f);
-            Character->GainGold(50);
+            //Character->GainGold(50);
             //Character->TakeDamage(50.0f, , , this);
         }
-        // ±âÁ¸ Å¸ÀÌ¸Ó°¡ ÀÖÀ¸¸é Å¬¸®¾î
+        // ê¸°ì¡´ íƒ€ì´ë¨¸ê°€ ìˆìœ¼ë©´ í´ë¦¬ì–´
         if (GetWorldTimerManager().IsTimerActive(TeleportTimerHandle))
         {
             GetWorldTimerManager().ClearTimer(TeleportTimerHandle);
@@ -43,10 +43,10 @@ void ATeleportVolume::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor
 
         PendingTeleportActor = OtherActor;
 
-        // Å¸ÀÌ¸Ó µî·Ï ? TeleportPendingActor ¸¦ È£Ãâ
+        // íƒ€ì´ë¨¸ ë“±ë¡ ? TeleportPendingActor ë¥¼ í˜¸ì¶œ
         GetWorldTimerManager().SetTimer(TeleportTimerHandle, this, &ATeleportVolume::TeleportPendingActor, DelayBeforeTeleport, false);
 
-        // (¼±ÅÃ) µğ¹ö±× ·Î±×/Ä«¿îÆ®´Ù¿î UI Æ®¸®°Å °¡´É
+        // (ì„ íƒ) ë””ë²„ê·¸ ë¡œê·¸/ì¹´ìš´íŠ¸ë‹¤ìš´ UI íŠ¸ë¦¬ê±° ê°€ëŠ¥
         if (GEngine)
         {
             GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, TEXT("Teleport countdown started"));
@@ -64,7 +64,7 @@ void ATeleportVolume::TeleportPendingActor()
         GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, FString::Printf(TEXT("Teleporting to level: %s"), *NextLevelName.ToString()));
     }
 
-    // ÄÁÆ®·Ñ·¯°¡ ÀÖ´Ù¸é ±× ÄÁÅØ½ºÆ®·Î ¿­°í ¾Æ´Ï¶ó¸é World·Î ¿­±â
+    // ì»¨íŠ¸ë¡¤ëŸ¬ê°€ ìˆë‹¤ë©´ ê·¸ ì»¨í…ìŠ¤íŠ¸ë¡œ ì—´ê³  ì•„ë‹ˆë¼ë©´ Worldë¡œ ì—´ê¸°
     UWorld* World = GetWorld();
     if (!World) return;
 

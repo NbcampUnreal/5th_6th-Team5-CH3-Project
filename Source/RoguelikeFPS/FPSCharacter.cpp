@@ -1,7 +1,6 @@
-#include "FPSCharacter.h"
+ï»¿#include "FPSCharacter.h"
 #include "Inventory.h"
 #include "UpgradeSystem.h"
-#include "PartSystem.h"
 #include "CraftingSystem.h"
 #include "Engine/DataTable.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -11,13 +10,16 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "AugmentWidget.h"
 #include "FPSGameMode.h"
-#include "Engine/DataTable.h"
+#include "StatsHUD.h"
 #include "Engine/Engine.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
-#include "Inventory.h"
 
-// SETTER IMPLEMENTATIONS (Çì´õ¿¡ ÀÎ¶óÀÎÀ¸·Î ¼±¾ğµÇ¾î ÀÖÀ¸¹Ç·Î ÀÌ ÆÄÀÏ¿¡ ±¸ÇöÀÌ ¾ø½À´Ï´Ù.)
+// GETTER êµ¬í˜„ (ëª¨ë‘ í—¤ë”ì— ì¸ë¼ì¸ìœ¼ë¡œ ì„ ì–¸ë˜ì–´ ìˆìœ¼ë¯€ë¡œ ì´ íŒŒì¼ì— êµ¬í˜„ì´ ì—†ìŠµë‹ˆë‹¤.)
+// int32 AFPSCharacter::GetLevel() { return Level; }
+// ... ë“±
+
+// SETTER IMPLEMENTATIONS (í—¤ë”ì— ì¸ë¼ì¸ìœ¼ë¡œ ì„ ì–¸ë˜ì–´ ìˆìœ¼ë¯€ë¡œ ì´ íŒŒì¼ì— êµ¬í˜„ì´ ì—†ìŠµë‹ˆë‹¤.)
 void AFPSCharacter::SetLevel(int32 level) { Level = level; }
 void AFPSCharacter::SetHealth(int32 health) { Health = health; }
 void AFPSCharacter::SetMaxHealth(int32 maxHealth) { MaxHealth = maxHealth; }
@@ -28,11 +30,12 @@ void AFPSCharacter::SetAttackSpeed(int32 attackSpeed) { AttackSpeed = attackSpee
 void AFPSCharacter::SetMovingSpeed(int32 movingSpeed) { MovingSpeed = movingSpeed; }
 void AFPSCharacter::SetStamina(int32 stamina) { Stamina = stamina; }
 void AFPSCharacter::SetExperience(float experience) { Experience = experience; }
-void AFPSCharacter::SetMaxExperience(int32 maxExperience) { MaxExperience = maxExperience; }
+void AFPSCharacter::SetMaxExperience(float maxExperience) { MaxExperience = maxExperience; }
 void AFPSCharacter::SetIsDashing(bool isdash) { bIsDashing = isdash; }
 
+
 // CONSTRUCTOR
-AFPSCharacter::AFPSCharacter()		// ÃÊ±â ¼³Á¤
+AFPSCharacter::AFPSCharacter()		// ì´ˆê¸° ì„¤ì •
 	: Level(1),
 	Health(100),
 	MaxHealth(100),
@@ -41,12 +44,11 @@ AFPSCharacter::AFPSCharacter()		// ÃÊ±â ¼³Á¤
 	AttackSpeed(5),
 	MovingSpeed(600),
 	Stamina(500),
-	Experience(0.0f),
-	MaxExperience(100.0f),
+	Experience(0),
+	MaxExperience(100),
 	bIsAlive(true),
-	Shield(100) // Shield ÃÊ±â°ª ¼³Á¤
+	Shield(100) // Shield ì´ˆê¸°ê°’ ì„¤ì •
 {
-	// ¡Ú¡Ú¡Ú Tick »ç¿ëÀ» À§ÇØ true·Î º¯°æ (Äğ´Ù¿î µî¿¡ ÇÊ¿ä) ¡Ú¡Ú¡Ú
 	PrimaryActorTick.bCanEverTick = true;
 
 
@@ -66,12 +68,11 @@ AFPSCharacter::AFPSCharacter()		// ÃÊ±â ¼³Á¤
 	DashSpeed = MovingSpeed * DashMultifly;
 	DashTime = 0.5f;
 
-	//ÀÎº¥Åä¸® ºÎÂø
+	//ì¸ë²¤í† ë¦¬ ë¶€ì°©
 	Inventory = CreateDefaultSubobject<UInventory>(TEXT("InventoryComponent"));
 	UpgradeSystem = CreateDefaultSubobject<UUpgradeSystem>(TEXT("UpgradeSystem"));
-	PartSystem = CreateDefaultSubobject<UPartSystem>(TEXT("PartSystem"));
 
-	// Crouch È°¼ºÈ­
+	// Crouch Activation
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
 	GetCharacterMovement()->SetCrouchedHalfHeight(60.0f);
 
@@ -81,6 +82,38 @@ AFPSCharacter::AFPSCharacter()		// ÃÊ±â ¼³Á¤
 
 	// Reload Time
 	ReloadTime = 1.5f;
+
+	//(ì„ì‹œ)
+	static ConstructorHelpers::FObjectFinder<UInputAction> LevelUpTestFinder(TEXT("/Game/Input/Actions/IA_LevelUPTest"));
+	if (LevelUpTestFinder.Succeeded())
+	{
+		LevelUpTestAction = LevelUpTestFinder.Object;
+	}
+}
+void AFPSCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+	
+	UGameDataInstance* instance = Cast<UGameDataInstance>(GetGameInstance());
+	
+	instance->RoadStatus(this);
+
+}
+
+
+void AFPSCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	AFPSCharacter* Character = this;
+
+	UGameDataInstance* instance = Cast<UGameDataInstance>(GetGameInstance());
+
+	if (!Character)UE_LOG(LogTemp, Log, TEXT("Character is NULL"));
+	if (!instance)UE_LOG(LogTemp, Log, TEXT("instance is NULL"));
+
+	instance->SaveStatus(Character);
+
+
+	Super::EndPlay(EndPlayReason);
 }
 
 // INPUT BINDING
@@ -197,7 +230,6 @@ void AFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	}
 }
 
-
 // INPUT ACTION IMPLEMENTATIONS
 void AFPSCharacter::Move(const FInputActionValue& value)
 {
@@ -303,6 +335,7 @@ void AFPSCharacter::StartFire_Auto(const FInputActionValue& value)
 	);
 
 }
+
 void AFPSCharacter::PerformFire()
 {
 	bIsFiring = true;
@@ -339,19 +372,34 @@ void AFPSCharacter::StopReload()
 
 // GAMEPLAY LOGIC IMPLEMENTATIONS
 void AFPSCharacter::LevelUp()
-{
+{	
+	if (!bIsAlive) //ì‚¬ë§ ìƒíƒœì¼ ë•Œ
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ì‚¬ë§ ìƒíƒœ: ë ˆë²¨ì—… ë¶ˆê°€"));
+		return;
+	}
 	if (Experience >= MaxExperience)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("ë ˆë²¨ì—…"));
 		Level += 1;
 		Health += 20;
 		Attack += 3;
 		Defence += 3;
 		Experience = 0.0f;
-		MaxExperience *= 1.2f; // ´ÙÀ½ ·¹º§ ¿ä±¸ °æÇèÄ¡ Áõ°¡
+		MaxExperience *= 1.2f; // ë‹¤ìŒ ë ˆë²¨ ìš”êµ¬ ê²½í—˜ì¹˜ ì¦ê°€
 		UpdateHUDStats(TEXT("Health"));
 		UpdateHUDStats(TEXT("Attack"));
 		UpdateHUDStats(TEXT("Defence"));
 		UpdateHUDStats(TEXT("Experience"));
+		UpdateHUDStats(TEXT("Level"));
+
+		if (APlayerController* PC = Cast<APlayerController>(GetController()))
+		{
+			if (AFPSGameMode* GameMode = Cast<AFPSGameMode>(UGameplayStatics::GetGameMode(GetWorld())))
+			{
+				GameMode->HandlePlayerLevelUp(PC);
+			}
+		}
 		if (APlayerController* PC = Cast<APlayerController>(GetController()))
 		{
 			OnLevelUp.Broadcast(PC);
@@ -365,7 +413,12 @@ void AFPSCharacter::OnDeath(AController* KillerController)
 	OnPlayerDeath.Broadcast(KillerController);
 }
 
-// ¹«Àû»óÅÂ ÇÔ¼ö
+//void AFPSCharacter::RoadStatus()
+//{
+//
+//}
+
+// ë¬´ì ìƒíƒœ í•¨ìˆ˜
 void AFPSCharacter::OnUndead()
 {
 	Undead = true;
@@ -375,7 +428,7 @@ void AFPSCharacter::OffUndead()
 	Undead = false;
 }
 
-// ¹«Àû»óÅÂ ÇÔ¼ö Å¸ÀÌ¸Ó (Undead¸¦ True·Î º¯°æÇÏ°í, UndeadTimeÀÌ Áö³ª¸é Undead = false.) 
+// ë¬´ì ìƒíƒœ í•¨ìˆ˜ íƒ€ì´ë¨¸ (Undeadë¥¼ Trueë¡œ ë³€ê²½í•˜ê³ , UndeadTimeì´ ì§€ë‚˜ë©´ Undead = false.) 
 void AFPSCharacter::OnUndeadTime(float time)
 {
 	Undead = true;
@@ -389,12 +442,12 @@ void AFPSCharacter::OnUndeadTime(float time)
 	);
 }
 
-// ¹«Àû»óÅÂ°¡ ¾Æ´Ò ¶§ µ¥¹ÌÁö¸¦ Àû¿ë
+// ë¬´ì ìƒíƒœê°€ ì•„ë‹ ë•Œ ë°ë¯¸ì§€ë¥¼ ì ìš©
 float AFPSCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
 	AController* EventInstigator, AActor* DamageCauser)
 {
 	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser) - Defence;
-	if (ActualDamage > 0)
+	if (Undead == true && ActualDamage > 0)
 	{
 		Health -= ActualDamage;
 
@@ -411,12 +464,12 @@ void AFPSCharacter::ApplyAugment(FName AugmentName)
 	AFPSGameMode* GameMode = Cast<AFPSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 	if (!GameMode || !GameMode->AugmentDataTable)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Áõ°­ µ¥ÀÌÅÍ Å×ÀÌºíÀ» Ã£À» ¼ö ¾ø½À´Ï´Ù!"));
+		UE_LOG(LogTemp, Error, TEXT("ì¦ê°• ë°ì´í„° í…Œì´ë¸”ì„ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤!"));
 		return;
 	}
 	if (AppliedAugments.Contains(AugmentName))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Áõ°­ %s ÀÌ¹Ì Àû¿ëµÊ!"), *AugmentName.ToString());
+		UE_LOG(LogTemp, Warning, TEXT("ì¦ê°• %s ì´ë¯¸ ì ìš©ë¨!"), *AugmentName.ToString());
 		return;
 	}
 	FAugmentData* AugmentData = GameMode->AugmentDataTable->FindRow<FAugmentData>(AugmentName, TEXT(""));
@@ -455,11 +508,11 @@ void AFPSCharacter::ApplyAugment(FName AugmentName)
 			UpdateHUDStats(TEXT("MovingSpeed"));
 		}
 		AppliedAugments.Add(AugmentName);
-		UE_LOG(LogTemp, Log, TEXT("Áõ°­ Àû¿ëµÊ: %s"), *AugmentName.ToString());
+		UE_LOG(LogTemp, Log, TEXT("ì¦ê°• ì ìš©ë¨: %s"), *AugmentName.ToString());
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("Áõ°­ %s µ¥ÀÌÅÍ Å×ÀÌºí¿¡¼­ Ã£À» ¼ö ¾øÀ½!"), *AugmentName.ToString());
+		UE_LOG(LogTemp, Error, TEXT("ì¦ê°• %s ë°ì´í„° í…Œì´ë¸”ì—ì„œ ì°¾ì„ ìˆ˜ ì—†ìŒ!"), *AugmentName.ToString());
 	}
 }
 
@@ -471,24 +524,91 @@ void AFPSCharacter::AddXP(float Amount)
 	LevelUp();
 }
 
-void AFPSCharacter::GainGold(int32 Amount)
-{
-	GoldAmount += Amount;
-	// °ñµå º¯°æ ½Ã HUD ¾÷µ¥ÀÌÆ® ½ÅÈ£ Àü¼Û
-	UpdateHUDStats(TEXT("Gold"));
-}
+//void AFPSCharacter::GainGold(int32 Amount)
+//{
+//	GoldAmount += Amount;
+//	// ê³¨ë“œ ë³€ê²½ ì‹œ HUD ì—…ë°ì´íŠ¸ ì‹ í˜¸ ì „ì†¡
+//	UpdateHUDStats(TEXT("Gold"));
+//}
 
 void AFPSCharacter::UpdateHUDStats(FName StatName)
 {
-	// HUD ¾÷µ¥ÀÌÆ®¸¦ À§ÇÑ µ¨¸®°ÔÀÌÆ® ÀüÆÄ (FOnHUDStatChangedSignature »ç¿ë)
-	OnHUDStatChanged.Broadcast(StatName);
+	if (AFPSPlayerController* PC = Cast<AFPSPlayerController>(GetController()))
+	{	
+		if (UStatsHUD* StatsHUD = Cast<UStatsHUD>(PC->HUDWidgetInstance))
+		{
+			if (StatName == TEXT("Level"))
+			{
+				FName FunctionName = TEXT("UpdateLevelText");
+				if (StatsHUD->FindFunction(FunctionName))
+				{
+					StatsHUD->ProcessEvent(StatsHUD->FindFunction(FunctionName), &Level);
+				}
+			}
+			else if (StatName == TEXT("Experience"))
+			{
+				FName FunctionName = TEXT("UpdateEXPProgress");
+				if (StatsHUD->FindFunction(FunctionName))
+				{
+					struct FEXPParams
+					{
+						float CurrentEXP;
+						float MaxEXP;
+					} Params{ Experience, static_cast<float>(MaxExperience) };
+					StatsHUD->ProcessEvent(StatsHUD->FindFunction(FunctionName), &Params);
+				}
+			}
+			if (StatName == TEXT("Health"))
+			{
+				FName FunctionName = TEXT("UpdateHealthText");
+				if (StatsHUD->FindFunction(FunctionName))
+				{
+					StatsHUD->ProcessEvent(StatsHUD->FindFunction(FunctionName), &Health);
+				}
+			}
+			if (StatName == TEXT("CurrentAmmo"))
+			{
+				FName FunctionName = TEXT("UpdateCurrentAmmoText");
+				if (StatsHUD->FindFunction(FunctionName))
+				{
+					StatsHUD->ProcessEvent(StatsHUD->FindFunction(FunctionName), &CurrentAmmo);
+				}
+			}
+			if (StatName == TEXT("MaxAmmo"))
+			{
+				FName FunctionName = TEXT("UpdateMaxAmmoText");
+				if (StatsHUD->FindFunction(FunctionName))
+				{
+					StatsHUD->ProcessEvent(StatsHUD->FindFunction(FunctionName), &MaxAmmo);
+				}
+			}
+			if (StatName == TEXT("Skill1CooldownRemaining"))
+			{
+				FName FunctionName = TEXT("UpdateSkill1CooldownRemainingText");
+				if (StatsHUD->FindFunction(FunctionName))
+				{
+					StatsHUD->ProcessEvent(StatsHUD->FindFunction(FunctionName), &Skill1CooldownRemaining);
+				}
+			}
+			if (StatName == TEXT("Skill2CooldownRemaining"))
+			{
+				FName FunctionName = TEXT("UpdateSkill2CooldownRemainingText");
+				if (StatsHUD->FindFunction(FunctionName))
+				{
+					StatsHUD->ProcessEvent(StatsHUD->FindFunction(FunctionName), &Skill2CooldownRemaining);
+				}
+			}
+			// ê¸°ì¡´ ìŠ¤íƒ¯ ì—…ë°ì´íŠ¸
+			OnHUDStatChanged.Broadcast(StatName);
+		}
+	}
 }
 
 void AFPSCharacter::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime); // TickÀ» »ç¿ëÇÏ·Á¸é »ı¼ºÀÚ¿¡¼­ PrimaryActorTick.bCanEverTick = true; ·Î º¯°æÇØ¾ß ÇÔ
+	Super::Tick(DeltaTime); // Tickì„ ì‚¬ìš©í•˜ë ¤ë©´ ìƒì„±ìì—ì„œ PrimaryActorTick.bCanEverTick = true; ë¡œ ë³€ê²½í•´ì•¼ í•¨
 
-	// ¿¹½Ã: Äğ´Ù¿î °¨¼Ò ·ÎÁ÷ µî
+	// ì˜ˆì‹œ: ì¿¨ë‹¤ìš´ ê°ì†Œ ë¡œì§ ë“±
 	if (Skill1CooldownRemaining > 0.0f)
 	{
 		Skill1CooldownRemaining -= DeltaTime;

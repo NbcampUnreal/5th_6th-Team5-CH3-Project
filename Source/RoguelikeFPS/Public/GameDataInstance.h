@@ -1,9 +1,13 @@
-#pragma once
+Ôªø#pragma once
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
 #include "GameDataInstance.generated.h"
-//for git commit
+
+class AFPSCharacter;
+class UGunComponent;
+class UInventory;
+
 UCLASS()
 class ROGUELIKEFPS_API UGameDataInstance : public UGameInstance
 {
@@ -12,33 +16,94 @@ class ROGUELIKEFPS_API UGameDataInstance : public UGameInstance
 public:
     UGameDataInstance();
 
-    // «√∑π¿ÃæÓ µ•¿Ã≈Õ
+    // ===== ÌîåÎ†àÏù¥Ïñ¥ ÏÑ†ÌÉù/ÏÉÅÌÉú Îç∞Ïù¥ÌÑ∞ =====
     UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "PlayerData")
-    int32 SelectedWeaponIndex; // º±≈√µ» π´±‚ ¿Œµ¶Ω∫
-    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "PlayerData")
-    bool bIsReadyToStart; // ∞‘¿” Ω√¿€ ¡ÿ∫Ò ø©∫Œ
-    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "PlayerData")
-    float PlayerXP; // «√∑π¿ÃæÓ ∞Ê«Ëƒ°
-    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "PlayerData")
-    int32 PlayerLevel; // «√∑π¿ÃæÓ ∑π∫ß
-    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "PlayerData")
-    float XPToLevelUp; // ∑π∫ßæ˜ « ø‰ ∞Ê«Ëƒ°
+    int32 SelectedWeaponIndex;
 
-    // Ω∫≈◊¿Ã¡ˆ ∞¸∏Æ
-    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "GameFlow")
-    int32 CurrentStageIndex; // «ˆ¿Á Ω∫≈◊¿Ã¡ˆ ¿Œµ¶Ω∫
-    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "GameFlow")
-    TArray<FName> StageLevelNames; // Ω∫≈◊¿Ã¡ˆ ∏  ∏Ò∑œ
-    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "GameFlow")
-    FName MainMenuLevelName; // ∏ﬁ¿Œ ∏ﬁ¥∫ ∑π∫ß ¿Ã∏ß
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "PlayerData")
+    bool bIsReadyToStart;
 
-    // ¿Ø∆ø∏Æ∆º «‘ºˆ
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "PlayerData")
+    int32 level = 1;
+
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "PlayerData")
+    int32 health = 100;
+
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "PlayerData")
+    int32 maxhealth = 100;
+
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "PlayerData")
+    int32 attack = 10;
+
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "PlayerData")
+    int32 defence = 10;
+
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "PlayerData")
+    int32 AttackSpeed = 5;
+
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "PlayerData")
+    int32 MovingSpeed = 600;
+
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "PlayerData")
+    int32 Stamina = 500;
+
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "PlayerData")
+    float Experience = 0;
+
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "PlayerData")
+    float MaxExperience = 100;
+
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "PlayerData")
+    UGunComponent* guncomp;
+
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "PlayerData")
+    UInventory* invencomp;
+
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "PlayerData")
+    UGunComponent* initpistolcomp;
+
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "PlayerData")
+    UGunComponent* initriflecomp;
+
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "PlayerData")
+    TSubclassOf<AActor> PistolBP;
+
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "PlayerData")
+    TSubclassOf<AActor> RifleBP;
+
+
+    UFUNCTION()
+    void RoadStatus(AFPSCharacter* Character);
+
+    UFUNCTION()
+    void SaveStatus(AFPSCharacter* Character);
+
+
+    // Ï†ïÏ†Å getter (C++ & Î∏îÎ£®ÌîÑÎ¶∞Ìä∏)
     UFUNCTION(BlueprintCallable, Category = "GameData")
-    static UGameDataInstance* GetGameDataInstance(UWorld* World);
+    static UGameDataInstance* GetGameDataInstance(const UObject* WorldContext);
+
+    UFUNCTION(BlueprintCallable, Category = "GameData")
+    void InitializeGameData();
+
+    // Ïä§ÌÖåÏù¥ÏßÄ Îç∞Ïù¥ÌÑ∞
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stage")
+    TArray<FName> StageLevelNames;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stage")
+    FName MainMenuLevelName;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stage")
+    int32 CurrentStageIndex = 0;
+
+public:
     UFUNCTION(BlueprintCallable, Category = "PlayerData")
     void SetSelectedOption(int32 WeaponIndex);
+
     UFUNCTION(BlueprintCallable, Category = "PlayerData")
     int32 GetSelectedOption() const;
+
     UFUNCTION(BlueprintCallable, Category = "PlayerData")
     void ResetGameStatsToLevelOne();
+
 };

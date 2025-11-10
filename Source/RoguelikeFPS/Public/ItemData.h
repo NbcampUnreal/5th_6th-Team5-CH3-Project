@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
@@ -39,43 +39,43 @@ public:
 	//ID
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
 	int32 ItemNumber;
-	//ÀÌ¸§
+	//ì´ë¦„
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
 	FName ItemName;
-	//¼³¸í
+	//ì„¤ëª…
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
 	FString Description;
-	//¾ÆÀÌÅÛ Å¸ÀÔ
+	//ì•„ì´í…œ íƒ€ì…
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
 	EItemType ItemType = EItemType::MaterialItem;
-	//¼ö·®
+	//ìˆ˜ëŸ‰
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
 	int32 Amount;
-	//±¸ÀÔ °¡°İ
+	//êµ¬ì… ê°€ê²©
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shop")
 	int32 BuyPrice;
-	//ÆÇ¸Å °¡°İ
+	//íŒë§¤ ê°€ê²©
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shop")
 	int32 SellPrice;
-	//ÀÌ¹ÌÁö
+	//ì´ë¯¸ì§€
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
 	UTexture2D* Thumbnail;
-	//ÆÄÃ÷ µî±Ş
+	//íŒŒì¸  ë“±ê¸‰
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Part")
 	EPartGrade PartGrade = EPartGrade::Normal;
-	//ÆÄÃ÷ Å¸ÀÔ
+	//íŒŒì¸  íƒ€ì…
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Part")
 	EPartType PartType = EPartType::Muzzle;
-	//±âº» µ¥¹ÌÁö
+	//ê¸°ë³¸ ë°ë¯¸ì§€
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Part")
 	float BaseDamage = 0.0f;
-	//±âº» °ø°İ¼Óµµ
+	//ê¸°ë³¸ ê³µê²©ì†ë„
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Part")
 	float BaseAttackSpeed = 0.0f;
-	//±âº» ÀåÅº
+	//ê¸°ë³¸ ì¥íƒ„
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Part")
 	int32 Ammo = 0;
-	//¹üÀ§
+	//ë²”ìœ„
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Part")
 	float MinDamage = 0.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Part")
@@ -89,7 +89,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Part")
 	float MaxAmmo = 0.0f;
 
-	//Á¦ÀÛ
+	//ì œì‘
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Crafting")
 	TMap<FName, int32> CraftingItems;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Crafting")

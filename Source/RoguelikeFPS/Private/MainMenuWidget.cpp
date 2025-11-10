@@ -1,58 +1,54 @@
-#include "MainMenuWidget.h"
+Ôªø#include "MainMenuWidget.h"
 #include "Components/Button.h"
 #include "FPSGameMode.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "GameDataInstance.h"
-#include "FPSGameMode.h" // GameMode ¡¢±Ÿ¿ª ¿ß«ÿ ∆˜«‘ (OnExitButtonClickedø°º≠ ªÁøÎ)
-//for git commit
+
 bool UMainMenuWidget::Initialize()
 {
-    if (!Super::Initialize())
-        return false;
+    if (!Super::Initialize()) return false;
 
     GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Cyan, TEXT("MainMenuWidget Initialized."));
 
-    // πˆ∆∞ ≈¨∏Ø ¿Ã∫•∆Æ πŸ¿Œµ˘
     if (Button_Weapon1) Button_Weapon1->OnClicked.AddDynamic(this, &UMainMenuWidget::OnButtonWeapon1Clicked);
     if (Button_Weapon2) Button_Weapon2->OnClicked.AddDynamic(this, &UMainMenuWidget::OnButtonWeapon2Clicked);
     if (Button_Weapon3) Button_Weapon3->OnClicked.AddDynamic(this, &UMainMenuWidget::OnButtonWeapon3Clicked);
     if (Button_Weapon4) Button_Weapon4->OnClicked.AddDynamic(this, &UMainMenuWidget::OnButtonWeapon4Clicked);
+    if (Button_Start)   Button_Start->OnClicked.AddDynamic(this, &UMainMenuWidget::OnStartGameClicked);
+    if (Button_Exit)    Button_Exit->OnClicked.AddDynamic(this, &UMainMenuWidget::OnBackToTitleClicked);
 
-    if (Button_Start) Button_Start->OnClicked.AddDynamic(this, &UMainMenuWidget::OnStartGameClicked);
-    if (Button_Exit) Button_Exit->OnClicked.AddDynamic(this, &UMainMenuWidget::OnBackToTitleClicked);
-
-    // Ω√¿€ Ω√ Start πˆ∆∞ ∫Ò»∞º∫»≠ (π´±‚ º±≈√ ¿¸)
-    if (Button_Start)
-        Button_Start->SetIsEnabled(false);
+    if (Button_Start) Button_Start->SetIsEnabled(false);
 
     return true;
 }
 
-//  π´±‚ º±≈√ ∑°∆€ 
+void UMainMenuWidget::NativeOnInitialized()
+{
+    Super::NativeOnInitialized();
+
+    GetWorld()->GetTimerManager().SetTimerForNextTick([this]()
+        {
+            OnMainMenuReady.Broadcast();  // Îç∏Î¶¨Í≤åÏù¥Ìä∏ Ìò∏Ï∂ú
+        });
+}
+
 void UMainMenuWidget::OnButtonWeapon1Clicked() { HandleWeaponSelection(1); }
 void UMainMenuWidget::OnButtonWeapon2Clicked() { HandleWeaponSelection(2); }
 void UMainMenuWidget::OnButtonWeapon3Clicked() { HandleWeaponSelection(3); }
 void UMainMenuWidget::OnButtonWeapon4Clicked() { HandleWeaponSelection(4); }
 
-// ∞¯≈Î π´±‚ º±≈√ ∑Œ¡˜ 
 void UMainMenuWidget::HandleWeaponSelection(int32 WeaponIndex)
 {
-    UGameDataInstance* GameInstance = Cast<UGameDataInstance>(GetGameInstance());
-
+    UGameDataInstance* GameInstance = UGameDataInstance::GetGameDataInstance(this);
     if (!GameInstance)
     {
-        // ø¿∑˘ ∏ﬁΩ√¡ˆ∏¶ ¥ı ∏Ì»Æ«œ∞‘ ∫Ø∞Ê
-        GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red,
-            TEXT("ERROR: GetGameInstance() is NOT UGameDataInstance! Check Project Settings -> Maps & Modes."));
-
-        // ¿Ã Ω√¡°ø°º≠ Start πˆ∆∞ »∞º∫»≠/∫Ò»∞º∫»≠∞° π´¿«πÃ«ÿ¡ˆπ«∑Œ ¡æ∑·
+        GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("ERROR: GameDataInstance is null!"));
         if (Button_Start) Button_Start->SetIsEnabled(false);
-        CurrentSelectedWeaponIndex = 0; // æ»¿¸«œ∞‘ √ ±‚»≠
+        CurrentSelectedWeaponIndex = 0;
         return;
     }
 
-    // ∞∞¿∫ π´±‚∏¶ ¥ŸΩ√ ¥©∏£∏È º±≈√ «ÿ¡¶
     if (CurrentSelectedWeaponIndex == WeaponIndex)
     {
         CurrentSelectedWeaponIndex = 0;
@@ -65,40 +61,34 @@ void UMainMenuWidget::HandleWeaponSelection(int32 WeaponIndex)
         CurrentSelectedWeaponIndex = WeaponIndex;
         GameInstance->SetSelectedOption(WeaponIndex);
         GameInstance->bIsReadyToStart = true;
-        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green,
-            FString::Printf(TEXT("Weapon Selected: %d"), WeaponIndex));
+        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("Weapon Selected: %d"), WeaponIndex));
     }
-    // Start πˆ∆∞ »∞º∫»≠ / ∫Ò»∞º∫»≠
+
     if (Button_Start)
         Button_Start->SetIsEnabled(GameInstance->bIsReadyToStart);
 }
 
-// ===================== ∞‘¿” Ω√¿€ πˆ∆∞ ===================== //
 void UMainMenuWidget::OnStartGameClicked()
 {
-    UGameDataInstance* GameInstance = Cast<UGameDataInstance>(GetGameInstance());
-    if (!GameInstance || !GameInstance->bIsReadyToStart)
-    {
-        GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, TEXT("Cannot start game"));
-        return;
-    }
+    UGameDataInstance* GameInstance = UGameDataInstance::GetGameDataInstance(GetWorld());
+    if (!GameInstance || !GameInstance->bIsReadyToStart) return;
 
     RemoveFromParent();
-    UGameplayStatics::OpenLevel(GetWorld(), TEXT("L_Map1"));
+    FName LevelName = GameInstance->StageLevelNames.IsValidIndex(0) ? GameInstance->StageLevelNames[0] : FName("L_Map1");
+
+
+
+    UGameplayStatics::OpenLevel(GetWorld(), LevelName);
 }
 
-// ===================== µ⁄∑Œ∞°±‚ πˆ∆∞ ===================== //
 void UMainMenuWidget::OnBackToTitleClicked()
 {
     RemoveFromParent();
-    UGameDataInstance* GameInstance = Cast<UGameDataInstance>(GetGameInstance());
-    AFPSGameMode* FPSGameMode = Cast<AFPSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
-    if (FPSGameMode)
+
+    AFPSGameMode* GameMode = Cast<AFPSGameMode>(UGameplayStatics::GetGameMode(this));
+    if (GameMode)
     {
-        FPSGameMode->OnMainMenuBackClicked();
-    }
-    else
-    {
-        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("GameMode Cast Failed in MainMenuWidget::OnBackToTitleClicked"));
+        GameMode->OnMainMenuBackClicked();
+        OnBackButtonClicked.Broadcast();
     }
 }
