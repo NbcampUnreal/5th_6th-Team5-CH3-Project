@@ -1,45 +1,35 @@
+// DeathWidget.cpp
 #include "DeathWidget.h"
-#include "Components/Button.h"
 #include "Kismet/GameplayStatics.h"
-#include "GameFramework/PlayerController.h"
 #include "GameDataInstance.h"
-//for git commit
-bool UDeathWidget::Initialize()
+#include "Kismet/KismetSystemLibrary.h"
+
+void UDeathWidget::Setup(APlayerController* PC, bool bAnyKey)
 {
-    if (!Super::Initialize()) return false;
-    // 버튼 이벤트 바인딩
-    if (RestartButton) RestartButton->OnClicked.AddDynamic(this, &UDeathWidget::OnRestartClicked);
-    if (ExitButton) ExitButton->OnClicked.AddDynamic(this, &UDeathWidget::OnExitClicked);
-    return true;
+    // 필요 시 사용 (현재는 비워둠)
+    // 예: 타이머, 애니메이션 등
 }
 
-void UDeathWidget::Setup(APlayerController* InController, bool bInIsCleared)
+void UDeathWidget::NativeConstruct()
 {
-    OwningController = InController;
-    bIsGameCleared = bInIsCleared;
-}
+    Super::NativeConstruct();
 
-void UDeathWidget::OnRestartClicked()
-{
-    UWorld* World = GetWorld();
-    if (!World) return;
-    // 게임 데이터 초기화 및 현재 레벨 재시작
-    if (UGameDataInstance* GameData = UGameDataInstance::GetGameDataInstance(World))
+    if (GameOverButton2)
     {
-        GameData->ResetGameStatsToLevelOne();
-        FString CurrentLevelName = UGameplayStatics::GetCurrentLevelName(World, true);
-        UGameplayStatics::OpenLevel(World, FName(*CurrentLevelName));
+        GameOverButton2->OnClicked.AddDynamic(this, &UDeathWidget::OnExitClicked);
     }
 }
 
 void UDeathWidget::OnExitClicked()
 {
-    UWorld* World = GetWorld();
-    if (!World) return;
-    // 게임 데이터 초기화 및 메인 메뉴로 이동
-    if (UGameDataInstance* GameData = UGameDataInstance::GetGameDataInstance(World))
+    UGameDataInstance* GameData = UGameDataInstance::GetGameDataInstance(this);
+    if (!GameData)
     {
-        GameData->ResetGameStatsToLevelOne();
-        UGameplayStatics::OpenLevel(World, GameData->MainMenuLevelName);
+        UE_LOG(LogTemp, Error, TEXT("GameDataInstance is null!"));
+        return;
     }
+
+    UGameplayStatics::OpenLevel(this, GameData->MainMenuLevelName);
+
+    RemoveFromParent();
 }

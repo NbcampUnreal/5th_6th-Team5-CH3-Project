@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Weapon/GunComponent.h"
@@ -31,8 +31,15 @@ void UGunComponent::DoAttack()
 
 	if ((CurrentBulletCount <= 0)) {
 		if(_IsReloading) return;
-		UWorld* const World = GetWorld();
-		World->GetTimerManager().SetTimer(_ReloadTimerHandle, this, &UGunComponent::ReloadBullet, _Status.ReloadTime, false);
+
+		if (auto* it = GetAttachParent())
+		{
+			if (UWorld* World = it->GetWorld())
+			{
+				World->GetTimerManager().SetTimer(_ReloadTimerHandle, this, &UGunComponent::ReloadBullet, _Status.ReloadTime, false);
+			}
+		}
+		
 		_IsReloading = true;
 		return;
 	}
@@ -65,7 +72,7 @@ void UGunComponent::OnRegister()
 	Super::OnRegister();
 
 	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
-	_WeaponSpringArm->AttachToComponent(this, AttachmentRules, _CameraSocketName);
+	//_WeaponSpringArm->AttachToComponent(this, AttachmentRules, _CameraSocketName);
 }
 
 void UGunComponent::AttachWeapon(ACharacter* TargetCharacter)
@@ -93,7 +100,9 @@ void UGunComponent::Fire()
 	CurrentBulletCount--;
 	CanAttack = false;
 
-	UWorld* const World = GetWorld();
+
+	auto* it = GetAttachParent();
+	UWorld* World = it->GetWorld();
 	World->GetTimerManager().SetTimer(_GunTimerHandle, [this]()
 		{
 			CanAttack = true;
@@ -101,6 +110,7 @@ void UGunComponent::Fire()
 
 	// Try and play the sound if specified b 
 	if (_AttackSound != nullptr) {
+
 		UGameplayStatics::PlaySoundAtLocation(this, _AttackSound, _Character->GetActorLocation());
 	}
 
@@ -228,8 +238,8 @@ void UGunComponent::ZoomIn() {
 	APlayerController* PC = Cast<APlayerController>(_Character->GetController());
 	if (PC && _WeaponCamera)
 	{
-		// Weapon¿¡ Ä«¸Ş¶ó°¡ ºÙ¾î ÀÖÀ¸¹Ç·Î ÇØ´ç ¹«±â¸¦ ViewTargetÀ¸·Î ¹Ù²Ş
-		//PC->SetViewTargetWithBlend(this /* ¶Ç´Â WeaponCameraActor°¡ ÀÖÀ¸¸é ±×°Í */, 0.15f);
+		// Weaponì— ì¹´ë©”ë¼ê°€ ë¶™ì–´ ìˆìœ¼ë¯€ë¡œ í•´ë‹¹ ë¬´ê¸°ë¥¼ ViewTargetìœ¼ë¡œ ë°”ê¿ˆ
+		//PC->SetViewTargetWithBlend(this /* ë˜ëŠ” WeaponCameraActorê°€ ìˆìœ¼ë©´ ê·¸ê²ƒ */, 0.15f);
 	}
 }
 

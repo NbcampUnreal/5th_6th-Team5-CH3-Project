@@ -1,15 +1,17 @@
-#pragma once
+Ôªø#pragma once
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "InputActionValue.h"
+#include "EnhancedInputComponent.h"
 #include "Weapon/WeaponComponent.h"
 #include "FPSCharacter.generated.h"
-//git
+
 class USpringArmComponent;
 class UCameraComponent;
 class UInventory;
 class UUpgradeSystem;
-class UPartSystem;
 struct FInputActionValue;
+
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLevelUpSignature, APlayerController*, PlayerController);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerDeathSignature, AController*, KillerController);
@@ -21,6 +23,8 @@ class ROGUELIKEFPS_API AFPSCharacter : public ACharacter
     GENERATED_BODY()
 public:
     AFPSCharacter();
+    virtual void BeginPlay() override;
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
     UFUNCTION(BlueprintCallable)
     void AddXP(float Amount);
@@ -28,8 +32,11 @@ public:
     void ApplyAugment(FName AugmentName);
     UFUNCTION(BlueprintCallable)
     void UpdateHUDStats(FName StatName);
-    UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
-    void GainGold(int32 Amount);
+    //UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
+    //void GainGold(int32 Amount);
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterStatus", meta = (AllowPrivateAccess = "true"))
+    UWeaponComponent* CurrentWeapon;
 
     UPROPERTY(BlueprintAssignable, Category = "Events")
     FOnLevelUpSignature OnLevelUp;
@@ -37,6 +44,12 @@ public:
     FOnPlayerDeathSignature OnPlayerDeath;
     UPROPERTY(BlueprintAssignable, Category = "Events")
     FOnHUDStatChangedSignature OnHUDStatChanged;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
+    UInventory* Inventory;//Ïù∏Î≤§ÌÜ†Î¶¨ Ï†ïÎ≥¥
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
+	UUpgradeSystem* UpgradeSystem;
 
     int32 GetLevel() const { return Level; }
     int32 GetHealth() const { return Health; }
@@ -48,14 +61,14 @@ public:
     int32 GetMovingSpeed() const { return MovingSpeed; }
     int32 GetDashSpeed() const { return DashSpeed; }
     int32 GetStamina() const { return Stamina; }
-    float GetExperience() const { return Experience; }
-    float GetMaxExperience() const { return MaxExperience; }
+    int32 GetExperience() const { return Experience; }
+    int32 GetMaxExperience() const { return MaxExperience; }
     FName GetCurrentWeaponName() const { return CurrentWeaponName; }
     int32 GetCurrentAmmo() const { return CurrentAmmo; }
     int32 GetMaxAmmo() const { return MaxAmmo; }
     float GetSkill1CooldownRemaining() const { return Skill1CooldownRemaining; }
     float GetSkill2CooldownRemaining() const { return Skill2CooldownRemaining; }
-    int32 GetGoldAmount() const { return GoldAmount; }
+    //int32 GetGoldAmount() const { return GoldAmount; }
     bool GetIsDash() const { return bIsDashing; }
 
     UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
@@ -79,29 +92,26 @@ public:
     UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
     void SetExperience(float experience);
     UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
-    void SetMaxExperience(int32 maxExperience);
+    void SetMaxExperience(float maxExperience);
     UFUNCTION(BlueprintCallable, Category = "CharacterStatus")
     void SetIsDashing(bool isdash);
 
-    // π´¿˚ ªÛ≈¬∫Øºˆ
+    // Î¨¥Ï†Å ÏÉÅÌÉúÎ≥ÄÏàò
     bool Undead = false;
-    // π´¿˚ ¡ˆº” Ω√∞£
+    // Î¨¥Ï†Å ÏßÄÏÜç ÏãúÍ∞Ñ
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Undead")
+    float UndeadTime = 3.0f;
     FTimerHandle UndeadTimeHandle;
-    // π´¿˚ «‘ºˆ
+    // Î¨¥Ï†Å Ìï®Ïàò
     void OnUndead();
     void OffUndead();
     void OnUndeadTime(float time);
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
-	UInventory* Inventory;//¿Œ∫•≈‰∏Æ ¡§∫∏
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
-	UUpgradeSystem* UpgradeSystem;
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Parts")
-    UPartSystem* PartSystem;
-
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterStatus", meta = (AllowPrivateAccess = "true"))
-    UWeaponComponent* CurrentWeapon;
 protected:
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input|Debug")
+    class UInputAction* LevelUpTestAction;
+
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
     TObjectPtr<USpringArmComponent> SpringArmComp;
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
@@ -129,13 +139,15 @@ protected:
     float MaxExperience;
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharacterStatus")
     bool bIsAlive;
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterStatus")
-    int32 GoldAmount = 100;
+    //UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterStatus")
+    //int32 GoldAmount = 100;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterStatus")
     int32 CurrentAmmo = 30;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterStatus")
     int32 MaxAmmo = 300;
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterStatus")
+    //UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterStatus")
+    //float CurrentExperience = 0.0f;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Skills")
     float Skill1CooldownRemaining = 0.0f;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Skills")
     float Skill2CooldownRemaining = 0.0f;
@@ -199,8 +211,9 @@ protected:
     UFUNCTION()
     void Reload(const FInputActionValue& value);
     void LevelUp();
-    UFUNCTION(BlueprintCallable)
     void OnDeath(AController* KillerController);
+
+
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Augment")
     TArray<FName> AppliedAugments;

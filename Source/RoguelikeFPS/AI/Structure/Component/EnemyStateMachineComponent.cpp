@@ -114,7 +114,7 @@ void UEnemyStateMachineComponent::OnEnterState(EEnemyState State)
     case EEnemyState::Idle:
         if (CachedAnim)
         {
-            UE_LOG(LogTemp, Log, TEXT("Enter Idle"));
+            //UE_LOG(LogTemp, Log, TEXT("Enter Idle"));
             CachedAnim->SetAnimState(EEnemyState::Idle);
             CachedAnim->SetInAttack(false);
             CachedAnim->SetHasTarget(false);
@@ -133,7 +133,7 @@ void UEnemyStateMachineComponent::OnEnterState(EEnemyState State)
     case EEnemyState::Chase:
         if (CachedAnim)
         {
-            UE_LOG(LogTemp, Log, TEXT("Enter Chase"));
+            //UE_LOG(LogTemp, Log, TEXT("Enter Chase"));
             SetCombatLocked(false);
             CachedAnim->SetAnimState(EEnemyState::Chase);
             CachedAnim->SetInAttack(false);
@@ -154,7 +154,7 @@ void UEnemyStateMachineComponent::OnEnterState(EEnemyState State)
     case EEnemyState::Attack:
         if (CachedAnim)
         {
-            UE_LOG(LogTemp, Log, TEXT("Enter Attack"));
+            //UE_LOG(LogTemp, Log, TEXT("Enter Attack"));
             CachedAnim->SetAnimState(EEnemyState::Attack);
             CachedAnim->SetInAttack(true);
             CachedAnim->SetHasTarget(true);

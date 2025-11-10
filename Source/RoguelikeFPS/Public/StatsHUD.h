@@ -1,75 +1,71 @@
-#pragma once
-
+ï»¿#pragma once
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
+#include "Components/Image.h"
+#include "GameDataInstance.h"
 #include "StatsHUD.generated.h"
-//for git commit
-class AFPSCharacter; // Ä³¸¯ÅÍ Å¬·¡½º ÂüÁ¶
-
+class AFPSCharacter;
+class UGunComponent;
+// StatsHUD.h
+void HideHUD();
+void ShowHUD();
 UCLASS()
 class ROGUELIKEFPS_API UStatsHUD : public UUserWidget
 {
     GENERATED_BODY()
-
 public:
-    // --- À§Á¬ »ı¼º ½Ã Ä³¸¯ÅÍ¸¦ ÀúÀåÇÒ ÇÔ¼ö (PlayerController°¡ È£Ãâ) ---
     void SetOwningCharacter(AFPSCharacter* NewCharacter);
-
+    // ì™¸ë¶€ì—ì„œ í˜¸ì¶œ â†’ HUD ìˆ¨ê¸°ê¸°/í‘œì‹œ
+    void HideHUD();
+    void ShowHUD();
 protected:
-    // --- 1. µğÀÚÀÌ³Ê¿¡¼­ ¸¸µç UI ÄÄÆ÷³ÍÆ® ÂüÁ¶ ---
-    // (WBP¿¡¼­ Is Variable Ã¼Å© ÇÊ¿ä)
-    UPROPERTY(meta = (BindWidget))
-    UProgressBar* ProgressBar_Health; // ProgressBar_Health ÀÌ¸§À¸·Î °¡Á¤
-
-    UPROPERTY(meta = (BindWidget))
-    UProgressBar* ProgressBar_EXP;    // ProgressBar_EXP ÀÌ¸§À¸·Î °¡Á¤
-
-    UPROPERTY(meta = (BindWidget))
-    UTextBlock* Text_Level;           // Text_Level ÀÌ¸§À¸·Î °¡Á¤
-
-    UPROPERTY(meta = (BindWidget))
-    UTextBlock* Text_MinMaxBullet;    // MinMaxBulit ÀÌ¸§À¸·Î °¡Á¤
-
-    UPROPERTY(meta = (BindWidget))
-    UTextBlock* Text_WeaponName;      // WeaponName ÀÌ¸§À¸·Î °¡Á¤
-
-    UPROPERTY(meta = (BindWidget))
-    UTextBlock* Text_Gold;            // Gold ÀÌ¸§À¸·Î °¡Á¤
-
-    //UPROPERTY(meta = (BindWidget))
-    //UImage* Skill1CD;        // Skill1 ÀÌ¸§À¸·Î °¡Á¤
-
-    //UPROPERTY(meta = (BindWidget))
-    //UTextBlock* Skill2CD;        // Skill2 ÀÌ¸§À¸·Î °¡Á¤
-
-    // Image º¯¼öµéÀº Text/ProgressBar¿Í ´Ş¸® Bind ´ë½Å SetBrush µîÀ» Á÷Á¢ È£ÃâÇÏ¹Ç·Î »ı·« °¡´É (ÇÊ¿äÇÏ¸é Ãß°¡)
-
-    // --- 2. Ä³¸¯ÅÍ ÂüÁ¶ ---
-    UPROPERTY()
-    TObjectPtr<AFPSCharacter> OwningCharacter;
-
-
-protected:
-    // --- 3. À§Á¬ÀÌ È­¸é¿¡ Ãß°¡µÉ ¶§ È£Ãâ ---
+    // í˜„ì¬ HUD ìƒíƒœ
+    bool bIsHUDVisible = true;
+    // UI ìœ„ì ¯ (WBP_StatsHUD ì—ì„œ ì´ë¦„ ì •í™•íˆ ì¼ì¹˜ + BindWidget ì²´í¬!)
+    UPROPERTY(meta = (BindWidget)) UProgressBar* ProgressBar_Health;
+    UPROPERTY(meta = (BindWidget))  UProgressBar* ProgressBar_Shield;
+    UPROPERTY(meta = (BindWidget)) UProgressBar* ProgressBar_EXP;
+    UPROPERTY(meta = (BindWidget)) UTextBlock* Text_Level;
+    UPROPERTY(meta = (BindWidget)) UTextBlock* Text_WeaponName;
+    UPROPERTY(meta = (BindWidget)) UTextBlock* Text_Ammo;
+    UPROPERTY(meta = (BindWidget)) UTextBlock* Text_Gold;
+    UPROPERTY(meta = (BindWidget)) UImage* DashIndicator;  // ëŒ€ì‹œ ì¤‘ì¼ ë•Œ ìƒ‰ìƒ ë³€ê²½ (ì˜µì…˜)
+    // ---------- 4ê°œì˜ ìŠ¤í‚¬ ----------
+    UPROPERTY(meta = (BindWidget)) UImage* Skill1_Icon;
+    UPROPERTY(meta = (BindWidget)) UTextBlock* Skill1_CD;
+    UPROPERTY(meta = (BindWidget)) UImage* Skill2_Icon;
+    UPROPERTY(meta = (BindWidget)) UTextBlock* Skill2_CD;
+    UPROPERTY(meta = (BindWidget))UImage* Skill3_Icon;
+    UPROPERTY(meta = (BindWidget)) UTextBlock* Skill3_CD;
+    UPROPERTY(meta = (BindWidget)) UImage* Skill4_Icon;
+    //ë¬´ê¸° ì•„ì´ì½˜
+    UPROPERTY(meta = (BindWidget)) UImage* WeaponIcon1;
+    UPROPERTY(meta = (BindWidget)) UImage* WeaponIcon2;
+    UPROPERTY(meta = (BindWidget)) UImage* WeaponIcon3;
+    UPROPERTY(meta = (BindWidget)) UImage* WeaponIcon4;
+    // ì°¸ì¡°
+    UPROPERTY() TObjectPtr<AFPSCharacter> OwningCharacter;
+    UPROPERTY() TObjectPtr<UGunComponent> GunComponent;
+    UPROPERTY() TObjectPtr<UGameDataInstance> GameDataInstance;
+    //í•¨ìˆ˜
+    virtual void NativeConstruct() override;
     virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
-
-    // --- 4. C++¿¡¼­ Á÷Á¢ UI ¾÷µ¥ÀÌÆ® (ÇÊ¿äÇÑ µ¥ÀÌÅÍ°¡ º¯°æµÉ ¶§¸¶´Ù È£Ãâ) ---
+    // ê¸°ì¡´ ì—…ë°ì´íŠ¸
     void UpdateHealthDisplay();
+    void UpdateShieldDisplay();
     void UpdateEXPDisplay();
-    void UpdateLevel();
+    void UpdateLevelDisplay();
     void UpdateWeaponDisplay();
     void UpdateGoldDisplay();
-    //void UpdateSkillCooldownDisplay();
-
-    // --- 5. µ¨¸®°ÔÀÌÆ® Äİ¹é (Character°¡ Á÷Á¢ È£Ãâ) ---
-    UFUNCTION()
-    void OnCharacterStatChanged(FName StatName);
-
-    UFUNCTION()
-    void OnCharacterDied(AController* KillerController);
-
-    // NativeConstruct ¼±¾ğ Ãß°¡ (ºôµå ¿À·ù ÇØ°á¿ë)
-    virtual void NativeConstruct() override;
+    void UpdateDashIndicator();
+    void UpdateSkillCooldownDisplay();
+    //ë¬´ê¸° ì•„ì´ì½˜ ì—…ë°ì´íŠ¸
+    void UpdateWeaponIcons();
+    void SetIconVisibility(UImage* Icon, bool bIsSelected);
+    // ë¸ë¦¬ê²Œì´íŠ¸
+    UFUNCTION() void OnCharacterStatChanged(FName StatName);
+    UFUNCTION() void OnCharacterDied(AController* KillerController);
+    UFUNCTION() void OnWeaponSelectedChanged(int32 NewIndex);
 };

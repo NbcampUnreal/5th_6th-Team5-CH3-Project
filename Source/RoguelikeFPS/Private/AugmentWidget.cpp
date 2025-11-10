@@ -1,25 +1,27 @@
-#include "AugmentWidget.h"
+﻿#include "AugmentWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/Engine.h"
 #include "FPSGameMode.h"
-//for git commit
 bool UAugmentWidget::Initialize()
 {
     if (!Super::Initialize()) return false;
-
     if (AugmentButton1) AugmentButton1->OnClicked.AddDynamic(this, &UAugmentWidget::OnAugment1Clicked);
     if (AugmentButton2) AugmentButton2->OnClicked.AddDynamic(this, &UAugmentWidget::OnAugment2Clicked);
     if (AugmentButton3) AugmentButton3->OnClicked.AddDynamic(this, &UAugmentWidget::OnAugment3Clicked);
-
+    if (ConfirmButton)  ConfirmButton->OnClicked.AddDynamic(this, &UAugmentWidget::OnConfirmClicked);
+    //확정 버튼 비활성화
+    UpdateConfirmButton();
+    if (GetWorld())
+    {
+        UpdateConfirmButton();
+    }
     return true;
 }
-
-
 void UAugmentWidget::Setup(AFPSCharacter* InCharacter, const TArray<FAugmentData>& InAugments)
 {
     OwningCharacter = InCharacter;
     AvailableAugments = InAugments;
-
+    SelectedAugmentIndex = -1;
     if (AvailableAugments.Num() >= 1 && AugmentName1 && AugmentDesc1)
     {
         AugmentName1->SetText(AvailableAugments[0].DisplayName);
@@ -35,29 +37,46 @@ void UAugmentWidget::Setup(AFPSCharacter* InCharacter, const TArray<FAugmentData
         AugmentName3->SetText(AvailableAugments[2].DisplayName);
         AugmentDesc3->SetText(AvailableAugments[2].Description);
     }
+    UpdateConfirmButton();
 }
-
-void UAugmentWidget::OnAugment1Clicked() { ApplyAugment(0); }
-void UAugmentWidget::OnAugment2Clicked() { ApplyAugment(1); }
-void UAugmentWidget::OnAugment3Clicked() { ApplyAugment(2); }
-
-void UAugmentWidget::ApplyAugment(int32 AugmentIndex)
+void UAugmentWidget::SelectAugment(int32 Index)
 {
-    if (!OwningCharacter.IsValid() || AugmentIndex >= AvailableAugments.Num()) return;
-
-    const FAugmentData& SelectedAugment = AvailableAugments[AugmentIndex];
-    OwningCharacter->ApplyAugment(SelectedAugment.AugmentID);
-
-    // Notify GameMode to close UI and resume game
+    if (Index >= AvailableAugments.Num()) return;
+    SelectedAugmentIndex = Index;
+    UpdateConfirmButton();
+    UE_LOG(LogTemp, Warning, TEXT("Augment %d Selected"), Index);
+}
+void UAugmentWidget::OnConfirmClicked()
+{
+    ApplyAugment(SelectedAugmentIndex);
+}
+void UAugmentWidget::ApplyAugment(int32 Index)
+{
+    if (!OwningCharacter.IsValid() || Index < 0 || Index >= AvailableAugments.Num()) return;
+    const FAugmentData& Augment = AvailableAugments[Index];
+    OwningCharacter->ApplyAugment(Augment.AugmentID);
+    // 세이브: 선택한 증강 기록 (옵션)
+    if (GameInstance)
+    {
+        // 예: GameInstance->LastAppliedAugment = Augment.AugmentID;
+        GameInstance->SaveGameData();
+    }
+    // GameMode에 UI 종료 요청
     if (AFPSGameMode* GameMode = Cast<AFPSGameMode>(UGameplayStatics::GetGameMode(GetWorld())))
     {
         GameMode->CloseCurrentUIAndResumeGame(true);
     }
-     
     if (GEngine)
     {
-        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("Applied Augment: %s"), *SelectedAugment.DisplayName.ToString()));
+        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green,
+            FString::Printf(TEXT("Applied Augment: %s"), *Augment.DisplayName.ToString()));
     }
-
     RemoveFromParent();
+}
+void UAugmentWidget::UpdateConfirmButton()
+{
+    if (ConfirmButton)
+    {
+        ConfirmButton->SetIsEnabled(SelectedAugmentIndex != -1);
+    }
 }

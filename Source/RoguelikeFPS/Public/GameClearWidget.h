@@ -2,29 +2,23 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/Button.h"
+#include "Components/TextBlock.h"
 #include "GameClearWidget.generated.h"
-//for git commit
-class UButton;
-class AFPSGameMode;
 
 UCLASS()
 class ROGUELIKEFPS_API UGameClearWidget : public UUserWidget
 {
-	GENERATED_BODY()
-
-public:
-	virtual bool Initialize() override;
-
-	// GameMode 포인터를 위젯에 전달할 함수
-	void SetupGameModeLink(AFPSGameMode* OwningGameMode);
+    GENERATED_BODY()
 
 protected:
-	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UButton> ExitButton;
+    virtual void NativeConstruct() override;
 
-private:
-	UFUNCTION()
-	void OnExitButtonClicked();
+    // 버튼 (GameOverButton 하나만!)
+    UPROPERTY(meta = (BindWidget))
+    UButton* GameOverButton;
 
-	TWeakObjectPtr<class AFPSGameMode> OwningGameModePtr;
+    // 클릭 이벤트
+    UFUNCTION()
+    void OnGameOverClicked();
 };
