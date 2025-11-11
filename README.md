@@ -17,7 +17,8 @@
 - Behavior Tree, Finite State Machine 기반의 AI 제어
 - ItemBase, ItemDataTable을 이용한 아이템 DB관리
 - Unreal Component 구조를 이용한 WeaponSkillComponent 구현
-- 
+- 게임 시작 및 종료 이벤트 컨트롤
+- 이벤트 발생시 Widget을 통해 플레이어에게 정보 전달을 할 수 있도록 설계
 
 ## 프로젝트 구조
 ```
